@@ -1,14 +1,15 @@
 import { Array, Effect, Function, pipe } from '@effect-ts/core'
 import * as Layer from '@effect-ts/core/Effect/Layer'
-import { DefaultEnv, gen, _ROut } from '@effect-ts/system/Effect'
+import { DefaultEnv, gen } from '@effect-ts/system/Effect'
 import { $Layer } from '../config/Layer.testing'
 import { Command } from './Command'
 import { CommandHandler } from './CommandHandler'
+import { ROutOf } from './Effect'
 import { Event } from './Event'
 import { $EventStore } from './EventStore'
 import { Message } from './Message'
 
-type GwtEnv = DefaultEnv & ReturnType<typeof $Layer[typeof _ROut]>
+type GwtEnv = DefaultEnv & ROutOf<typeof $Layer>
 
 const stripMessageHeaders = <A extends Message>({ _, ...message }: A) => ({
   ...message,

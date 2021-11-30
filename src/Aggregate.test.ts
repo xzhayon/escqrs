@@ -7,7 +7,7 @@ import { EntityNotFound } from './EntityNotFound'
 import { $Event, Event } from './Event'
 import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
 import { $EventStore } from './EventStore'
-import { $MutableEntity } from './MutableEntity'
+import { $MutableEntity, MutableEntity } from './MutableEntity'
 import { $Repository } from './Repository'
 import { WrongEntityVersion } from './WrongEntityVersion'
 
@@ -23,42 +23,19 @@ const aggregate = $Aggregate<Foo, Event>('foo', {
 })
 
 describe('Aggregate', () => {
-  describe('loadFromEventStore', () => {
-    it('failing when there are no events', async () => {
-      await expect(
-        pipe(
-          $Aggregate.loadFromEventStore(aggregate)('bar'),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).rejects.toThrow(EntityNotFound)
-    })
-    it('loading an entity', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const event = yield* _(
-              $Event('foo')({ aggregateId: 'bar', bar: 42 } as Body<Event>)(),
-            )
-            yield* _($EventStore.publish(event))
-
-            return yield* _($Aggregate.loadFromEventStore(aggregate)('bar'))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).resolves.toMatchObject({
-        _: { type: 'foo', id: 'bar', version: 0 },
-        bar: 42,
-      })
-    })
-  })
-
   describe('load', () => {
     it('failing when there is no entity', async () => {
       await expect(
         pipe(
-          $Aggregate.load(aggregate)('bar'),
+          aggregate.load('bar'),
+          Effect.provideSomeLayer($Layer),
+          Effect.runPromise,
+        ),
+      ).rejects.toThrow(EntityNotFound)
+
+      await expect(
+        pipe(
+          $Aggregate('foo').load('bar'),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
         ),
@@ -73,7 +50,7 @@ describe('Aggregate', () => {
             )
             yield* _($EventStore.publish(event))
 
-            return yield* _($Aggregate.load({ type: 'foo' })('bar'))
+            return yield* _($Aggregate('foo').load('bar'))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
@@ -86,7 +63,7 @@ describe('Aggregate', () => {
             const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
             yield* _($Repository.insert(entity))
 
-            return yield* _($Aggregate.load(aggregate)('bar'))
+            return yield* _(aggregate.load('bar'))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
@@ -102,7 +79,7 @@ describe('Aggregate', () => {
             )
             yield* _($EventStore.publish(event))
 
-            return yield* _($Aggregate.load(aggregate)('bar'))
+            return yield* _(aggregate.load('bar'))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
@@ -118,120 +95,12 @@ describe('Aggregate', () => {
             )
             yield* _($Repository.insert(entity))
 
-            return yield* _($Aggregate.load({ type: 'foo' })('bar'))
+            return yield* _($Aggregate('foo').load('bar'))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
         ),
       ).resolves.toMatchObject({ _: { type: 'foo', id: 'bar' }, bar: 42 })
-    })
-  })
-
-  describe('saveToEventStore', () => {
-    it('saving a new entity', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const entity = yield* _(
-              $EventSourcedEntity('foo')({}, { id: 'bar' }),
-            )
-
-            return yield* _($Aggregate.saveToEventStore(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).resolves.toBeUndefined()
-    })
-    it('saving an entity with the wrong version', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const event = yield* _($Event('foo')({ aggregateId: 'bar' })())
-            yield* _($EventStore.publish(event))
-            yield* _($EventStore.publish(event))
-            const entity = yield* _(
-              $EventSourcedEntity('foo')(
-                {},
-                { id: 'bar', version: 0, events: { uncommitted: [event] } },
-              ),
-            )
-
-            return yield* _($Aggregate.saveToEventStore(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).rejects.toThrow(WrongEntityVersion)
-    })
-    it('updating an entity', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const event = yield* _($Event('foo')({ aggregateId: 'bar' })())
-            yield* _($EventStore.publish(event))
-            yield* _($EventStore.publish(event))
-            const entity = yield* _(
-              $EventSourcedEntity('foo')(
-                {},
-                { id: 'bar', version: 1, events: { uncommitted: [event] } },
-              ),
-            )
-
-            return yield* _($Aggregate.saveToEventStore(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).resolves.toBeUndefined()
-    })
-  })
-
-  describe('saveToRepository', () => {
-    it('saving a new entity', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
-
-            return yield* _($Aggregate.saveToRepository(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).resolves.toBeUndefined()
-    })
-    it('saving an entity with the wrong version', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
-            yield* _(
-              $Repository.insert({ ...entity, _: { ...entity._, version: 0 } }),
-            )
-
-            return yield* _($Aggregate.saveToRepository(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).rejects.toThrow(WrongEntityVersion)
-    })
-    it('updating an entity', async () => {
-      await expect(
-        pipe(
-          gen(function* (_) {
-            const entity = yield* _(
-              $MutableEntity('foo')({}, { id: 'bar', version: 0 }),
-            )
-            yield* _($Repository.insert(entity))
-
-            return yield* _($Aggregate.saveToRepository(entity))
-          }),
-          Effect.provideSomeLayer($Layer),
-          Effect.runPromise,
-        ),
-      ).resolves.toBeUndefined()
     })
   })
 
@@ -247,7 +116,7 @@ describe('Aggregate', () => {
                 { id: 'bar', events: { uncommitted: [event] } },
               ),
             )
-            yield* _($Aggregate.save(aggregate)(entity))
+            yield* _(aggregate.save(entity))
 
             return yield* _($EventStore.events('bar'))
           }),
@@ -261,7 +130,7 @@ describe('Aggregate', () => {
         pipe(
           gen(function* (_) {
             const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
-            yield* _($Aggregate.save({ type: 'foo' })(entity))
+            yield* _($Aggregate('foo').save(entity))
 
             return yield* _($Repository.find(entity))
           }),
@@ -281,10 +150,23 @@ describe('Aggregate', () => {
           )
           yield* _($EventStore.publish(event))
           yield* _($EventStore.publish(event))
-          const entity = yield* _($Aggregate.load(aggregate)('bar'))
+          const entity = yield* _(aggregate.load('bar'))
           yield* _($EventStore.publish(event))
 
-          return yield* _($Aggregate.save(aggregate)(entity))
+          return yield* _(aggregate.save(entity))
+        }),
+        Effect.provideSomeLayer($Layer),
+        Effect.runPromise,
+      ),
+    ).rejects.toThrow(WrongEntityVersion)
+
+    await expect(
+      pipe(
+        gen(function* (_) {
+          const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
+          yield* _($Aggregate('foo').save(entity))
+
+          return yield* _($Aggregate('foo').save(entity))
         }),
         Effect.provideSomeLayer($Layer),
         Effect.runPromise,
@@ -300,15 +182,15 @@ describe('Aggregate', () => {
           )
           yield* _($EventStore.publish(event))
           yield* _($EventStore.publish(event))
-          const entity = yield* _($Aggregate.load(aggregate)('bar'))
+          const entity = yield* _(aggregate.load('bar'))
           yield* _(
-            $Aggregate.save(aggregate)({
+            aggregate.save({
               ...entity,
               _: { ...entity._, events: { uncommitted: [event] } },
             }),
           )
 
-          return yield* _($Aggregate.load(aggregate)('bar'))
+          return yield* _(aggregate.load('bar'))
         }),
         Effect.provideSomeLayer($Layer),
         Effect.runPromise,
@@ -316,6 +198,28 @@ describe('Aggregate', () => {
     ).resolves.toMatchObject({
       _: { type: 'foo', id: 'bar', version: 2 },
       bar: 42 + 42 + 42,
+    })
+
+    await expect(
+      pipe(
+        gen(function* (_) {
+          const entity = yield* _(
+            $MutableEntity('foo')({ bar: 42 }, { id: 'bar' }),
+          )
+          yield* _($Aggregate('foo').save(entity))
+          const _entity = yield* _($Aggregate('foo').load('bar'))
+          yield* _(
+            $Aggregate('foo').save({ ..._entity, bar: 1138 } as MutableEntity),
+          )
+
+          return yield* _($Aggregate('foo').load('bar'))
+        }),
+        Effect.provideSomeLayer($Layer),
+        Effect.runPromise,
+      ),
+    ).resolves.toMatchObject({
+      _: { type: 'foo', id: 'bar', version: 1 },
+      bar: 1138,
     })
   })
 })

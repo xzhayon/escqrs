@@ -1,5 +1,6 @@
 import { Effect, NonEmptyArray, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
+import { EOf, ROf } from './Effect'
 import { Body, Id, Type } from './Entity'
 import { EntityNotFound } from './EntityNotFound'
 import { Event } from './Event'
@@ -13,9 +14,13 @@ import { WrongEntityVersion } from './WrongEntityVersion'
 
 const CHANNEL = 'Aggregate'
 
-export type Aggregate<A extends MutableEntity> = A extends EventSourcedEntity
-  ? { readonly type: Type<A>; readonly reducer: Reducer<A> }
-  : { readonly type: Type<A> }
+export interface Aggregate<A extends MutableEntity> {
+  readonly load: (id: Id<A>) => Effect.Effect<ROf<Load>, EOf<Load>, A>
+  readonly save: (entity: A) => Effect.Effect<ROf<Save>, EOf<Save>, void>
+}
+
+type Load = ReturnType<ReturnType<typeof load>>
+type Save = ReturnType<ReturnType<typeof save>>
 
 export function $Aggregate<A extends EventSourcedEntity, E extends Event>(
   type: Type<A>,
@@ -27,18 +32,21 @@ export function $Aggregate<A extends MutableEntity>(type: Type<A>): Aggregate<A>
 export function $Aggregate<A extends MutableEntity, E extends Event>(
   type: Type<A>,
   reducers?: {
-    readonly [k in Type<E>]: (entity: Body<A> | undefined, event: E) => Body<A>
+    readonly [k in Type<E>]: (
+      entity: Body<A & EventSourcedEntity> | undefined,
+      event: E,
+    ) => Body<A & EventSourcedEntity>
   },
-) {
-  return { type, reducer: reducers && $Reducer.compose(reducers) }
+): Aggregate<A> {
+  const reducer = reducers && $Reducer.compose(reducers)
+
+  return reducer
+    ? { load: load(type, reducer), save: save(type, reducer) }
+    : { load: load(type), save: save(type) }
 }
 
-const isEventSourced = <A extends MutableEntity>(
-  aggregate: Aggregate<A>,
-): aggregate is Aggregate<A & EventSourcedEntity> => 'reducer' in aggregate
-
-$Aggregate.loadFromEventStore =
-  <A extends EventSourcedEntity>({ type, reducer }: Aggregate<A>) =>
+const loadFromEventStore =
+  <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
   (id: Id<A>) =>
     gen(function* (_) {
       const _events = yield* _($EventStore.events(id))
@@ -52,40 +60,43 @@ $Aggregate.loadFromEventStore =
       )
     })
 
-$Aggregate.loadFromRepository =
-  <A extends MutableEntity>({ type }: Aggregate<A>) =>
+const loadFromRepository =
+  <A extends MutableEntity>(type: Type<A>) =>
   (id: Id<A>) =>
     $Repository.find({ _: { type, id } })
 
-$Aggregate.load =
-  <A extends MutableEntity>(aggregate: Aggregate<A>) =>
+const load =
+  <A extends MutableEntity>(
+    type: Type<A>,
+    reducer?: Reducer<A & EventSourcedEntity>,
+  ) =>
   (id: Id<A>) =>
     pipe(
-      aggregate,
-      isEventSourced,
-      Effect.if(
-        () =>
-          $Aggregate.loadFromEventStore<A & EventSourcedEntity>(aggregate)(id),
-        () => $Aggregate.loadFromRepository(aggregate)(id),
+      reducer,
+      Effect.fromNullable,
+      Effect.foldM(
+        () => loadFromRepository(type)(id),
+        (reducer) =>
+          loadFromEventStore<A & EventSourcedEntity>(type, reducer)(id),
       ),
       Effect.tapBoth(
         (error) =>
           $Logger.error('Aggregate not loaded', {
-            aggregateType: aggregate.type,
+            aggregateType: type,
             error,
             aggregateId: id,
             channel: CHANNEL,
           }),
         () =>
           $Logger.debug('Aggregate loaded', {
-            aggregateType: aggregate.type,
+            aggregateType: type,
             aggregateId: id,
             channel: CHANNEL,
           }),
       ),
     )
 
-$Aggregate.saveToEventStore = <A extends EventSourcedEntity>(entity: A) =>
+const saveToEventStore = <A extends EventSourcedEntity>(entity: A) =>
   gen(function* (_) {
     const events = yield* _($EventStore.events(entity._.id))
     if (entity._.version !== events.length - 1) {
@@ -102,7 +113,7 @@ $Aggregate.saveToEventStore = <A extends EventSourcedEntity>(entity: A) =>
     }
   })
 
-$Aggregate.saveToRepository = <A extends MutableEntity>(entity: A) =>
+const saveToRepository = <A extends MutableEntity>(entity: A) =>
   pipe(
     $Repository.find<A>(entity),
     Effect.map(({ _ }) => _.version),
@@ -123,37 +134,39 @@ $Aggregate.saveToRepository = <A extends MutableEntity>(entity: A) =>
           )
         : Option.none,
     ),
-    Effect.as(entity),
-    Effect.chain($MutableEntity.bump),
-    Effect.map((entity) => 0 === entity._.version),
-    Effect.ifM(
-      () => $Repository.insert(entity),
-      () => $Repository.update(entity),
+    Effect.chain(() =>
+      gen(function* (_) {
+        const _entity = yield* _($MutableEntity.bump(entity))
+        0 === _entity._.version
+          ? yield* _($Repository.insert(_entity))
+          : yield* _($Repository.update(_entity))
+      }),
     ),
-    Effect.asUnit,
   )
 
-$Aggregate.save =
-  <A extends MutableEntity>(aggregate: Aggregate<A>) =>
+const save =
+  <A extends MutableEntity>(
+    type: Type<A>,
+    reducer?: Reducer<A & EventSourcedEntity>,
+  ) =>
   (entity: A) =>
     pipe(
-      aggregate,
-      isEventSourced,
+      undefined !== reducer,
       Effect.if(
-        () => $Aggregate.saveToEventStore(entity as A & EventSourcedEntity),
-        () => $Aggregate.saveToRepository(entity),
+        () => saveToEventStore(entity as A & EventSourcedEntity),
+        () => saveToRepository(entity),
       ),
       Effect.tapBoth(
         (error) =>
           $Logger.error('Aggregate not saved', {
-            aggregateType: aggregate.type,
+            aggregateType: type,
             error,
             aggregateId: entity._.id,
             channel: CHANNEL,
           }),
         () =>
           $Logger.debug('Aggregate saved', {
-            aggregateType: aggregate.type,
+            aggregateType: type,
             aggregateId: entity._.id,
             channel: CHANNEL,
           }),
