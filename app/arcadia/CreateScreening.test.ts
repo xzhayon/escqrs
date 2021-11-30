@@ -25,7 +25,7 @@ describe('CreateScreening', () => {
   describe('film was created', () => {
     it('failing because of nonexistent screen', async () => {
       await Gwt.test($CreateScreening.handler)
-        .prepare(
+        .given(
           gen(function* (_) {
             const film = yield* _($Film()({}, { id: filmId }))
             yield* _($Repository.insert<Film>(film))
@@ -39,7 +39,7 @@ describe('CreateScreening', () => {
     describe('screen was created', () => {
       it('creating screening', async () => {
         await Gwt.test($CreateScreening.handler)
-          .prepare(
+          .given(
             gen(function* (_) {
               const film = yield* _($Film()({}, { id: filmId }))
               const screen = yield* _($Screen()({ seats }, { id: screenId }))

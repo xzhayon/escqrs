@@ -18,8 +18,7 @@ const stripMessageHeaders = <A extends Message>({ _, ...message }: A) => ({
 
 export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
   private readonly _S!: S
-  private _prepare: Effect.Effect<any, Error, void>
-  private _given: Array.Array<Effect.Effect<any, Error, Event>>
+  private _given: Effect.Effect<any, Error, Array.Array<Event>>
   private _when!: Effect.Effect<any, Error, Command>
   private _error!: Error
   private _then: Array.Array<Effect.Effect<any, Error, Event>>
@@ -27,8 +26,7 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
   private constructor(
     private readonly _subject: Effect.Effect<any, Error, CommandHandler>,
   ) {
-    this._prepare = Effect.unit
-    this._given = []
+    this._given = Effect.succeed([])
     this._then = []
   }
 
@@ -38,20 +36,30 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
     return new Gwt<_R, 'Given'>(subject)
   }
 
-  prepare<_R>(
-    this: Gwt<R, 'Given'>,
-    prepare: Effect.Effect<GwtEnv & _R, Error, void>,
-  ): Gwt<R & _R, 'Given'> {
-    this._prepare = prepare
-
-    return this
-  }
-
   given<_R>(
     this: Gwt<R, 'Given'>,
+    event: Effect.Effect<GwtEnv & _R, Error, Event>,
     ...events: Array.Array<Effect.Effect<GwtEnv & _R, Error, Event>>
-  ): Gwt<R & _R, 'When'> {
-    this._given = events
+  ): Gwt<R & _R, 'When'>
+  given<_R>(
+    this: Gwt<R, 'Given'>,
+    effect: Effect.Effect<GwtEnv & _R, Error, void>,
+  ): Gwt<R & _R, 'Given'>
+  given<_R>(
+    this: Gwt<R, 'Given'>,
+    effectOrEvent: Effect.Effect<any, Error, void | Event>,
+    ...events: Array.Array<Effect.Effect<any, Error, Event>>
+  ): Gwt<R & _R, 'Given' | 'When'> {
+    let given = this._given
+    for (const arg of [effectOrEvent, ...events]) {
+      given = gen(function* (_) {
+        const events = yield* _(given)
+        const a = yield* _(arg)
+
+        return undefined !== a ? [...events, a] : events
+      })
+    }
+    this._given = given
 
     return this as Gwt<R & _R, any>
   }
@@ -68,6 +76,7 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
   then(this: Gwt<R, 'Then'>, error: Error): Gwt<R, 'Run'>
   then<_R>(
     this: Gwt<R, 'Then'>,
+    event: Effect.Effect<GwtEnv & _R, Error, Event>,
     ...events: Array.Array<Effect.Effect<GwtEnv & _R, Error, Event>>
   ): Gwt<R & _R, 'Run'>
   then<_R>(
@@ -94,7 +103,6 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
     layer: Layer.Layer<GwtEnv, Error, R> = Layer.identity<any>(),
   ): Promise<void> {
     const subject = this._subject
-    const prepare = this._prepare
     const given = this._given
     const when = this._when
 
@@ -114,10 +122,7 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
         const handler = yield* _(subject)
         const command = yield* _(when)
 
-        yield* _(prepare)
-        const events = yield* _(
-          pipe(given, Array.mapEffectPar(Function.identity)),
-        )
+        const events = yield* _(given)
         for (const event of events) {
           yield* _($EventStore.publish(event))
         }
