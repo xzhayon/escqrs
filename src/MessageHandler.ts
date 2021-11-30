@@ -13,10 +13,10 @@ export interface MessageHandler<A extends Message = Message> {
 
 export function $MessageHandler<A extends Message>(type: Type<A>) {
   return <R>(
-    handle: Effect.RIO<R, MessageHandler['handle']>,
+    handle: Effect.RIO<R, MessageHandler<A>['handle']>,
   ): Effect.RIO<R, MessageHandler> =>
     gen(function* (_) {
-      return { type, handle: yield* _(handle) }
+      return { type, handle: (yield* _(handle)) as MessageHandler['handle'] }
     })
 }
 

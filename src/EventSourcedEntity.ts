@@ -1,6 +1,7 @@
-import { Array, Option, pipe } from '@effect-ts/core'
+import { Array, Either, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { Body, Header, Id, Type } from './Entity'
+import { EntityNotFound } from './EntityNotFound'
 import { Event } from './Event'
 import { $MutableEntity, MutableEntity } from './MutableEntity'
 import { PartialDeep } from './PartialDeep'
@@ -37,7 +38,7 @@ const fold =
   <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
   (id: Id<A>) =>
   (entity: A | undefined) =>
-  (events: Array.Array<Event>) =>
+  (events: Array.Array<Event>, uncommitted = false) =>
     pipe(
       events,
       Array.filter(
@@ -62,16 +63,15 @@ const fold =
                         event._.date,
                       updated: event._.date,
                     },
-                    version: entity?._.version ?? version,
+                    version: uncommitted ? entity?._.version ?? -1 : version,
                     events: {
-                      uncommitted:
-                        undefined !== entity
-                          ? [
-                              ...(Option.toUndefined(_entity)?._.events
-                                .uncommitted ?? []),
-                              event,
-                            ]
-                          : [],
+                      uncommitted: uncommitted
+                        ? [
+                            ...(Option.toUndefined(_entity)?._.events
+                              .uncommitted ?? []),
+                            event,
+                          ]
+                        : [],
                     },
                   },
                 } as EventSourcedEntity as A),
@@ -86,7 +86,10 @@ $EventSourcedEntity.reduce =
     fold(type, reducer)(id)(undefined)
 
 $EventSourcedEntity.applyEvent =
-  <A extends EventSourcedEntity>(reducer: Reducer<A>) =>
-  (event: Event) =>
-  (entity: A) =>
-    fold(entity._.type, reducer)(entity._.id)(entity)([event])
+  <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
+  (id: Id<A>) =>
+  (event: Event, entity?: A) =>
+    pipe(
+      fold(type, reducer)(id)(entity)([event], true),
+      Either.fromOption(() => EntityNotFound.unreducibleEvents(type, id)),
+    )

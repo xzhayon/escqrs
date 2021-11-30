@@ -7,9 +7,11 @@ export interface CommandHandler<A extends Command = Command>
   extends MessageHandler<A> {}
 
 export function $CommandHandler<A extends Command>(type: Type<A>) {
-  return <R>(handle: Effect.RIO<R, CommandHandler['handle']>) =>
+  return <R>(handle: Effect.RIO<R, CommandHandler<A>['handle']>) =>
     pipe(
-      $MessageHandler(type)(handle as Effect.RIO<R, MessageHandler['handle']>),
+      $MessageHandler(type)(
+        handle as Effect.RIO<R, MessageHandler<A>['handle']>,
+      ),
       Effect.map((handler) => handler as CommandHandler),
     )
 }

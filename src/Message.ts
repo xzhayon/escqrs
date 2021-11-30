@@ -5,13 +5,13 @@ import { $ImmutableEntity, ImmutableEntity } from './ImmutableEntity'
 import { PartialDeep } from './PartialDeep'
 import { $Uuid } from './Uuid'
 
-export interface Message<A extends string = string>
+export interface Message<T extends string = string, I extends string = string>
   extends ImmutableEntity<
-    A,
+    T,
     MessageId,
     { readonly correlationId: MessageId; readonly causationId: MessageId }
   > {
-  readonly aggregateId: Id<Entity>
+  readonly aggregateId: I
 }
 
 export type MessageId = Branded.Branded<string, 'MessageId'>
