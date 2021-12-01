@@ -5,7 +5,7 @@ import { $ImmutableEntity, ImmutableEntity } from './ImmutableEntity'
 import { PartialDeep } from './PartialDeep'
 import { $Uuid } from './Uuid'
 
-export interface Message<T extends string = string, A extends Entity = Entity>
+export interface Message< A extends Entity = Entity,T extends string = string>
   extends ImmutableEntity<
     T,
     MessageId,

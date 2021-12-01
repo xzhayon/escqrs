@@ -6,16 +6,16 @@ interface Foo extends Entity<'Foo'> {
   readonly bar: number
 }
 
-interface Add extends Event<'Add'> {
+interface Add extends Event<Foo, 'Add'> {
   readonly bar: number
 }
-interface Sub extends Event<'Sub'> {
+interface Sub extends Event<Foo, 'Sub'> {
   readonly bar: number
 }
-interface Mul extends Event<'Mul'> {
+interface Mul extends Event<Foo, 'Mul'> {
   readonly bar: number
 }
-interface Div extends Event<'Div'> {
+interface Div extends Event<Foo, 'Div'> {
   readonly bar: number
 }
 
