@@ -50,16 +50,18 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
     effectOrEvent: Effect.Effect<any, Error, void | Event>,
     ...events: Array.Array<Effect.Effect<any, Error, Event>>
   ): Gwt<R & _R, 'Given' | 'When'> {
-    let given = this._given
-    for (const arg of [effectOrEvent, ...events]) {
-      given = gen(function* (_) {
-        const events = yield* _(given)
-        const a = yield* _(arg)
+    const given = this._given
+    this._given = gen(function* (_) {
+      const _events: Array<Event> = []
+      for (const _effectOrEvent of [effectOrEvent, ...events]) {
+        const a = yield* _(_effectOrEvent)
+        if (undefined !== a) {
+          _events.push(a)
+        }
+      }
 
-        return undefined !== a ? [...events, a] : events
-      })
-    }
-    this._given = given
+      return [...(yield* _(given)), ..._events]
+    })
 
     return this as Gwt<R & _R, any>
   }
