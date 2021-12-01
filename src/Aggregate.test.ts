@@ -17,7 +17,7 @@ interface Foo extends EventSourcedEntity<'foo'> {
   readonly bar: number
 }
 
-const aggregate = $Aggregate<Foo, Event>('foo', {
+const aggregate = $Aggregate<Foo, Event<string, Foo>>('foo', {
   foo: (entity, event) =>
     'bar' in event
       ? entity

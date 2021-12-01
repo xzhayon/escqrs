@@ -36,14 +36,17 @@ interface _Aggregate<A extends MutableEntity> {
 type Load = ReturnType<ReturnType<typeof load>>
 type Save = ReturnType<ReturnType<typeof save>>
 
-export function $Aggregate<A extends EventSourcedEntity, E extends Event>(
+export function $Aggregate<
+  A extends EventSourcedEntity,
+  E extends Event<string, A>,
+>(
   type: Type<A>,
   reducer: {
     readonly [k in Type<E>]: Reducer<A, Extract<E, { _: { readonly type: k } }>>
   },
 ): Aggregate<A & EventSourcedEntity>
 export function $Aggregate<A extends MutableEntity>(type: Type<A>): Aggregate<A>
-export function $Aggregate<A extends MutableEntity, E extends Event>(
+export function $Aggregate<A extends MutableEntity, E extends Event<string, A>>(
   type: Type<A>,
   reducers?: {
     readonly [k in Type<E>]: Reducer<
