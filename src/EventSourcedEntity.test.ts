@@ -96,10 +96,11 @@ describe('EventSourcedEntity', () => {
       const _entity = entity('bar')
 
       expect(
-        $EventSourcedEntity.applyEvent(reducer)(event('foo', { bar: 42 }))(
+        $EventSourcedEntity.applyEvent('foo', reducer)(
+          event('foo', { bar: 42 }),
           _entity,
         ),
-      ).toStrictEqual(Option.some(_entity))
+      ).toStrictEqual(Option.some({ _: _entity._ }))
     })
     it('applying an event', () => {
       const created = new Date(42)
@@ -108,23 +109,34 @@ describe('EventSourcedEntity', () => {
       const _event = event('bar', { bar: 42 }, { date: updated })
 
       expect(
-        $EventSourcedEntity.applyEvent(reducer)(_event)(_entity),
+        $EventSourcedEntity.applyEvent('foo', reducer)(_event, _entity),
       ).toStrictEqual(
         Option.some({
-          ..._entity,
           _: {
             ..._entity._,
             date: { ..._entity._.date, updated },
             events: { uncommitted: [_event] },
           },
-          bar: _entity.bar + 42,
         }),
       )
     })
     it('applying an event that nullifies the entity', () => {
+      const created = new Date(42)
+      const updated = new Date(1138)
+      const _entity = entity('bar', { date: { created, updated: created } })
+      const _event = event('bar', {}, { date: updated })
+
       expect(
-        $EventSourcedEntity.applyEvent(reducer)(event('bar'))(entity('bar')),
-      ).toStrictEqual(Option.none)
+        $EventSourcedEntity.applyEvent('foo', reducer)(_event, _entity),
+      ).toStrictEqual(
+        Option.some({
+          _: {
+            ..._entity._,
+            date: { ..._entity._.date, updated },
+            events: { uncommitted: [_event] },
+          },
+        }),
+      )
     })
   })
 })

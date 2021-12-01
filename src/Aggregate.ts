@@ -1,7 +1,7 @@
-import { Effect, NonEmptyArray, Option, pipe } from '@effect-ts/core'
+import { Effect, Either, NonEmptyArray, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { EOf, ROf } from './Effect'
-import { Body, Id, Type } from './Entity'
+import { Id, Type } from './Entity'
 import { EntityNotFound } from './EntityNotFound'
 import { Event } from './Event'
 import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
@@ -14,7 +14,17 @@ import { WrongEntityVersion } from './WrongEntityVersion'
 
 const CHANNEL = 'Aggregate'
 
-export interface Aggregate<A extends MutableEntity> {
+export type Aggregate<A extends MutableEntity> = A extends EventSourcedEntity
+  ? _Aggregate<A & EventSourcedEntity> & {
+      readonly apply: (
+        event: Event,
+      ) => (
+        entity?: A & EventSourcedEntity,
+      ) => Either.Either<EntityNotFound, Pick<A & EventSourcedEntity, '_'>>
+    }
+  : _Aggregate<A>
+
+interface _Aggregate<A extends MutableEntity> {
   readonly load: (id: Id<A>) => Effect.Effect<ROf<Load>, EOf<Load>, A>
   readonly save: (entity: A) => Effect.Effect<ROf<Save>, EOf<Save>, void>
 }
@@ -25,23 +35,24 @@ type Save = ReturnType<ReturnType<typeof save>>
 export function $Aggregate<A extends EventSourcedEntity, E extends Event>(
   type: Type<A>,
   reducer: {
-    readonly [k in Type<E>]: (entity: Body<A> | undefined, event: E) => Body<A>
+    readonly [k in Type<E>]: Reducer<A>
   },
-): Aggregate<A>
+): Aggregate<A & EventSourcedEntity>
 export function $Aggregate<A extends MutableEntity>(type: Type<A>): Aggregate<A>
 export function $Aggregate<A extends MutableEntity, E extends Event>(
   type: Type<A>,
   reducers?: {
-    readonly [k in Type<E>]: (
-      entity: Body<A & EventSourcedEntity> | undefined,
-      event: E,
-    ) => Body<A & EventSourcedEntity>
+    readonly [k in Type<E>]: Reducer<A & EventSourcedEntity>
   },
-): Aggregate<A> {
+) {
   const reducer = reducers && $Reducer.compose(reducers)
 
   return reducer
-    ? { load: load(type, reducer), save: save(type, reducer) }
+    ? {
+        load: load(type, reducer),
+        apply: apply<A & EventSourcedEntity>(type, reducer),
+        save: save(type),
+      }
     : { load: load(type), save: save(type) }
 }
 
@@ -55,7 +66,7 @@ const loadFromEventStore =
       )
 
       return yield* _(
-        $EventSourcedEntity.reduce(type, reducer as Reducer<A>)(id)(events),
+        $EventSourcedEntity.reduce(type, reducer)(id)(events),
         () => EntityNotFound.unreducibleEvents(type, id),
       )
     })
@@ -96,15 +107,30 @@ const load =
       ),
     )
 
-const saveToEventStore = <A extends EventSourcedEntity>(entity: A) =>
+const apply =
+  <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
+  (event: Event) =>
+  (entity?: A) =>
+    pipe(
+      $EventSourcedEntity.applyEvent(type, reducer)(event, entity),
+      Either.fromOption(() =>
+        EntityNotFound.missingEvents(type, event.aggregateId),
+      ),
+    )
+
+const saveToEventStore = <A extends EventSourcedEntity>(entity: Pick<A, '_'>) =>
   gen(function* (_) {
     const events = yield* _($EventStore.events(entity._.id))
     if (entity._.version !== events.length - 1) {
-      throw WrongEntityVersion.build(
-        entity._.type,
-        entity._.id,
-        events.length - 1,
-        entity._.version,
+      yield* _(
+        Effect.fail(
+          WrongEntityVersion.build(
+            entity._.type,
+            entity._.id,
+            events.length - 1,
+            entity._.version,
+          ),
+        ),
       )
     }
 
@@ -145,15 +171,12 @@ const saveToRepository = <A extends MutableEntity>(entity: A) =>
   )
 
 const save =
-  <A extends MutableEntity>(
-    type: Type<A>,
-    reducer?: Reducer<A & EventSourcedEntity>,
-  ) =>
-  (entity: A) =>
+  <A extends MutableEntity>(type: Type<A>) =>
+  (entity: Pick<A & EventSourcedEntity, '_'> | A) =>
     pipe(
-      undefined !== reducer,
+      'events' in entity._,
       Effect.if(
-        () => saveToEventStore(entity as A & EventSourcedEntity),
+        () => saveToEventStore(entity as Pick<A & EventSourcedEntity, '_'>),
         () => saveToRepository(entity),
       ),
       Effect.tapBoth(
