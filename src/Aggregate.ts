@@ -21,12 +21,16 @@ export type Aggregate<A extends MutableEntity> = A extends EventSourcedEntity
       ) => (
         entity?: A & EventSourcedEntity,
       ) => Either.Either<EntityNotFound, Pick<A & EventSourcedEntity, '_'>>
+      readonly save: (
+        entity: Pick<A & EventSourcedEntity, '_'>,
+      ) => Effect.Effect<ROf<Save>, EOf<Save>, void>
     }
-  : _Aggregate<A>
+  : _Aggregate<A> & {
+      readonly save: (entity: A) => Effect.Effect<ROf<Save>, EOf<Save>, void>
+    }
 
 interface _Aggregate<A extends MutableEntity> {
   readonly load: (id: Id<A>) => Effect.Effect<ROf<Load>, EOf<Load>, A>
-  readonly save: (entity: A) => Effect.Effect<ROf<Save>, EOf<Save>, void>
 }
 
 type Load = ReturnType<ReturnType<typeof load>>
