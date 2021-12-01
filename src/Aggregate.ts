@@ -35,14 +35,17 @@ type Save = ReturnType<ReturnType<typeof save>>
 export function $Aggregate<A extends EventSourcedEntity, E extends Event>(
   type: Type<A>,
   reducer: {
-    readonly [k in Type<E>]: Reducer<A>
+    readonly [k in Type<E>]: Reducer<A, Extract<E, { _: { readonly type: k } }>>
   },
 ): Aggregate<A & EventSourcedEntity>
 export function $Aggregate<A extends MutableEntity>(type: Type<A>): Aggregate<A>
 export function $Aggregate<A extends MutableEntity, E extends Event>(
   type: Type<A>,
   reducers?: {
-    readonly [k in Type<E>]: Reducer<A & EventSourcedEntity>
+    readonly [k in Type<E>]: Reducer<
+      A & EventSourcedEntity,
+      Extract<E, { _: { readonly type: k } }>
+    >
   },
 ) {
   const reducer = reducers && $Reducer.compose(reducers)
