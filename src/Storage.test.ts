@@ -84,7 +84,7 @@ describe('Storage', () => {
           yield* _($Storage.write(`foo.${seed}/bar`)(Buffer.from('foobar')))
           yield* _($Storage.delete(`foo.${seed}/bar`))
 
-          return yield* _($Storage.delete(`foo.${seed}/bar`))
+          return yield* _($Storage.read(`foo.${seed}/bar`))
         }),
         Effect.provideSomeLayer($Layer),
         Effect.runPromise,
