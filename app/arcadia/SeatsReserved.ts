@@ -1,9 +1,9 @@
 import { Array } from '@effect-ts/core'
 import { $Event, Event } from '../../src/Event'
-import { ScreeningId } from './Screening'
+import { Screening } from './Screening'
 import { Seat } from './Seat'
 
-export interface SeatsReserved extends Event<'SeatsReserved', ScreeningId> {
+export interface SeatsReserved extends Event<Screening, 'SeatsReserved'> {
   readonly seats: Array.Array<Seat>
 }
 

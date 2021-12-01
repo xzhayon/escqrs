@@ -1,7 +1,8 @@
 import { $Event, Event } from '../../src/Event'
 import { Screen } from './Screen'
+import { Screening } from './Screening'
 
-export interface ScreeningCreated extends Event<'ScreeningCreated'> {
+export interface ScreeningCreated extends Event<Screening, 'ScreeningCreated'> {
   readonly date: Date
   readonly seats: Screen['seats']
 }

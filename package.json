@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start-cli": "rm -rf var; ts-node-dev app/cli.ts",
+    "start-cli": "rm -rf var; ts-node-dev app/arcadia",
     "start-replay": "ts-node-dev app/replay.ts",
-    "test": "jest --coverage --collectCoverageFrom=src/**/*.ts"
+    "test": "jest --coverage --collectCoverageFrom=app/**/*.ts --collectCoverageFrom=src/**/*.ts"
   },
   "author": "Alberto Villa <villa.alberto@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@effect-ts/core": "^0.45.5",
+    "@effect-ts/core": "^0.44.15",
+    "@effect-ts/morphic": "^0.38.1",
     "big.js": "^6.1.1",
     "uuid": "^8.3.2"
   },
@@ -22,6 +23,7 @@
     "@types/uuid": "^8.3.1",
     "eslint": "^8.1.0",
     "jest": "^27.3.1",
+    "memfs": "^3.4.0",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.7",
     "ts-node-dev": "^1.1.8",

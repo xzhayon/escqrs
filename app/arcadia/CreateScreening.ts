@@ -1,6 +1,5 @@
 import { Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
-import { $Aggregate } from '../../src/Aggregate'
 import { $Command, Command } from '../../src/Command'
 import { $CommandHandler } from '../../src/CommandHandler'
 import { HasEventStore } from '../../src/EventStore'
@@ -9,10 +8,9 @@ import { $Repository, HasRepository } from '../../src/Repository'
 import { HasUuid } from '../../src/Uuid'
 import { Film, FilmId } from './Film'
 import { Screen, ScreenId } from './Screen'
-import { $Screening, ScreeningId } from './Screening'
+import { $Screening, Screening } from './Screening'
 
-export interface CreateScreening
-  extends Command<'CreateScreening', ScreeningId> {
+export interface CreateScreening extends Command<Screening, 'CreateScreening'> {
   readonly filmId: FilmId
   readonly screenId: ScreenId
   readonly date: Date
@@ -43,7 +41,7 @@ $CreateScreening.handler = $CommandHandler<CreateScreening>('CreateScreening')(
                 _: { type: 'Screen', id: command.screenId },
               }),
             )
-            const screening = yield* _(
+            const screening_ = yield* _(
               $Screening.create(
                 command.aggregateId,
                 film,
@@ -52,7 +50,7 @@ $CreateScreening.handler = $CommandHandler<CreateScreening>('CreateScreening')(
                 command,
               ),
             )
-            yield* _($Aggregate.save($Screening)(screening))
+            yield* _($Screening.save(screening_))
           }),
           Effect.provideService(HasEventStore)($eventStore),
           Effect.provideService(HasLogger)($logger),

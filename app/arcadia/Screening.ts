@@ -1,10 +1,7 @@
 import { Array, Branded, Clock, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Aggregate } from '../../src/Aggregate'
-import {
-  $EventSourcedEntity,
-  EventSourcedEntity,
-} from '../../src/EventSourcedEntity'
+import { EventSourcedEntity } from '../../src/EventSourcedEntity'
 import { CreateScreening } from './CreateScreening'
 import { Film } from './Film'
 import { ReserveSeats } from './ReserveSeats'
@@ -28,7 +25,7 @@ export const $ScreeningId = (id: string): ScreeningId => Branded.makeBranded(id)
 const aggregate = $Aggregate<Screening, ScreeningCreated | SeatsReserved>(
   'Screening',
   {
-    ScreeningCreated: (_, event: any) => ({
+    ScreeningCreated: (_, event) => ({
       date: event.date,
       seats: pipe(
         event.seats.rows,
@@ -40,10 +37,7 @@ const aggregate = $Aggregate<Screening, ScreeningCreated | SeatsReserved>(
         ),
       ),
     }),
-    SeatsReserved: (screening, event) =>
-      ({
-        ...screening,
-      } as any),
+    SeatsReserved: (screening, event) => screening && { ...screening },
   },
 )
 
@@ -58,13 +52,13 @@ export const $Screening = {
   ) =>
     gen(function* (_) {
       return yield* _(
-        $EventSourcedEntity.applyEvent(aggregate.type, aggregate.reducer)(id)(
+        $Screening.apply(
           yield* _(
             $ScreeningCreated()({ aggregateId: id, date, seats: screen.seats })(
               command,
             ),
           ),
-        ),
+        )(),
       )
     }),
   reserveSeats: (
@@ -95,15 +89,11 @@ export const $Screening = {
       })
 
       return yield* _(
-        $EventSourcedEntity.applyEvent(
-          aggregate.type,
-          aggregate.reducer,
-        )(screening._.id)(
+        $Screening.apply(
           yield* _(
             $SeatsReserved()({ aggregateId: screening._.id, seats })(command),
           ),
-          screening,
-        ),
+        )(screening),
       )
     }),
 }
