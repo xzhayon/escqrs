@@ -1,10 +1,10 @@
 import { Effect, Managed, pipe } from '@effect-ts/core'
 import { HasClock } from '@effect-ts/system/Clock'
+import { gen } from '@effect-ts/system/Effect'
 import { join } from 'path'
 import { $Logger, HasLogger } from './Logger'
-import { $Storage, HasStorage } from './Storage'
 import { Repository } from './Repository'
-import { gen } from '@effect-ts/system/Effect'
+import { $Storage, HasStorage } from './Storage'
 
 const CHANNEL = 'StorageRepository'
 
@@ -76,6 +76,8 @@ export const $StorageRepository = (location: string) =>
             Effect.provideService(HasStorage)($storage),
           ),
       }
+
+      return repository
     }),
     Managed.make(() =>
       $Logger.debug('Connection to storage repository closed', {
