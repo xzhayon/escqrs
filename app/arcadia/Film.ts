@@ -1,7 +1,9 @@
 import { Branded } from '@effect-ts/core'
 import { $MutableEntity, MutableEntity } from '../../src/MutableEntity'
 
-export interface Film extends MutableEntity<'Film', FilmId> {}
+export interface Film extends MutableEntity<'Film', FilmId> {
+  readonly title: string
+}
 
 export type FilmId = Branded.Branded<string, 'FilmId'>
 

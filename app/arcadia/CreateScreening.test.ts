@@ -27,7 +27,7 @@ describe('CreateScreening', () => {
       await Gwt.test($CreateScreening.handler)
         .given(
           gen(function* (_) {
-            const film = yield* _($Film()({}, { id: filmId }))
+            const film = yield* _($Film()({ title: 'foo' }, { id: filmId }))
             yield* _($Repository.insert<Film>(film))
           }),
         )
@@ -41,8 +41,10 @@ describe('CreateScreening', () => {
         await Gwt.test($CreateScreening.handler)
           .given(
             gen(function* (_) {
-              const film = yield* _($Film()({}, { id: filmId }))
-              const screen = yield* _($Screen()({ seats }, { id: screenId }))
+              const film = yield* _($Film()({ title: 'foo' }, { id: filmId }))
+              const screen = yield* _(
+                $Screen()({ name: 'bar', seats }, { id: screenId }),
+              )
               yield* _($Repository.insert<Film>(film))
               yield* _($Repository.insert<Screen>(screen))
             }),

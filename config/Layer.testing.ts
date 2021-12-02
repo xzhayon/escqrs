@@ -25,9 +25,9 @@ export const $Layer = pipe(
     Layer.fromManaged(HasServiceBus)(
       $InMemoryServiceBus(() => new EventEmitter()),
     ),
-    Layer.pure(HasStorage)($Fs(fs as unknown as typeof _fs)),
-    Layer.pure(HasUuid)($Rfc4122),
+    Layer.fromValue(HasStorage)($Fs(fs as unknown as typeof _fs)),
+    Layer.fromValue(HasUuid)($Rfc4122),
   ),
-  Layer.usingAnd(Layer.pure(HasLogger)($NilLogger)),
+  Layer.usingAnd(Layer.fromValue(HasLogger)($NilLogger)),
   Layer.main,
 )
