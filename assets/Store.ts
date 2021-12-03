@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, isPlain } from '@reduxjs/toolkit'
 import createSagaMiddleware from 'redux-saga'
 import { $Context } from './Context'
 import { $FilmCreationSlice } from './film/creation/slice'
@@ -17,7 +17,12 @@ export const $Store = configureStore({
     [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaMiddleware),
+    getDefaultMiddleware({
+      serializableCheck: {
+        isSerializable: (value: unknown) =>
+          value instanceof Date ? true : isPlain(value),
+      },
+    }).concat(sagaMiddleware),
 })
 
 sagaMiddleware.run($Saga)
