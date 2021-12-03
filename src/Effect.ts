@@ -21,3 +21,8 @@ export type RInOf<A extends Layer.Layer<never, unknown, unknown>> = Parameters<
 export type ROutOf<A extends Layer.Layer<never, unknown, unknown>> = ReturnType<
   A[typeof _ROut]
 >
+
+const is = (u: unknown): u is Effect.Effect<unknown, unknown, unknown> =>
+  u instanceof Effect.Base
+
+export const $Effect = { is }

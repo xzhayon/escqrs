@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
-    "start-cli": "rm -rf var; ts-node-dev app/arcadia",
+    "start-web": "ts-node-dev app/arcadia/web",
     "test": "jest --coverage --collectCoverageFrom=app/**/*.ts --collectCoverageFrom=src/**/*.ts",
     "serve": "webpack serve --open --mode=development"
   },
@@ -19,6 +19,7 @@
     "@reduxjs/toolkit": "^1.6.2",
     "big.js": "^6.1.1",
     "fastify": "^3.24.1",
+    "fastify-cors": "^6.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "react-router-dom": "^6.0.2",
