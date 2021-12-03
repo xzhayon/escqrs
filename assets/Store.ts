@@ -19,6 +19,7 @@ export const $Store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
+        ignoredActionPaths: ['payload.onFailure', 'payload.onSuccess'],
         isSerializable: (value: unknown) =>
           value instanceof Date ? true : isPlain(value),
       },
