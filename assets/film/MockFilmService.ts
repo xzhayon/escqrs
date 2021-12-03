@@ -1,18 +1,18 @@
 import { Array, Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
-import { $Screen, Screen } from '../../app/arcadia/Screen'
+import { $Film, Film } from '../../app/arcadia/Film'
 import { Body } from '../../src/Entity'
 import { HasUuid, Uuid } from '../../src/Uuid'
-import { ScreenService } from './ScreenService'
+import { FilmService } from './FilmService'
 
-export const $MockScreenService =
+export const $MockFilmService =
   ({ $uuid }: { $uuid: Uuid }) =>
-  (screens: Array.Array<Body<Screen>> = []): ScreenService => {
-    const _films: Screen[] = []
+  (films: Array.Array<Body<Film>> = []): FilmService => {
+    const _films: Film[] = []
     const seed = pipe(
       gen(function* (_) {
-        for (const screen of screens) {
-          _films.push(yield* _($Screen()(screen)))
+        for (const film of films) {
+          _films.push(yield* _($Film()(film)))
         }
       }),
       Effect.provideService(HasUuid)($uuid),
@@ -28,7 +28,7 @@ export const $MockScreenService =
           Effect.runPromise,
         )
       },
-      getMany: async () => {
+      getList: async () => {
         await seed
 
         return await pipe(

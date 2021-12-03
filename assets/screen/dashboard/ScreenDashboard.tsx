@@ -19,20 +19,24 @@ import {
 import React, { FC, useEffect } from 'react'
 import { Outlet } from 'react-router'
 import { Link } from 'react-router-dom'
-import { FilmList } from './FilmListSlice'
-import { use$Dispatch, use$Selector } from './Hook'
+import { use$Dispatch, use$Selector } from '../../Hook'
+import { $ScreenDashboard, $ScreenDashboardSlice } from './slice'
 
-export const FilmListUI: FC = () => {
+export const ScreenDashboard: FC = () => {
   const dispatch = use$Dispatch()
 
-  const isLoading = use$Selector((state) => state.FilmList.isLoading)
-  const error = use$Selector((state) => state.FilmList.error)
-  const films = use$Selector((state) => state.FilmList.films)
+  const isLoading = use$Selector(
+    (state) => state[$ScreenDashboardSlice.name].isLoading,
+  )
+  const error = use$Selector((state) => state[$ScreenDashboardSlice.name].error)
+  const screens = use$Selector(
+    (state) => state[$ScreenDashboardSlice.name].screens,
+  )
 
   useEffect(() => {
-    dispatch(FilmList.Start())
+    dispatch($ScreenDashboard.Start())
     return () => {
-      dispatch(FilmList.Stop())
+      dispatch($ScreenDashboard.Stop())
     }
   }, [])
 
@@ -41,7 +45,7 @@ export const FilmListUI: FC = () => {
       <Box>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h4">Films</Typography>
+            <Typography variant="h4">Screens</Typography>
           </Grid>
           {error && (
             <Grid item xs={12}>
@@ -51,14 +55,14 @@ export const FilmListUI: FC = () => {
                     color="inherit"
                     disabled={isLoading}
                     size="small"
-                    onClick={() => dispatch(FilmList.Fetch())}
+                    onClick={() => dispatch($ScreenDashboard.FetchList())}
                   >
                     Retry
                   </Button>
                 }
                 severity="error"
               >
-                Cannot update list of films.
+                Cannot fetch list of screens.
               </Alert>
             </Grid>
           )}
@@ -67,14 +71,20 @@ export const FilmListUI: FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Title</TableCell>
+                    <TableCell sx={{ width: 'calc(100% * 2 / 3)' }}>
+                      Name
+                    </TableCell>
+                    <TableCell align="right">Seats</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {(films ?? [null, null, null]).map((film, i) => (
+                  {(screens ?? [null, null, null]).map((screen, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        {film ? film.title : <Skeleton variant="text" />}
+                        {screen ? screen.name : <Skeleton variant="text" />}
+                      </TableCell>
+                      <TableCell align="right">
+                        {screen ? screen.seats : <Skeleton variant="text" />}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -87,15 +97,15 @@ export const FilmListUI: FC = () => {
           color="primary"
           component={Link}
           disabled={isLoading}
-          to="new"
+          to="create"
           variant="extended"
           sx={{ bottom: 16, position: 'absolute', right: 16 }}
         >
-          <Add sx={{ mr: 1 }} /> Film
+          <Add sx={{ mr: 1 }} /> Screen
         </Fab>
       </Box>
       <Outlet />
-      <Snackbar open={isLoading} message="Updating list of films..." />
+      <Snackbar open={isLoading} message="Fetching list of screens..." />
     </>
   )
 }

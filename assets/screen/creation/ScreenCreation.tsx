@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -10,23 +11,26 @@ import {
 } from '@mui/material'
 import React, { FC, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { use$Dispatch, use$Selector } from './Hook'
-import { ScreenCreation } from './ScreenCreationSlice'
+import { use$Dispatch, use$Selector } from '../../Hook'
+import { $ScreenCreation, $ScreenCreationSlice } from './slice'
 
-export const NewScreen: FC = () => {
+export const ScreenCreation: FC = () => {
   const dispatch = use$Dispatch()
   const navigate = useNavigate()
 
-  const isLoading = use$Selector((state) => state.ScreenCreation.isLoading)
+  const isLoading = use$Selector(
+    (state) => state[$ScreenCreationSlice.name].isLoading,
+  )
+  const error = use$Selector((state) => state[$ScreenCreationSlice.name].error)
 
   const [name, setName] = useState<string>('')
   const [rows, setRows] = useState<number>(NaN)
   const [columns, setColumns] = useState<number>(NaN)
 
   useEffect(() => {
-    dispatch(ScreenCreation.Start())
+    dispatch($ScreenCreation.Start())
     return () => {
-      dispatch(ScreenCreation.Stop())
+      dispatch($ScreenCreation.Stop())
     }
   }, [])
 
@@ -37,7 +41,7 @@ export const NewScreen: FC = () => {
           onSubmit={(event) => {
             event.preventDefault()
             dispatch(
-              ScreenCreation.Create({
+              $ScreenCreation.Create({
                 name,
                 seats: { rows, columns },
                 onSuccess: () => navigate(-1),
@@ -48,6 +52,11 @@ export const NewScreen: FC = () => {
           <DialogTitle>Create screen</DialogTitle>
           <DialogContent>
             <Grid container spacing={2}>
+              {error && (
+                <Grid item xs={12}>
+                  <Alert severity="error">Cannot create screen.</Alert>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <TextField
                   autoFocus

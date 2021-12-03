@@ -1,6 +1,6 @@
-import { $Rfc4122 } from '../../src/Rfc4122'
-import { $MockFilmService } from './MockFilmService'
-import { $MockScreenService } from './MockScreenService'
+import { $Rfc4122 } from '../src/Rfc4122'
+import { $MockFilmService } from './film/MockFilmService'
+import { $MockScreenService } from './screen/MockScreenService'
 import { $Rfc4122UuidService } from './Rfc4122UuidService'
 
 export type Context = typeof $Context

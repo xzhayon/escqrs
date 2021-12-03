@@ -1,20 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit'
 import createSagaMiddleware from 'redux-saga'
 import { $Context } from './Context'
-import { $FilmCreationSlice } from './FilmCreationSlice'
-import { $FilmListSlice } from './FilmListSlice'
+import { $FilmCreationSlice } from './film/creation/slice'
+import { $FilmDashboardSlice } from './film/dashboard/slice'
 import { $Saga } from './Saga'
-import { $ScreenCreationSlice } from './ScreenCreationSlice'
-import { $ScreenListSlice } from './ScreenListSlice'
+import { $ScreenCreationSlice } from './screen/creation/slice'
+import { $ScreenDashboardSlice } from './screen/dashboard/slice'
 
 const sagaMiddleware = createSagaMiddleware({ context: $Context })
 
 export const $Store = configureStore({
   reducer: {
-    [$FilmListSlice.name]: $FilmListSlice.reducer,
-    [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
-    [$ScreenListSlice.name]: $ScreenListSlice.reducer,
+    [$ScreenDashboardSlice.name]: $ScreenDashboardSlice.reducer,
     [$ScreenCreationSlice.name]: $ScreenCreationSlice.reducer,
+    [$FilmDashboardSlice.name]: $FilmDashboardSlice.reducer,
+    [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(sagaMiddleware),

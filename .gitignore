@@ -1,4 +1,5 @@
 **.local.ts
-/coverage
-/node_modules
-/var
+/coverage/
+/dist/
+/node_modules/
+/var/

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Screen } from '../../app/arcadia/Screen'
-import { Command, Event } from './Message'
+import { Screen } from '../../../app/arcadia/Screen'
+import { Command, Event } from '../../Message'
 
 export interface ScreenCreationState {
   isLoading?: boolean
@@ -38,4 +38,4 @@ export const $ScreenCreationSlice = createSlice({
   },
 })
 
-export const ScreenCreation = $ScreenCreationSlice.actions
+export const $ScreenCreation = $ScreenCreationSlice.actions

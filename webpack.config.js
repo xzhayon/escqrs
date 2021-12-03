@@ -2,9 +2,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 module.exports = (env, argv) => ({
-  entry: './assets/js/index.tsx',
+  entry: './assets/index.tsx',
   output: { path: path.resolve(__dirname, 'dist', 'assets') },
-  devtool: 'development' === argv.mode ? 'eval-source-map' : false,
   module: {
     rules: [
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
@@ -12,13 +11,13 @@ module.exports = (env, argv) => ({
       { test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
     ],
   },
+  resolve: { extensions: ['.css', '.js', '.ts', '.tsx'] },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'assets', 'index.html'),
+      template: path.resolve(__dirname, 'public', 'index.html'),
       hash: true,
       inject: 'body',
-      showErrors: false,
     }),
   ],
-  resolve: { extensions: ['.css', '.js', '.ts', '.tsx'] },
+  devtool: 'development' === argv.mode ? 'eval-source-map' : false,
 })

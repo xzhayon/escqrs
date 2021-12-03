@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Film } from '../../app/arcadia/Film'
-import { Command, Event } from './Message'
+import { Film } from '../../../app/arcadia/Film'
+import { Command, Event } from '../../Message'
 
 export interface FilmCreationState {
   isLoading?: boolean
@@ -32,4 +32,4 @@ export const $FilmCreationSlice = createSlice({
   },
 })
 
-export const FilmCreation = $FilmCreationSlice.actions
+export const $FilmCreation = $FilmCreationSlice.actions

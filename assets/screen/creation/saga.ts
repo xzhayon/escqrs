@@ -6,15 +6,15 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $ScreenId, Screen } from '../../app/arcadia/Screen'
-import { Id } from '../../src/Entity'
-import { ScreenCreation } from './ScreenCreationSlice'
-import { ScreenService } from './ScreenService'
-import { UuidService } from './UuidService'
+import { $ScreenId, Screen } from '../../../app/arcadia/Screen'
+import { Id } from '../../../src/Entity'
+import { UuidService } from '../../UuidService'
+import { ScreenService } from '../ScreenService'
+import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
-  function* (command: ReturnType<typeof ScreenCreation['Create']>) {
-    yield* put(ScreenCreation.CreationStarted())
+  function* (command: ReturnType<typeof $ScreenCreation['Create']>) {
+    yield* put($ScreenCreation.CreationStarted())
     try {
       const screenService: ScreenService = yield getContext('screenService')
       const date = new Date()
@@ -29,27 +29,27 @@ const createScreen = (screenId: Id<Screen>) =>
         seats: command.payload.seats,
       }
       yield* call(screenService.create, screen)
-      yield* put(ScreenCreation.Created(screen))
+      yield* put($ScreenCreation.Created(screen))
       command.payload.onSuccess &&
         (yield* call(command.payload.onSuccess, screen))
     } catch (error: any) {
-      yield* put(ScreenCreation.NotCreated(error))
+      yield* put($ScreenCreation.NotCreated(error))
       command.payload.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
 export function* $ScreenCreationSaga() {
-  yield* takeLeading(ScreenCreation.Start.type, function* () {
-    yield* put(ScreenCreation.Started())
+  yield* takeLeading($ScreenCreation.Start.type, function* () {
+    yield* put($ScreenCreation.Started())
     const uuidService: UuidService = yield getContext('uuidService')
     const uuid = yield* call(uuidService.v4)
     const task = yield* takeLeading(
-      ScreenCreation.Create.type,
+      $ScreenCreation.Create.type,
       createScreen($ScreenId(uuid)),
     )
-    yield* take(ScreenCreation.Stop.type)
+    yield* take($ScreenCreation.Stop.type)
     yield* cancel(task)
-    yield* put(ScreenCreation.Stopped())
+    yield* put($ScreenCreation.Stopped())
   })
 }

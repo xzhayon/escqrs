@@ -3,5 +3,5 @@ import { Film } from '../../app/arcadia/Film'
 
 export interface FilmService {
   readonly create: (film: Film) => Promise<void>
-  readonly getMany: () => Promise<Array.Array<Film>>
+  readonly getList: () => Promise<Array.Array<Film>>
 }

@@ -2,13 +2,13 @@ import { CssBaseline } from '@mui/material'
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import { Router } from './Router'
+import { App } from './App'
 import { $Store } from './Store'
 
 render(
   <Provider store={$Store}>
     <CssBaseline />
-    <Router />
+    <App />
   </Provider>,
   document.getElementById('app'),
 )

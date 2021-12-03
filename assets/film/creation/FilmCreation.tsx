@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -10,21 +11,24 @@ import {
 } from '@mui/material'
 import React, { FC, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { FilmCreation } from './FilmCreationSlice'
-import { use$Dispatch, use$Selector } from './Hook'
+import { $FilmCreation, $FilmCreationSlice } from './slice'
+import { use$Dispatch, use$Selector } from '../../Hook'
 
-export const NewFilm: FC = () => {
+export const FilmCreation: FC = () => {
   const dispatch = use$Dispatch()
   const navigate = useNavigate()
 
-  const isLoading = use$Selector((state) => state.FilmCreation.isLoading)
+  const isLoading = use$Selector(
+    (state) => state[$FilmCreationSlice.name].isLoading,
+  )
+  const error = use$Selector((state) => state[$FilmCreationSlice.name].error)
 
   const [title, setTitle] = useState<string>('')
 
   useEffect(() => {
-    dispatch(FilmCreation.Start())
+    dispatch($FilmCreation.Start())
     return () => {
-      dispatch(FilmCreation.Stop())
+      dispatch($FilmCreation.Stop())
     }
   }, [])
 
@@ -35,7 +39,7 @@ export const NewFilm: FC = () => {
           onSubmit={(event) => {
             event.preventDefault()
             dispatch(
-              FilmCreation.Create({
+              $FilmCreation.Create({
                 title,
                 onSuccess: () => navigate(-1),
               }),
@@ -45,6 +49,11 @@ export const NewFilm: FC = () => {
           <DialogTitle>Create film</DialogTitle>
           <DialogContent>
             <Grid container spacing={2}>
+              {error && (
+                <Grid item xs={12}>
+                  <Alert severity="error">Cannot create film.</Alert>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <TextField
                   autoFocus
@@ -54,6 +63,7 @@ export const NewFilm: FC = () => {
                   name="title"
                   required
                   variant="filled"
+                  value={title}
                   onChange={(event) => setTitle(event.target.value)}
                 />
               </Grid>
