@@ -3,7 +3,10 @@ const path = require('path')
 
 module.exports = (env, argv) => ({
   entry: './assets/index.tsx',
-  output: { path: path.resolve(__dirname, 'dist', 'assets') },
+  output: {
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, 'dist', 'assets'),
+  },
   module: {
     rules: [
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
@@ -12,12 +15,24 @@ module.exports = (env, argv) => ({
     ],
   },
   resolve: { extensions: ['.css', '.js', '.ts', '.tsx'] },
+  optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /\/node_modules\//,
+          name: 'vendor',
+          chunks: 'all',
+        },
+      },
+    },
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public', 'index.html'),
-      hash: true,
       inject: 'body',
     }),
   ],
-  devtool: 'development' === argv.mode ? 'eval-source-map' : false,
+  devtool: 'development' === argv.mode ? 'inline-source-map' : 'source-map',
 })
