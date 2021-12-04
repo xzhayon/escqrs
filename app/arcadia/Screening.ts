@@ -1,6 +1,7 @@
 import { Array, Branded, Clock, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Aggregate } from '../../src/Aggregate'
+import { Id } from '../../src/Entity'
 import { EventSourcedEntity } from '../../src/EventSourcedEntity'
 import { CreateScreening } from './CreateScreening'
 import { Film } from './Film'
@@ -13,14 +14,13 @@ import { SeatsOutOfBounds } from './SeatsOutOfBounds'
 import { $SeatsReserved, SeatsReserved } from './SeatsReserved'
 
 export interface Screening
-  extends EventSourcedEntity<'Screening', ScreeningId> {
+  extends EventSourcedEntity<
+    'Screening',
+    Branded.Branded<string, 'ScreeningId'>
+  > {
   readonly date: Date
   readonly seats: Array.Array<Array.Array<SeatWithState>>
 }
-
-export type ScreeningId = Branded.Branded<string, 'ScreeningId'>
-
-export const $ScreeningId = (id: string): ScreeningId => Branded.makeBranded(id)
 
 const aggregate = $Aggregate<Screening, ScreeningCreated | SeatsReserved>(
   'Screening',
@@ -44,7 +44,7 @@ const aggregate = $Aggregate<Screening, ScreeningCreated | SeatsReserved>(
 export const $Screening = {
   ...aggregate,
   create: (
-    id: ScreeningId,
+    id: Id<Screening>,
     film: Film,
     screen: Screen,
     date: Date,

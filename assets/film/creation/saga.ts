@@ -6,7 +6,7 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $FilmId, Film } from '../../../app/arcadia/Film'
+import { $Film, Film } from '../../../app/arcadia/Film'
 import { Id } from '../../../src/Entity'
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { UuidService } from '../../UuidService'
@@ -45,7 +45,7 @@ export function* $FilmCreationSaga() {
     const uuid = yield* call(uuidService.v4)
     const task = yield* takeLeading(
       $FilmCreation.Create.type,
-      createFilm($FilmId(uuid)),
+      createFilm($Film.id(uuid)),
     )
     yield* take($FilmCreation.Stop.type)
     yield* cancel(task)

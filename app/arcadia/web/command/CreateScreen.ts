@@ -48,9 +48,9 @@ export const $CreateScreen: FastifyPluginAsync = async (instance, opts) => {
         },
       },
     },
-    async (request, reply) =>
+    async (request, _reply) =>
       pipe(
-        $Repository.insert<Screen>((request.body as any).data),
+        $Screen.save((request.body as any).data),
         Effect.map(() => request.body),
       ),
   )

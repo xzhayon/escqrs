@@ -3,15 +3,15 @@ import { EntityNotFound } from '../../src/EntityNotFound'
 import { Gwt } from '../../src/Gwt'
 import { $Repository } from '../../src/Repository'
 import { $CreateScreening } from './CreateScreening'
-import { $Film, $FilmId, Film } from './Film'
-import { $Screen, $ScreenId, Screen } from './Screen'
-import { $ScreeningId } from './Screening'
+import { $Film, Film } from './Film'
+import { $Screen, Screen } from './Screen'
+import { $Screening } from './Screening'
 import { $ScreeningCreated } from './ScreeningCreated'
 
 describe('CreateScreening', () => {
-  const aggregateId = $ScreeningId('screeningId')
-  const filmId = $FilmId('filmId')
-  const screenId = $ScreenId('screenId')
+  const aggregateId = $Screening.id('screeningId')
+  const filmId = $Film.id('filmId')
+  const screenId = $Screen.id('screenId')
   const seats = { rows: 16, columns: 40 }
   const date = new Date()
 

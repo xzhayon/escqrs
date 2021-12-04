@@ -1,7 +1,7 @@
 import { EntityNotFound } from '../../src/EntityNotFound'
 import { Gwt } from '../../src/Gwt'
 import { $ReserveSeats } from './ReserveSeats'
-import { $ScreeningId } from './Screening'
+import { $Screening } from './Screening'
 import { $ScreeningCreated } from './ScreeningCreated'
 import { ScreeningExpired } from './ScreeningExpired'
 import { $Seat } from './Seat'
@@ -10,7 +10,7 @@ import { SeatsOutOfBounds } from './SeatsOutOfBounds'
 import { $SeatsReserved } from './SeatsReserved'
 
 describe('ReserveSeats', () => {
-  const aggregateId = $ScreeningId('screeningId')
+  const aggregateId = $Screening.id('screeningId')
   const date = new Date()
   const seats = { rows: 16, columns: 40 }
   date.setFullYear(date.getFullYear() + 1)

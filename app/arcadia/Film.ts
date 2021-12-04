@@ -1,14 +1,18 @@
 import { Branded } from '@effect-ts/core'
+import { $Aggregate } from '../../src/Aggregate'
 import { $MutableEntity, MutableEntity } from '../../src/MutableEntity'
 
-export interface Film extends MutableEntity<'Film', FilmId> {
+export interface Film
+  extends MutableEntity<'Film', Branded.Branded<string, 'FilmId'>> {
   readonly title: string
 }
 
-export type FilmId = Branded.Branded<string, 'FilmId'>
+const aggregate = $Aggregate<Film>('Film')
 
 export function $Film() {
   return $MutableEntity<Film>('Film')
 }
 
-export const $FilmId = (id: string): FilmId => Branded.makeBranded(id)
+$Film.id = aggregate.id
+$Film.load = aggregate.load
+$Film.save = aggregate.save

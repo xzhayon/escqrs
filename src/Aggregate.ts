@@ -1,4 +1,11 @@
-import { Effect, Either, NonEmptyArray, Option, pipe } from '@effect-ts/core'
+import {
+  Branded,
+  Effect,
+  Either,
+  NonEmptyArray,
+  Option,
+  pipe,
+} from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { EOf, ROf } from './Effect'
 import { Id, Type } from './Entity'
@@ -30,6 +37,7 @@ export type Aggregate<A extends MutableEntity> = A extends EventSourcedEntity
     }
 
 interface _Aggregate<A extends MutableEntity> {
+  readonly id: (id: string) => Id<A>
   readonly load: (id: Id<A>) => Effect.Effect<ROf<Load>, EOf<Load>, A>
 }
 
@@ -52,15 +60,19 @@ export function $Aggregate<A extends MutableEntity, E extends Event<A>>(
     >
   },
 ) {
+  const aggregate = {
+    id: (id: string) => Branded.makeBranded(id),
+    save: save(type),
+  }
   const reducer = reducers && $Reducer.compose(reducers)
 
   return reducer
     ? {
+        ...aggregate,
         load: load(type, reducer),
         apply: apply<A & EventSourcedEntity>(type, reducer),
-        save: save(type),
       }
-    : { load: load(type), save: save(type) }
+    : { ...aggregate, load: load(type) }
 }
 
 const loadFromEventStore =

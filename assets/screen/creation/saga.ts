@@ -6,10 +6,10 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $ScreenId, Screen } from '../../../app/arcadia/Screen'
+import { $Screen, Screen } from '../../../app/arcadia/Screen'
 import { Id } from '../../../src/Entity'
-import { UuidService } from '../../UuidService'
 import { ArcadiaClient } from '../../ArcadiaClient'
+import { UuidService } from '../../UuidService'
 import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
@@ -46,7 +46,7 @@ export function* $ScreenCreationSaga() {
     const uuid = yield* call(uuidService.v4)
     const task = yield* takeLeading(
       $ScreenCreation.Create.type,
-      createScreen($ScreenId(uuid)),
+      createScreen($Screen.id(uuid)),
     )
     yield* take($ScreenCreation.Stop.type)
     yield* cancel(task)
