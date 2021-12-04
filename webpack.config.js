@@ -1,8 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const DotEnv = require('dotenv-webpack')
 const path = require('path')
 
 module.exports = (env, argv) => ({
-  entry: './assets/index.tsx',
+  entry: path.resolve(__dirname, 'assets', 'index.tsx'),
   output: {
     filename: '[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -11,7 +12,18 @@ module.exports = (env, argv) => ({
     rules: [
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
       { test: /\.(woff|woff2|eot|ttf|otf)$/i, type: 'asset/resource' },
-      { test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
+      {
+        test: /\.tsx?$/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: { module: 'es6', moduleResolution: 'node' },
+            },
+          },
+        ],
+        exclude: /node_modules/,
+      },
     ],
   },
   resolve: { extensions: ['.css', '.js', '.ts', '.tsx'] },
@@ -29,6 +41,7 @@ module.exports = (env, argv) => ({
     },
   },
   plugins: [
+    new DotEnv(),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public', 'index.html'),
       inject: 'body',
