@@ -1,20 +1,12 @@
 import { $Rfc4122 } from '../src/Rfc4122'
-import { $MockFilmService } from './film/MockFilmService'
-import { $MockScreenService } from './screen/MockScreenService'
+import { $HttpArcadiaClient } from './HttpArcadiaClient'
 import { $Rfc4122UuidService } from './Rfc4122UuidService'
-import { $HttpScreenService } from './screen/HttpScreenService'
 
 export type Context = typeof $Context
 
 export const $Context = {
-  filmService: $MockFilmService({ $uuid: $Rfc4122 })([
-    { title: 'Dune: Part One' },
-    { title: 'The Matrix Resurrections' },
-    { title: 'Dune: Part Two' },
-  ]),
-  // screenService: $MockScreenService({ $uuid: $Rfc4122 })([
-  //   { name: 'Energia', seats: { rows: 16, columns: 40 } },
-  // ]),
-  screenService: $HttpScreenService,
+  arcadiaClient: $HttpArcadiaClient(
+    process.env.ARCADIA_URL || window.location.origin,
+  ),
   uuidService: $Rfc4122UuidService({ $uuid: $Rfc4122 }),
 }

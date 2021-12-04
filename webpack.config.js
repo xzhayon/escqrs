@@ -41,7 +41,7 @@ module.exports = (env, argv) => ({
     },
   },
   plugins: [
-    new DotEnv(),
+    new DotEnv({ path: './.env.local' }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public', 'index.html'),
       inject: 'body',

@@ -7,13 +7,13 @@ import {
   takeLeading,
 } from 'typed-redux-saga'
 import { $ScreenDashboard } from './slice'
-import { ScreenService } from '../ScreenService'
+import { ArcadiaClient } from '../../ArcadiaClient'
 
 function* fetchList(command: ReturnType<typeof $ScreenDashboard['FetchList']>) {
   yield* put($ScreenDashboard.ListFetchingStarted())
   try {
-    const screenService: ScreenService = yield getContext('screenService')
-    const Screens = yield* call(screenService.getList)
+    const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+    const Screens = yield* call(arcadiaClient.getScreens)
     yield* put($ScreenDashboard.ListFetched(Screens))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, Screens))

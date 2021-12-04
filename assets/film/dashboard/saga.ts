@@ -6,14 +6,14 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
+import { ArcadiaClient } from '../../ArcadiaClient'
 import { $FilmDashboard } from './slice'
-import { FilmService } from '../FilmService'
 
 function* fetchList(command: ReturnType<typeof $FilmDashboard['FetchList']>) {
   yield* put($FilmDashboard.ListFetchingStarted())
   try {
-    const filmService: FilmService = yield getContext('filmService')
-    const films = yield* call(filmService.getList)
+    const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+    const films = yield* call(arcadiaClient.getFilms)
     yield* put($FilmDashboard.ListFetched(films))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, films))

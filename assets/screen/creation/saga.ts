@@ -9,14 +9,14 @@ import {
 import { $ScreenId, Screen } from '../../../app/arcadia/Screen'
 import { Id } from '../../../src/Entity'
 import { UuidService } from '../../UuidService'
-import { ScreenService } from '../ScreenService'
+import { ArcadiaClient } from '../../ArcadiaClient'
 import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
   function* (command: ReturnType<typeof $ScreenCreation['Create']>) {
     yield* put($ScreenCreation.CreationStarted())
     try {
-      const screenService: ScreenService = yield getContext('screenService')
+      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
       const date = new Date()
       const screen: Screen = {
         _: {
@@ -28,7 +28,7 @@ const createScreen = (screenId: Id<Screen>) =>
         name: command.payload.name,
         seats: command.payload.seats,
       }
-      yield* call(screenService.create, screen)
+      yield* call(arcadiaClient.createScreen, screen)
       yield* put($ScreenCreation.Created(screen))
       command.payload.onSuccess &&
         (yield* call(command.payload.onSuccess, screen))

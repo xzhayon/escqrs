@@ -8,15 +8,15 @@ import {
 } from 'typed-redux-saga'
 import { $FilmId, Film } from '../../../app/arcadia/Film'
 import { Id } from '../../../src/Entity'
-import { $FilmCreation } from './slice'
-import { FilmService } from '../FilmService'
+import { ArcadiaClient } from '../../ArcadiaClient'
 import { UuidService } from '../../UuidService'
+import { $FilmCreation } from './slice'
 
 const createFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmCreation['Create']>) {
     yield* put($FilmCreation.CreationStarted())
     try {
-      const filmService: FilmService = yield getContext('filmService')
+      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
       const date = new Date()
       const film: Film = {
         _: {
@@ -27,7 +27,7 @@ const createFilm = (filmId: Id<Film>) =>
         },
         title: command.payload.title,
       }
-      yield* call(filmService.create, film)
+      yield* call(arcadiaClient.createFilm, film)
       yield* put($FilmCreation.Created(film))
       command.payload.onSuccess &&
         (yield* call(command.payload.onSuccess, film))
