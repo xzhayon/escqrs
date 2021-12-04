@@ -1,5 +1,6 @@
 **.local
 **.local.ts
+/.env
 /coverage/
 /dist/
 /node_modules/

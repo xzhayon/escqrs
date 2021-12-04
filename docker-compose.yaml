@@ -5,7 +5,7 @@ services:
     ports:
       - ${COMPOSE_PORT_BROWSER}:8080
     env_file:
-      - ./.env.local
+      - ./.env
     working_dir: /dist/
     entrypoint: ['npm', 'run', 'start-browser', '--', "--client-web-socket-url-port=${COMPOSE_PORT_BROWSER}", '--port=8080']
     volumes:
@@ -17,7 +17,7 @@ services:
     ports:
       - ${COMPOSE_PORT_WEB}:8081
     env_file:
-      - ./.env.local
+      - ./.env
     environment:
       EVENT_STORE_PATH: '/tmp/eventstore/'
       REPOSITORY_PATH: '/tmp/repository/'
