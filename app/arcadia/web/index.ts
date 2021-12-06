@@ -1,9 +1,10 @@
 import { Effect, pipe } from '@effect-ts/core'
 import _fastify from 'fastify'
+import fastifyCors from 'fastify-cors'
 import { $Layer } from '../../../config/Layer.local'
 import { $Effect } from '../../../src/Effect'
+import { $CreateFilm } from './command/CreateFilm'
 import { $CreateScreen } from './command/CreateScreen'
-import fastifyCors from 'fastify-cors'
 
 const fastify = _fastify({ logger: true })
 
@@ -16,6 +17,7 @@ fastify.addHook('preSerialization', async (_request, _reply, payload) =>
 )
 
 fastify.register($CreateScreen)
+fastify.register($CreateFilm)
 
 const start = async () => {
   try {

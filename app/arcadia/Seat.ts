@@ -1,4 +1,5 @@
-import { MessageId } from '../../src/Message'
+import { Id } from '../../src/Entity'
+import { Message } from '../../src/Message'
 
 export interface Seat {
   readonly row: number
@@ -10,7 +11,7 @@ export type SeatWithState = Seat &
     | { readonly state: 'Unavailable' | 'Free' }
     | {
         readonly state: 'Reserved' | 'Booked'
-        readonly correlationId: MessageId
+        readonly correlationId: Id<Message>
       }
   )
 
@@ -24,13 +25,13 @@ export function $Seat(
   row: number,
   column: number,
   state: 'Reserved' | 'Booked',
-  correlationId: MessageId,
+  correlationId: Id<Message>,
 ): SeatWithState
 export function $Seat(
   row: number,
   column: number,
   state?: SeatWithState['state'],
-  correlationId?: MessageId,
+  correlationId?: Id<Message>,
 ): Seat | SeatWithState {
   return undefined === state
     ? { row, column }

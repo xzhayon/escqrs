@@ -1,4 +1,5 @@
-import { ScreeningId } from './Screening'
+import { Id } from '../../src/Entity'
+import { Screening } from './Screening'
 
 export class ScreeningExpired extends Error {
   constructor(message: string) {
@@ -6,7 +7,7 @@ export class ScreeningExpired extends Error {
     Object.setPrototypeOf(this, ScreeningExpired.prototype)
   }
 
-  static build(screeningId: ScreeningId, date: Date) {
+  static build(screeningId: Id<Screening>, date: Date) {
     return new ScreeningExpired(`Screening "${screeningId}" expired on ${date}`)
   }
 }

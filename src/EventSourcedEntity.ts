@@ -1,8 +1,9 @@
 import { Array, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
+import * as t from 'io-ts'
 import { Body, Header, Id, Type } from './Entity'
-import { Event } from './Event'
-import { $MutableEntity, MutableEntity } from './MutableEntity'
+import { $EventC, Event } from './Event'
+import { $MutableEntity, $MutableEntityC, MutableEntity } from './MutableEntity'
 import { PartialDeep } from './PartialDeep'
 import { Reducer } from './Reducer'
 
@@ -15,6 +16,38 @@ export interface EventSourcedEntity<
     I,
     H & { readonly events: { readonly uncommitted: Array.Array<Event> } }
   > {}
+
+export const $EventSourcedEntityC = <
+  T extends t.Type<string>,
+  I extends t.Type<string>,
+  H extends t.Type<{ readonly [K: string]: unknown }>,
+>(
+  tC: T = t.string as unknown as T,
+  iC: I = t.string as unknown as I,
+  hC: H = t.type({}) as unknown as H,
+  name?: string,
+): t.Type<
+  EventSourcedEntity<t.TypeOf<T>, t.TypeOf<I>, t.TypeOf<H>>,
+  EventSourcedEntity<t.OutputOf<T>, t.OutputOf<I>, t.OutputOf<H>>
+> =>
+  $MutableEntityC(
+    tC,
+    iC,
+    t.intersection([
+      hC,
+      t.readonly(
+        t.type({
+          events: t.readonly(
+            t.type({
+              uncommitted: t.readonlyArray($EventC()),
+            }),
+          ),
+        }),
+        'EventSourcedEntityHeader',
+      ),
+    ]) as t.Mixed,
+    name ?? 'EventSourcedEntity',
+  )
 
 export function $EventSourcedEntity<A extends EventSourcedEntity>(
   type: Type<A>,

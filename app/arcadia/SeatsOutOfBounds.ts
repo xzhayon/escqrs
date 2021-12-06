@@ -1,4 +1,5 @@
-import { ScreeningId } from './Screening'
+import { Id } from '../../src/Entity'
+import { Screening } from './Screening'
 import { Seat } from './Seat'
 
 export class SeatsOutOfBounds extends Error {
@@ -8,7 +9,7 @@ export class SeatsOutOfBounds extends Error {
   }
 
   static build(
-    screeningId: ScreeningId,
+    screeningId: Id<Screening>,
     seats: { readonly rows: number; readonly columns: number },
     seat: Seat,
   ) {

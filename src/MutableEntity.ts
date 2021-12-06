@@ -1,6 +1,8 @@
 import { Clock } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
-import { $Entity, Body, Entity, Header, Type } from './Entity'
+import * as t from 'io-ts'
+import { DateFromISOString } from 'io-ts-types'
+import { $Entity, $EntityC, Body, Entity, Header, Type } from './Entity'
 import { PartialDeep } from './PartialDeep'
 
 export interface MutableEntity<
@@ -15,6 +17,40 @@ export interface MutableEntity<
       readonly version: number
     }
   > {}
+
+export const $MutableEntityC = <
+  T extends t.Type<string>,
+  I extends t.Type<string>,
+  H extends t.Type<{ readonly [K: string]: unknown }>,
+>(
+  tC: T = t.string as unknown as T,
+  iC: I = t.string as unknown as I,
+  hC: H = t.type({}) as unknown as H,
+  name?: string,
+): t.Type<
+  MutableEntity<t.TypeOf<T>, t.TypeOf<I>, t.TypeOf<H>>,
+  MutableEntity<t.OutputOf<T>, t.OutputOf<I>, t.OutputOf<H>>
+> =>
+  $EntityC(
+    tC,
+    iC,
+    t.intersection([
+      hC,
+      t.readonly(
+        t.type({
+          date: t.readonly(
+            t.type({
+              created: DateFromISOString,
+              updated: DateFromISOString,
+            }),
+          ),
+          version: t.number,
+        }),
+        'MutableEntityHeader',
+      ),
+    ]) as t.Mixed,
+    name ?? 'MutableEntity',
+  )
 
 export function $MutableEntity<A extends MutableEntity>(type: Type<A>) {
   return (body: Body<A>, header?: PartialDeep<Omit<Header<A>, 'type'>>) =>

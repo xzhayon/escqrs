@@ -2,17 +2,18 @@ import { Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Command, Command } from '../../src/Command'
 import { $CommandHandler } from '../../src/CommandHandler'
+import { Id } from '../../src/Entity'
 import { HasEventStore } from '../../src/EventStore'
 import { HasLogger } from '../../src/Logger'
 import { $Repository, HasRepository } from '../../src/Repository'
 import { HasUuid } from '../../src/Uuid'
-import { Film, FilmId } from './Film'
-import { Screen, ScreenId } from './Screen'
+import { Film } from './Film'
+import { Screen } from './Screen'
 import { $Screening, Screening } from './Screening'
 
 export interface CreateScreening extends Command<Screening, 'CreateScreening'> {
-  readonly filmId: FilmId
-  readonly screenId: ScreenId
+  readonly filmId: Id<Film>
+  readonly screenId: Id<Screen>
   readonly date: Date
 }
 

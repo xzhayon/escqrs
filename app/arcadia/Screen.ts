@@ -1,6 +1,11 @@
 import { Branded } from '@effect-ts/core'
+import * as t from 'io-ts'
 import { $Aggregate } from '../../src/Aggregate'
-import { $MutableEntity, MutableEntity } from '../../src/MutableEntity'
+import {
+  $MutableEntity,
+  $MutableEntityC,
+  MutableEntity,
+} from '../../src/MutableEntity'
 
 export interface Screen
   extends MutableEntity<'Screen', Branded.Branded<string, 'ScreenId'>> {
@@ -10,6 +15,20 @@ export interface Screen
     readonly columns: number
   }
 }
+
+export const $ScreenC: t.Type<Screen> = t.intersection(
+  [
+    t.readonly(
+      t.type({
+        name: t.string,
+        seats: t.readonly(t.type({ rows: t.number, columns: t.number })),
+      }),
+      'Body',
+    ),
+    $MutableEntityC(t.literal('Screen') as t.Mixed, t.string as t.Mixed),
+  ],
+  'Screen',
+)
 
 const aggregate = $Aggregate<Screen>('Screen')
 

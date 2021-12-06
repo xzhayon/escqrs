@@ -1,7 +1,7 @@
 import { Effect, pipe } from '@effect-ts/core'
 import { $Layer } from '../config/Layer.testing'
 import { Body } from './Entity'
-import { $Message, $MessageId, Message } from './Message'
+import { $Message, Message } from './Message'
 
 describe('Message', () => {
   it('creating a message', async () => {
@@ -10,9 +10,9 @@ describe('Message', () => {
     await expect(
       pipe(
         $Message('foo')({ aggregateId: 'bar', mad: 'max' } as Body<Message>, {
-          id: $MessageId('bar'),
-          correlationId: $MessageId('mad'),
-          causationId: $MessageId('max'),
+          id: $Message.id('bar'),
+          correlationId: $Message.id('mad'),
+          causationId: $Message.id('max'),
           date,
         })(),
         Effect.provideSomeLayer($Layer),
@@ -36,7 +36,7 @@ describe('Message', () => {
     await expect(
       pipe(
         $Message('foo')({ aggregateId: 'bar', mad: 'max' } as Body<Message>, {
-          id: $MessageId('bar'),
+          id: $Message.id('bar'),
           date,
         })(),
         Effect.provideSomeLayer($Layer),
@@ -60,16 +60,16 @@ describe('Message', () => {
     await expect(
       pipe(
         $Message('foo')({ aggregateId: 'bar', mad: 'max' } as Body<Message>, {
-          id: $MessageId('bar'),
-          correlationId: $MessageId('mad'),
-          causationId: $MessageId('max'),
+          id: $Message.id('bar'),
+          correlationId: $Message.id('mad'),
+          causationId: $Message.id('max'),
           date,
         })({
           _: {
             type: 'foo',
-            id: $MessageId('BAR'),
-            correlationId: $MessageId('MAD'),
-            causationId: $MessageId('MAX'),
+            id: $Message.id('BAR'),
+            correlationId: $Message.id('MAD'),
+            causationId: $Message.id('MAX'),
             date,
           },
           aggregateId: 'bar',
