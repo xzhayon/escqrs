@@ -7,7 +7,7 @@ import { EntityNotFound } from './EntityNotFound'
 import { $Event, Event } from './Event'
 import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
 import { $EventStore } from './EventStore'
-import { $MessageId } from './Message'
+import { $Message } from './Message'
 import { $MutableEntity, MutableEntity } from './MutableEntity'
 import { PartialDeep } from './PartialDeep'
 import { $Repository } from './Repository'
@@ -34,10 +34,10 @@ const event = (
   Branded.makeBranded({
     _: {
       type: 'type',
-      id: $MessageId('id'),
+      id: $Message.id('id'),
       date: new Date(),
-      correlationId: $MessageId('correlationId'),
-      causationId: $MessageId('causationId'),
+      correlationId: $Message.id('correlationId'),
+      causationId: $Message.id('causationId'),
       ...header,
     },
     aggregateId,

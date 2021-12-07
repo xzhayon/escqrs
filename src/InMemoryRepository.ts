@@ -68,7 +68,7 @@ export const $InMemoryRepository = pipe(
       delete: (entity) =>
         pipe(
           repository.find(entity),
-          Effect.map(() => entities),
+          Effect.as(entities),
           Effect.chain(
             Ref.updateSome(
               Record.modifyAt(entity._.type, Record.deleteAt(entity._.id)),

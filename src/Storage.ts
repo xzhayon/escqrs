@@ -1,12 +1,16 @@
 import { Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
+import { FileNotFound } from './FileNotFound'
 import { $Logger } from './Logger'
 
 const CHANNEL = 'Storage'
 
 export interface Storage {
-  readonly readStream: (path: string) => Effect.IO<Error, NodeJS.ReadableStream>
-  readonly read: (path: string) => Effect.IO<Error, Buffer>
+  readonly exists: (path: string) => Effect.IO<Error, boolean>
+  readonly readStream: (
+    path: string,
+  ) => Effect.IO<FileNotFound | Error, NodeJS.ReadableStream>
+  readonly read: (path: string) => Effect.IO<FileNotFound | Error, Buffer>
   readonly writeStream: (
     path: string,
     options?: WriteOptions,
@@ -15,7 +19,7 @@ export interface Storage {
     path: string,
     options?: WriteOptions,
   ) => (data: Buffer) => Effect.IO<Error, void>
-  readonly delete: (path: string) => Effect.IO<Error, void>
+  readonly delete: (path: string) => Effect.IO<FileNotFound | Error, void>
 }
 
 type WriteOptions = { readonly append?: boolean }
@@ -23,10 +27,29 @@ type WriteOptions = { readonly append?: boolean }
 export const HasStorage = Has.tag<Storage>()
 
 const _storage = Effect.deriveLifted(HasStorage)(
-  ['readStream', 'read', 'writeStream', 'delete'],
+  ['exists', 'readStream', 'read', 'writeStream', 'delete'],
   [],
   ['write'],
 )
+
+const exists = (path: string) =>
+  pipe(
+    path,
+    _storage.exists,
+    Effect.tapBoth(
+      (error) =>
+        $Logger.error('File not found', {
+          filePath: path,
+          error,
+          channel: CHANNEL,
+        }),
+      (exists) =>
+        $Logger.debug(`File${exists ? '' : ' not'} found`, {
+          filePath: path,
+          channel: CHANNEL,
+        }),
+    ),
+  )
 
 const readStream = (path: string) =>
   pipe(
@@ -125,6 +148,7 @@ const _delete = (path: string) =>
   )
 
 export const $Storage = {
+  exists,
   readStream,
   read,
   writeStream,

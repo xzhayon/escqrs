@@ -2,7 +2,7 @@ import { Branded, Option } from '@effect-ts/core'
 import { Header, Id } from './Entity'
 import { Event } from './Event'
 import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
-import { $MessageId } from './Message'
+import { $Message } from './Message'
 import { PartialDeep } from './PartialDeep'
 import { Reducer } from './Reducer'
 
@@ -25,10 +25,10 @@ const event = (
   Branded.makeBranded({
     _: {
       type: 'type',
-      id: $MessageId('id'),
+      id: $Message.id('id'),
       date: new Date(),
-      correlationId: $MessageId('correlationId'),
-      causationId: $MessageId('causationId'),
+      correlationId: $Message.id('correlationId'),
+      causationId: $Message.id('causationId'),
       ...header,
     },
     aggregateId,

@@ -17,6 +17,7 @@ import { $Error } from './Error'
 import { Event } from './Event'
 import { $EventHandler, EventHandler } from './EventHandler'
 import { EventStore } from './EventStore'
+import { FileNotFound } from './FileNotFound'
 import { $Logger, HasLogger } from './Logger'
 import { $Storage, HasStorage } from './Storage'
 
@@ -70,14 +71,16 @@ export const $StorageEventStore = (
         ? pipe(
             $Storage.read(getLocation(location, 'pointer.json')),
             Effect.catchSome((error) =>
-              Option.some(
-                pipe(
-                  $Storage.write(getLocation(location, 'pointer.json'))(
-                    Buffer.from('0'),
-                  ),
-                  Effect.map(() => 0),
-                ),
-              ),
+              error instanceof FileNotFound
+                ? Option.some(
+                    pipe(
+                      $Storage.write(getLocation(location, 'pointer.json'))(
+                        Buffer.from('0'),
+                      ),
+                      Effect.as(0),
+                    ),
+                  )
+                : Option.none,
             ),
           )
         : Effect.succeed(0),

@@ -2,6 +2,8 @@ import { Effect, Managed, pipe } from '@effect-ts/core'
 import { HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { join } from 'path'
+import { EntityNotFound } from './EntityNotFound'
+import { FileNotFound } from './FileNotFound'
 import { $Logger, HasLogger } from './Logger'
 import { Repository } from './Repository'
 import { $Storage, HasStorage } from './Storage'
@@ -38,6 +40,11 @@ export const $StorageRepository = (location: string) =>
         find: ({ _: { type, id } }) =>
           pipe(
             $Storage.read(getLocation(location, type, id)),
+            Effect.mapError((error) =>
+              error instanceof FileNotFound
+                ? EntityNotFound.build(type, id)
+                : error,
+            ),
             Effect.map((buffer) => JSON.parse(buffer.toString())),
             Effect.provideService(HasClock)($clock),
             Effect.provideService(HasLogger)($logger),
@@ -45,7 +52,7 @@ export const $StorageRepository = (location: string) =>
           ),
         update: (entity) =>
           pipe(
-            $storage.read(getLocation(location, entity._.type, entity._.id)),
+            repository.find(entity),
             Effect.map((_entity) => ({
               ...JSON.parse(_entity.toString()),
               ...entity,
@@ -65,11 +72,14 @@ export const $StorageRepository = (location: string) =>
           ),
         delete: (entity) =>
           pipe(
-            $storage.read(getLocation(location, entity._.type, entity._.id)),
-            Effect.tap(() =>
-              $Storage.delete(
-                getLocation(location, entity._.type, entity._.id),
-              ),
+            $Storage.exists(getLocation(location, entity._.type, entity._.id)),
+            Effect.ifM(
+              () =>
+                $Storage.delete(
+                  getLocation(location, entity._.type, entity._.id),
+                ),
+              () =>
+                Effect.fail(EntityNotFound.build(entity._.type, entity._.id)),
             ),
             Effect.provideService(HasClock)($clock),
             Effect.provideService(HasLogger)($logger),
