@@ -5,6 +5,7 @@ import { $Layer } from '../../../config/Layer.local'
 import { $Effect } from '../../../src/Effect'
 import { $CreateFilm } from './command/CreateFilm'
 import { $CreateScreen } from './command/CreateScreen'
+import { $UpdateScreen } from './command/UpdateScreen'
 
 const fastify = _fastify({ logger: true })
 
@@ -17,6 +18,7 @@ fastify.addHook('preSerialization', async (_request, _reply, payload) =>
 )
 
 fastify.register($CreateScreen)
+fastify.register($UpdateScreen)
 fastify.register($CreateFilm)
 
 const start = async () => {

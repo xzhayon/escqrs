@@ -1,18 +1,15 @@
 import { gen } from '@effect-ts/system/Effect'
-import { FastifyPluginAsync } from 'fastify'
 import * as t from 'io-ts'
-import { $Any } from '../../../../src/Any'
 import { $Screen, $ScreenC } from '../../Screen'
+import { $Fastify } from '../Fastify'
 
-export const $CreateScreen: FastifyPluginAsync = async (instance, opts) => {
-  instance.post('/api/v1/screens', { schema: {} }, async (request, _reply) =>
+export const $CreateScreen = $Fastify.post(
+  '/api/v1/screens',
+  { body: t.type({ data: $ScreenC }), response: t.type({ data: $ScreenC }) },
+  async (request) =>
     gen(function* (_) {
-      const body = yield* _(
-        $Any.decode(t.type({ data: $ScreenC }))(request.body),
-      )
-      yield* _($Screen.save(body.data))
+      yield* _($Screen.save(request.body.data))
 
-      return { data: yield* _($Screen.load(body.data._.id)) }
+      return { data: yield* _($Screen.load(request.body.data._.id)) }
     }),
-  )
-}
+)

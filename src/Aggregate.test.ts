@@ -2,15 +2,18 @@ import { Branded, Effect, Either, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Layer } from '../config/Layer.testing'
 import { $Aggregate } from './Aggregate'
-import { Body, Header, Id } from './Entity'
-import { EntityNotFound } from './EntityNotFound'
-import { $Event, Event } from './Event'
-import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
-import { $EventStore } from './EventStore'
-import { $Message } from './Message'
-import { $MutableEntity, MutableEntity } from './MutableEntity'
+import { Body, Header, Id } from './entity/Entity'
+import { $Event, Event } from './entity/message/event/Event'
+import {
+  $EventSourcedEntity,
+  EventSourcedEntity,
+} from './entity/message/event/EventSourcedEntity'
+import { $EventStore } from './entity/message/event/eventstore/EventStore'
+import { $Message } from './entity/message/Message'
+import { $MutableEntity, MutableEntity } from './entity/MutableEntity'
+import { EntityNotFound } from './entity/repository/EntityNotFound'
+import { $Repository } from './entity/repository/Repository'
 import { PartialDeep } from './PartialDeep'
-import { $Repository } from './Repository'
 import { WrongEntityVersion } from './WrongEntityVersion'
 
 interface Foo extends EventSourcedEntity<'foo'> {
@@ -61,7 +64,7 @@ const entity = (
 
 describe('Aggregate', () => {
   describe('load', () => {
-    it('failing when there is no entity', async () => {
+    test('failing when there is no entity', async () => {
       await expect(
         pipe(
           aggregate.load('bar'),
@@ -78,7 +81,7 @@ describe('Aggregate', () => {
         ),
       ).rejects.toThrow(EntityNotFound)
     })
-    it('failing when the events nullify the entity', async () => {
+    test('failing when the events nullify the entity', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -92,7 +95,7 @@ describe('Aggregate', () => {
         ),
       ).rejects.toThrow(EntityNotFound.unreducibleEvents('foo', 'bar'))
     })
-    it('failing when loading an entity of the wrong kind', async () => {
+    test('failing when loading an entity of the wrong kind', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -121,7 +124,7 @@ describe('Aggregate', () => {
         ),
       ).rejects.toThrow(EntityNotFound)
     })
-    it('loading from event store', async () => {
+    test('loading from event store', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -137,7 +140,7 @@ describe('Aggregate', () => {
         ),
       ).resolves.toMatchObject({ _: { type: 'foo', id: 'bar' }, bar: 42 })
     })
-    it('loading from repository', async () => {
+    test('loading from repository', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -156,7 +159,7 @@ describe('Aggregate', () => {
   })
 
   describe('apply', () => {
-    it('applying an event to a new entity', () => {
+    test('applying an event to a new entity', () => {
       const _event = event('foo', { bar: 42 })
 
       expect(aggregate.apply(_event)()).toStrictEqual(
@@ -171,7 +174,7 @@ describe('Aggregate', () => {
         }),
       )
     })
-    it('applying an event to an existing entity', () => {
+    test('applying an event to an existing entity', () => {
       const _event = event('bar', { bar: 42 })
       const _entity = entity('bar')
 
@@ -185,7 +188,7 @@ describe('Aggregate', () => {
         }),
       )
     })
-    it('applying an event that nullifies the entity', () => {
+    test('applying an event that nullifies the entity', () => {
       const _event = event('bar')
       const _entity = entity('bar')
 
@@ -199,7 +202,7 @@ describe('Aggregate', () => {
         }),
       )
     })
-    it('applying an event of another entity to an existing one', () => {
+    test('applying an event of another entity to an existing one', () => {
       const _event = event('foo')
       const _entity = entity('bar')
 
@@ -210,7 +213,7 @@ describe('Aggregate', () => {
   })
 
   describe('save', () => {
-    it('saving to event store', async () => {
+    test('saving to event store', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -230,7 +233,7 @@ describe('Aggregate', () => {
         ),
       ).resolves.toHaveLength(1)
     })
-    it('saving to repository', async () => {
+    test('saving to repository', async () => {
       await expect(
         pipe(
           gen(function* (_) {
@@ -246,7 +249,7 @@ describe('Aggregate', () => {
     })
   })
 
-  it('saving a stale entity', async () => {
+  test('saving a stale entity', async () => {
     await expect(
       pipe(
         gen(function* (_) {
@@ -278,7 +281,7 @@ describe('Aggregate', () => {
       ),
     ).rejects.toThrow(WrongEntityVersion)
   })
-  it('updating an entity', async () => {
+  test('updating an entity', async () => {
     await expect(
       pipe(
         gen(function* (_) {

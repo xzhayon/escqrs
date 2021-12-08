@@ -5,7 +5,7 @@ import {
   $MutableEntity,
   $MutableEntityC,
   MutableEntity,
-} from '../../src/MutableEntity'
+} from '../../src/entity/MutableEntity'
 
 export interface Screen
   extends MutableEntity<'Screen', Branded.Branded<string, 'ScreenId'>> {

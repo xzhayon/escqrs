@@ -5,7 +5,7 @@ import {
   $MutableEntity,
   $MutableEntityC,
   MutableEntity,
-} from '../../src/MutableEntity'
+} from '../../src/entity/MutableEntity'
 
 export interface Film
   extends MutableEntity<'Film', Branded.Branded<string, 'FilmId'>> {
@@ -17,7 +17,7 @@ export const $FilmC: t.Type<Film> = t.intersection(
     t.readonly(t.type({ title: t.string }), 'Body'),
     $MutableEntityC(t.literal('Film') as t.Mixed, t.string as t.Mixed),
   ],
-  'Screen',
+  'Film',
 )
 
 const aggregate = $Aggregate<Film>('Film')

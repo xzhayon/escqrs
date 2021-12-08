@@ -2,12 +2,12 @@ import { Array, Effect, Function, pipe } from '@effect-ts/core'
 import * as Layer from '@effect-ts/core/Effect/Layer'
 import { DefaultEnv, gen } from '@effect-ts/system/Effect'
 import { $Layer } from '../config/Layer.testing'
-import { Command } from './Command'
-import { CommandHandler } from './CommandHandler'
 import { ROutOf } from './Effect'
-import { Event } from './Event'
-import { $EventStore } from './EventStore'
-import { Message } from './Message'
+import { Command } from './entity/message/command/Command'
+import { CommandHandler } from './entity/message/command/CommandHandler'
+import { Event } from './entity/message/event/Event'
+import { $EventStore } from './entity/message/event/eventstore/EventStore'
+import { Message } from './entity/message/Message'
 
 type GwtEnv = DefaultEnv & ROutOf<typeof $Layer>
 

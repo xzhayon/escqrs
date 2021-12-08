@@ -1,4 +1,4 @@
-import { $Rfc4122 } from '../src/Rfc4122'
+import { $Rfc4122 } from '../src/uuid/Rfc4122'
 import { $HttpArcadiaClient } from './HttpArcadiaClient'
 import { $Rfc4122UuidService } from './Rfc4122UuidService'
 

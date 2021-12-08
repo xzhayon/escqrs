@@ -2,8 +2,8 @@ import { Array, Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Film, Film } from '../app/arcadia/Film'
 import { $Screen, Screen } from '../app/arcadia/Screen'
-import { Body } from '../src/Entity'
-import { HasUuid, Uuid } from '../src/Uuid'
+import { Body } from '../src/entity/Entity'
+import { HasUuid, Uuid } from '../src/uuid/Uuid'
 import { ArcadiaClient } from './ArcadiaClient'
 
 export const $MockArcadiaClient =

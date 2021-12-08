@@ -1,8 +1,8 @@
 import { Effect } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
-import { $Command } from './Command'
-import { $CommandHandler } from './CommandHandler'
-import { $Event } from './Event'
+import { $Command } from './entity/message/command/Command'
+import { $CommandHandler } from './entity/message/command/CommandHandler'
+import { $Event } from './entity/message/event/Event'
 import { Gwt } from './Gwt'
 
 const handler = $CommandHandler('foo')(
@@ -10,7 +10,7 @@ const handler = $CommandHandler('foo')(
 )
 
 describe('Gwt', () => {
-  it('calling `given` multiple times', async () => {
+  test('calling `given` multiple times', async () => {
     let a = 0
     let b = 0
 

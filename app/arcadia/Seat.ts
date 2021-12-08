@@ -1,5 +1,5 @@
-import { Id } from '../../src/Entity'
-import { Message } from '../../src/Message'
+import { Id } from '../../src/entity/Entity'
+import { Message } from '../../src/entity/message/Message'
 
 export interface Seat {
   readonly row: number

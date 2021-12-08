@@ -8,15 +8,18 @@ import {
 } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { EOf, ROf } from './Effect'
-import { Id, Type } from './Entity'
-import { EntityNotFound } from './EntityNotFound'
-import { Event } from './Event'
-import { $EventSourcedEntity, EventSourcedEntity } from './EventSourcedEntity'
-import { $EventStore } from './EventStore'
-import { $Logger } from './Logger'
-import { $MutableEntity, MutableEntity } from './MutableEntity'
-import { $Reducer, Reducer } from './Reducer'
-import { $Repository } from './Repository'
+import { Id, Type } from './entity/Entity'
+import { Event } from './entity/message/event/Event'
+import {
+  $EventSourcedEntity,
+  EventSourcedEntity,
+} from './entity/message/event/EventSourcedEntity'
+import { $EventStore } from './entity/message/event/eventstore/EventStore'
+import { $Reducer, Reducer } from './entity/message/event/Reducer'
+import { $MutableEntity, MutableEntity } from './entity/MutableEntity'
+import { EntityNotFound } from './entity/repository/EntityNotFound'
+import { $Repository } from './entity/repository/Repository'
+import { $Logger } from './logger/Logger'
 import { WrongEntityVersion } from './WrongEntityVersion'
 
 const CHANNEL = 'Aggregate'
