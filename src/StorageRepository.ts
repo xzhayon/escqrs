@@ -53,16 +53,13 @@ export const $StorageRepository = (location: string) =>
         update: (entity) =>
           pipe(
             repository.find(entity),
-            Effect.map((_entity) => ({
-              ...JSON.parse(_entity.toString()),
-              ...entity,
-            })),
+            Effect.map((_entity) => ({ ..._entity, ...entity })),
             Effect.tap((_entity) =>
               pipe(
                 JSON.stringify(_entity),
                 Buffer.from,
                 $Storage.write(
-                  getLocation(location, entity._.type, entity._.id),
+                  getLocation(location, _entity._.type, _entity._.id),
                 ),
               ),
             ),
