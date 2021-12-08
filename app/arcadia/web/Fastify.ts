@@ -76,11 +76,11 @@ const route =
 
         const promise = handler.call(instance, request, reply)
         if (undefined !== promise) {
-          const valueOrEffect = yield* _(Effect.tryPromise(() => promise))
+          const effectOrValue = yield* _(Effect.tryPromise(() => promise))
 
-          return $Effect.is(valueOrEffect)
-            ? yield* _(valueOrEffect)
-            : valueOrEffect
+          return $Effect.is(effectOrValue)
+            ? yield* _(effectOrValue)
+            : effectOrValue
         }
       })
 
