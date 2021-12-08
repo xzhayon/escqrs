@@ -281,6 +281,21 @@ describe('Aggregate', () => {
       ),
     ).rejects.toThrow(WrongEntityVersion)
   })
+  test('updating a nonexistent entity', async () => {
+    await expect(
+      pipe(
+        gen(function* (_) {
+          const entity = yield* _(
+            $MutableEntity('foo')({}, { id: 'bar', version: 0 }),
+          )
+
+          return yield* _($Aggregate('foo').save(entity))
+        }),
+        Effect.provideSomeLayer($Layer),
+        Effect.runPromise,
+      ),
+    ).rejects.toThrow(EntityNotFound.build('foo', 'bar'))
+  })
   test('updating an entity', async () => {
     await expect(
       pipe(

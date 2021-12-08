@@ -166,7 +166,7 @@ const saveToRepository = <A extends MutableEntity>(entity: A) =>
     $Repository.find<A>(entity),
     Effect.map(({ _ }) => _.version),
     Effect.catchSome((error) =>
-      error instanceof EntityNotFound
+      -1 === entity._.version && error instanceof EntityNotFound
         ? Option.some(Effect.succeed(-1))
         : Option.none,
     ),
