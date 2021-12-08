@@ -16,9 +16,9 @@ export const $Layer = pipe(
   Layer.all(
     $Layer_testing,
     Layer.fromManaged(HasEventStore)(
-      $StorageEventStore('var/eventstore', () => new EventEmitter()),
+      $StorageEventStore('./var/eventstore', () => new EventEmitter()),
     ),
-    Layer.fromManaged(HasRepository)($StorageRepository('var/repository')),
+    Layer.fromManaged(HasRepository)($StorageRepository('./var/repository')),
   ),
   Layer.usingAnd(Layer.fromValue(HasLogger)($Console(true))),
   Layer.usingAnd(Layer.fromValue(HasStorage)($Fs(fs))),

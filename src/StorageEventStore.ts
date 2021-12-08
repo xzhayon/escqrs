@@ -241,8 +241,11 @@ export const $StorageEventStore = (
                   error,
                   channel: CHANNEL,
                 }),
-              () =>
-                $Logger.debug('Event replay completed', { channel: CHANNEL }),
+              (events) =>
+                $Logger.debug('Event replay completed', {
+                  eventsCount: events.length,
+                  channel: CHANNEL,
+                }),
             ),
             Effect.provideService(HasClock)($clock),
             Effect.provideService(HasLogger)($logger),
@@ -265,6 +268,7 @@ export const $StorageEventStore = (
             channel: CHANNEL,
           }),
         ),
+        Effect.delay(100),
       ),
     ),
   )
