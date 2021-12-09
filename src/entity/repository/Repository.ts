@@ -96,16 +96,15 @@ function find<A extends Entity>(
     }),
     Effect.tapBoth(
       (error) =>
-        $Logger.error('Entity not found', {
+        $Logger.error('Entities not found', {
           entityType: entity._.type,
           error,
-          entityId: entity._.id,
           channel: CHANNEL,
         }),
-      () =>
-        $Logger.debug('Entity found', {
+      (entities) =>
+        $Logger.debug('Entities found', {
           entityType: entity._.type,
-          entityId: entity._.id,
+          entitiesCount: entities.length,
           channel: CHANNEL,
         }),
     ),
