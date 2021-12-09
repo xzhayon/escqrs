@@ -1,8 +1,17 @@
-import { Array, Effect, Managed, pipe } from '@effect-ts/core'
+import {
+  Array,
+  Effect,
+  Equal,
+  Managed,
+  Option,
+  pipe,
+  Record,
+} from '@effect-ts/core'
 import { HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { join } from 'path'
 import { $Logger, HasLogger } from '../../logger/Logger'
+import { FileNotFound } from '../../storage/FileNotFound'
 import { $Storage, HasStorage } from '../../storage/Storage'
 import { Body, Entity, Header } from '../Entity'
 import { EntityNotFound } from './EntityNotFound'
@@ -10,8 +19,14 @@ import { Repository } from './Repository'
 
 const CHANNEL = 'StorageRepository'
 
-const getLocation = (directory: string, type: string, id: string) =>
-  join(directory, ...type.toLowerCase().split('.'), `${id.toLowerCase()}.json`)
+const getLocation = (directory: string, type: string, id?: string) =>
+  undefined !== id
+    ? join(
+        directory,
+        ...type.toLowerCase().split('.'),
+        `${id.toLowerCase()}.json`,
+      )
+    : join(directory, ...type.toLowerCase().split('.'))
 
 export const $StorageRepository = (location: string) =>
   pipe(
@@ -45,14 +60,7 @@ export const $StorageRepository = (location: string) =>
         } & Partial<Body<A>>) =>
           pipe(
             gen(function* (_) {
-              if (
-                undefined !== header.id &&
-                (yield* _(
-                  $Storage.exists(
-                    getLocation(location, header.type, header.id),
-                  ),
-                ))
-              ) {
+              if (undefined !== header.id) {
                 const buffer = yield* _(
                   $Storage.read(getLocation(location, header.type, header.id)),
                 )
@@ -61,8 +69,32 @@ export const $StorageRepository = (location: string) =>
                 return [entity as A]
               }
 
-              return Array.emptyOf<A>()
+              const ids = yield* _(
+                $Storage.list(getLocation(location, header.type)),
+              )
+              const entities = []
+              for (const id of ids) {
+                const buffer = yield* _(
+                  $Storage.read(join(getLocation(location, header.type), id)),
+                )
+                const entity = JSON.parse(buffer.toString())
+                if (pipe(body, Record.isSubrecord(Equal.strict())(entity))) {
+                  entities.push(entity)
+                }
+              }
+
+              return entities
             }),
+            Effect.mapError((error) =>
+              undefined !== header.id && error instanceof FileNotFound
+                ? EntityNotFound.build(header.type, header.id)
+                : error,
+            ),
+            Effect.catchSome((error) =>
+              error instanceof FileNotFound
+                ? Option.some(Effect.succeed([]))
+                : Option.none,
+            ),
             Effect.provideService(HasClock)($clock),
             Effect.provideService(HasLogger)($logger),
             Effect.provideService(HasStorage)($storage),
