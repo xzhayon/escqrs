@@ -6,6 +6,7 @@ import { fs } from 'memfs'
 import { $Layer } from '../../config/Layer.testing'
 import { FileNotFound } from './FileNotFound'
 import { $Fs } from './Fs'
+import { NotADirectory } from './NotADirectory'
 import { $Storage, HasStorage } from './Storage'
 
 describe('Storage', () => {
@@ -28,7 +29,7 @@ describe('Storage', () => {
       seed++
     })
 
-    test('listing files of nonexistent directory', async () => {
+    test('listing files of a nonexistent directory', async () => {
       await expect(
         pipe(
           $Storage.list(`foo.${seed}`),
@@ -36,6 +37,33 @@ describe('Storage', () => {
           Effect.runPromise,
         ),
       ).rejects.toThrow(FileNotFound.build(`foo.${seed}`))
+    })
+    test('listing files of a non-directory', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}`)(Buffer.from('bar')))
+
+            return yield* _($Storage.list(`foo.${seed}`))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).rejects.toThrow(NotADirectory.build(`foo.${seed}`))
+    })
+    test('listing files of a directory', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}/mad`)(Buffer.from('mad')))
+            yield* _($Storage.write(`foo.${seed}/max`)(Buffer.from('max')))
+
+            return yield* _($Storage.list(`foo.${seed}`))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).resolves.toStrictEqual(['mad', 'max'])
     })
     test('checking for a nonexistent file', async () => {
       await expect(
