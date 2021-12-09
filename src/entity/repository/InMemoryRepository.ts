@@ -1,6 +1,16 @@
-import { Effect, Managed, Option, pipe, Record, Ref } from '@effect-ts/core'
+import {
+  Array,
+  Effect,
+  Equal,
+  Managed,
+  NonEmptyArray,
+  Option,
+  pipe,
+  Record,
+  Ref,
+} from '@effect-ts/core'
+import * as Dictionary from '@effect-ts/core/Collections/Immutable/Dictionary'
 import { gen } from '@effect-ts/system/Effect'
-import { flow } from '@effect-ts/system/Function'
 import { $Logger } from '../../logger/Logger'
 import { Body, Entity, Header } from '../Entity'
 import { EntityNotFound } from './EntityNotFound'
@@ -42,39 +52,73 @@ export const $InMemoryRepository = pipe(
           ),
         ),
       find: <A extends Entity>({
-        _: { type, id },
-      }: {
-        readonly _: Pick<Header<A>, 'type' | 'id'>
-      }) =>
+        _: header,
+        ...body
+      }: { readonly _: Pick<Header<A>, 'type'> & Partial<Header<A>> } & Partial<
+        Body<A>
+      >) =>
         pipe(
-          entities.get,
-          Effect.chain(flow(Record.lookup(type), Effect.fromOption)),
-          Effect.chain(flow(Record.lookup(id), Effect.fromOption)),
-          Effect.mapBoth(
-            () => EntityNotFound.build(type, id),
-            (entity) => entity as A,
-          ),
+          gen(function* (_) {
+            const _entities = yield* _(entities.get)
+            const collection = yield* _(
+              Record.lookup(header.type)(_entities),
+              Error,
+            )
+            if (undefined !== header.id) {
+              const entity = yield* _(
+                Record.lookup(header.id)(collection),
+                Error,
+              )
+
+              return [entity as A]
+            }
+
+            return pipe(
+              collection,
+              Record.values,
+              Array.filter((entity) =>
+                pipe(
+                  body as Dictionary.Dictionary<unknown>,
+                  Record.isSubrecord(Equal.strict())(
+                    entity as unknown as Dictionary.Dictionary<unknown>,
+                  ),
+                ),
+              ),
+            ) as Array.Array<A>
+          }),
+          Effect.catchAll(() => Effect.succeed(Array.emptyOf<A>())),
         ),
       update: <A extends Entity>(
-        entity: {
-          readonly _: Pick<Header<A>, 'type' | 'id'>
-        } & Partial<Body<A>>,
+        entity: { readonly _: Pick<Header<A>, 'type' | 'id'> } & Partial<
+          Body<A>
+        >,
       ) =>
-        pipe(
-          repository.find(entity),
-          Effect.map((_entity) => ({ ..._entity, ...entity })),
-          Effect.tap(repository.insert),
-        ),
+        gen(function* (_) {
+          const _entities = yield* _(repository.find(entity))
+          const _entity = yield* _(Array.head(_entities), () =>
+            EntityNotFound.build(entity._.type, entity._.id),
+          )
+          const __entity = { ..._entity, ...entity }
+          yield* _(repository.insert(__entity))
+
+          return __entity
+        }),
       delete: (entity) =>
-        pipe(
-          repository.find(entity),
-          Effect.as(entities),
-          Effect.chain(
-            Ref.updateSome(
-              Record.modifyAt(entity._.type, Record.deleteAt(entity._.id)),
+        gen(function* (_) {
+          const _entities = yield* _(repository.find(entity))
+          yield* _(NonEmptyArray.fromArray(_entities), () =>
+            EntityNotFound.build(entity._.type, entity._.id),
+          )
+
+          yield* _(
+            pipe(
+              entities,
+              Ref.updateSome(
+                Record.modifyAt(entity._.type, Record.deleteAt(entity._.id)),
+              ),
             ),
-          ),
-        ),
+          )
+        }),
     }
 
     return { ...repository, entities }

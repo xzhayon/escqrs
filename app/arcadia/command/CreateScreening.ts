@@ -1,4 +1,4 @@
-import { Effect, pipe } from '@effect-ts/core'
+import { Effect, NonEmptyArray, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { Id } from '../../../src/entity/Entity'
 import { $Command, Command } from '../../../src/entity/message/command/Command'
@@ -35,12 +35,12 @@ $CreateScreening.handler = $CommandHandler<CreateScreening>('CreateScreening')(
       (command) =>
         pipe(
           gen(function* (_) {
-            const film = yield* _(
+            const films = yield* _(
               $Repository.find<Film>({
                 _: { type: 'Film', id: command.filmId },
               }),
             )
-            const screen = yield* _(
+            const screens = yield* _(
               $Repository.find<Screen>({
                 _: { type: 'Screen', id: command.screenId },
               }),
@@ -48,8 +48,8 @@ $CreateScreening.handler = $CommandHandler<CreateScreening>('CreateScreening')(
             const screening_ = yield* _(
               $Screening.create(
                 command.aggregateId,
-                film,
-                screen,
+                NonEmptyArray.head(films),
+                NonEmptyArray.head(screens),
                 command.date,
                 command,
               ),

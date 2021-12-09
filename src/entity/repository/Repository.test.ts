@@ -10,7 +10,7 @@ import { HasLogger } from '../../logger/Logger'
 import { $NilLogger } from '../../logger/NilLogger'
 import { $Fs } from '../../storage/Fs'
 import { HasStorage } from '../../storage/Storage'
-import { Entity } from '../Entity'
+import { Body, Entity, Header } from '../Entity'
 import { EntityNotFound } from './EntityNotFound'
 import { $InMemoryRepository } from './InMemoryRepository'
 import { $Repository, HasRepository } from './Repository'
@@ -61,6 +61,15 @@ describe('Repository', () => {
         ),
       ).rejects.toThrow(EntityNotFound.build('foo', 'bar'))
     })
+    test('finding entities in an empty repository', async () => {
+      await expect(
+        pipe(
+          $Repository.find({ _: { type: 'foo' } }),
+          Effect.provideSomeLayer(layer(seed)),
+          Effect.runPromise,
+        ),
+      ).resolves.toHaveLength(0)
+    })
     test('inserting an entity', async () => {
       await expect(
         pipe(
@@ -81,7 +90,62 @@ describe('Repository', () => {
           Effect.provideSomeLayer(layer(seed)),
           Effect.runPromise,
         ),
-      ).resolves.toMatchObject({ _: { type: 'foo', id: 'bar' } })
+      ).resolves.toMatchObject([{ _: { type: 'foo', id: 'bar' } }])
+    })
+    test('finding all entities', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Repository.insert({ _: { type: 'foo', id: 'bar' } }))
+            yield* _($Repository.insert({ _: { type: 'foo', id: 'mad' } }))
+            yield* _($Repository.insert({ _: { type: 'foo', id: 'max' } }))
+
+            return yield* _($Repository.find({ _: { type: 'foo' } }))
+          }),
+          Effect.provideSomeLayer(layer(seed)),
+          Effect.runPromise,
+        ),
+      ).resolves.toHaveLength(3)
+    })
+    test('finding some entities', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Repository.insert({ _: { type: 'foo', id: 'bar' } }))
+            yield* _(
+              $Repository.insert({ _: { type: 'foo', id: 'mad' }, max: 42 }),
+            )
+
+            return yield* _(
+              $Repository.find({ _: { type: 'foo' }, max: 42 } as {
+                readonly _: Pick<Header<Entity>, 'type'>
+              } & Partial<Body<Entity>>),
+            )
+          }),
+          Effect.provideSomeLayer(layer(seed)),
+          Effect.runPromise,
+        ),
+      ).resolves.toMatchObject([{ _: { type: 'foo', id: 'mad' }, max: 42 }])
+    })
+    test('finding no entities', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Repository.insert({ _: { type: 'foo', id: 'bar' } }))
+            yield* _(
+              $Repository.insert({ _: { type: 'foo', id: 'mad' }, max: 42 }),
+            )
+
+            return yield* _(
+              $Repository.find({ _: { type: 'foo' }, max: 1138 } as {
+                readonly _: Pick<Header<Entity>, 'type'>
+              } & Partial<Body<Entity>>),
+            )
+          }),
+          Effect.provideSomeLayer(layer(seed)),
+          Effect.runPromise,
+        ),
+      ).resolves.toHaveLength(0)
     })
     test('replacing an entity', async () => {
       await expect(
@@ -114,14 +178,13 @@ describe('Repository', () => {
             yield* _(
               $Repository.insert({ _: { type: 'foo', id: 'bar' }, bar: 42 }),
             )
-            yield* _(
+
+            return yield* _(
               $Repository.update({
                 _: { type: 'foo', id: 'bar' },
                 mad: 'max',
               } as Entity),
             )
-
-            return yield* _($Repository.find({ _: { type: 'foo', id: 'bar' } }))
           }),
           Effect.provideSomeLayer(layer(seed)),
           Effect.runPromise,

@@ -1,4 +1,4 @@
-import { Effect, Option, pipe } from '@effect-ts/core'
+import { Array, Effect, Option, pipe } from '@effect-ts/core'
 import _fs from 'fs'
 import { dirname } from 'path'
 import { $Error } from '../Error'
@@ -12,11 +12,20 @@ export const $Fs = (
     | 'createReadStream'
     | 'createWriteStream'
     | 'promises'
+    | 'readdir'
     | 'readFile'
     | 'unlink'
     | 'writeFile'
   >,
 ): Storage => ({
+  list: (path) =>
+    pipe(
+      path,
+      Effect.fromNodeCb<string, Error, Array.Array<string>>(fs.readdir),
+      Effect.mapError((error) =>
+        /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
+      ),
+    ),
   exists: (path) =>
     pipe(
       path,

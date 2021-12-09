@@ -1,4 +1,4 @@
-import { Branded, Effect, Either, pipe } from '@effect-ts/core'
+import { Branded, Effect, Either, NonEmptyArray, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Layer } from '../config/Layer.testing'
 import { $Aggregate } from './Aggregate'
@@ -240,7 +240,7 @@ describe('Aggregate', () => {
             const entity = yield* _($MutableEntity('foo')({}, { id: 'bar' }))
             yield* _($Aggregate('foo').save(entity))
 
-            return yield* _($Repository.find(entity))
+            return NonEmptyArray.head(yield* _($Repository.find(entity)))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,

@@ -1,11 +1,15 @@
-import { Effect, Has, pipe } from '@effect-ts/core'
+import { Array, Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Logger } from '../logger/Logger'
 import { FileNotFound } from './FileNotFound'
+import { NotADirectory } from './NotADirectory'
 
 const CHANNEL = 'Storage'
 
 export interface Storage {
+  readonly list: (
+    path: string,
+  ) => Effect.IO<FileNotFound | NotADirectory | Error, Array.Array<string>>
   readonly exists: (path: string) => Effect.IO<Error, boolean>
   readonly readStream: (
     path: string,
@@ -27,10 +31,30 @@ type WriteOptions = { readonly append?: boolean }
 export const HasStorage = Has.tag<Storage>()
 
 const _storage = Effect.deriveLifted(HasStorage)(
-  ['exists', 'readStream', 'read', 'writeStream', 'delete'],
+  ['list', 'exists', 'readStream', 'read', 'writeStream', 'delete'],
   [],
   ['write'],
 )
+
+const list = (path: string) =>
+  pipe(
+    path,
+    _storage.list,
+    Effect.tapBoth(
+      (error) =>
+        $Logger.error('Files not listed', {
+          filePath: path,
+          error,
+          channel: CHANNEL,
+        }),
+      (paths) =>
+        $Logger.debug('Files listed', {
+          filePath: path,
+          filesCount: paths.length,
+          channel: CHANNEL,
+        }),
+    ),
+  )
 
 const exists = (path: string) =>
   pipe(
@@ -148,6 +172,7 @@ const _delete = (path: string) =>
   )
 
 export const $Storage = {
+  list,
   exists,
   readStream,
   read,

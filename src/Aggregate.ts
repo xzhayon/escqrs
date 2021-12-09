@@ -8,7 +8,7 @@ import {
 } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { EOf, ROf } from './Effect'
-import { Id, Type } from './entity/Entity'
+import { Body, Header, Id, Type } from './entity/Entity'
 import { Event } from './entity/message/event/Event'
 import {
   $EventSourcedEntity,
@@ -96,7 +96,12 @@ const loadFromEventStore =
 const loadFromRepository =
   <A extends MutableEntity>(type: Type<A>) =>
   (id: Id<A>) =>
-    $Repository.find({ _: { type, id } })
+    pipe(
+      $Repository.find({ _: { type, id } } as {
+        readonly _: Pick<Header<A>, 'type' | 'id'> & Partial<Header<A>>
+      } & Partial<Body<A>>),
+      Effect.map(NonEmptyArray.head),
+    )
 
 const load =
   <A extends MutableEntity>(
@@ -164,6 +169,7 @@ const saveToEventStore = <A extends EventSourcedEntity>(entity: Pick<A, '_'>) =>
 const saveToRepository = <A extends MutableEntity>(entity: A) =>
   pipe(
     $Repository.find<A>(entity),
+    Effect.map(NonEmptyArray.head),
     Effect.map(({ _ }) => _.version),
     Effect.catchSome((error) =>
       -1 === entity._.version && error instanceof EntityNotFound

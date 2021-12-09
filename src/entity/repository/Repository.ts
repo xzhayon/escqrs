@@ -1,5 +1,7 @@
-import { Effect, Has, pipe } from '@effect-ts/core'
-import { $Logger } from '../../logger/Logger'
+import { Array, Effect, Has, NonEmptyArray, pipe } from '@effect-ts/core'
+import { HasClock } from '@effect-ts/system/Clock'
+import { gen } from '@effect-ts/system/Effect'
+import { $Logger, Logger } from '../../logger/Logger'
 import { Body, Entity, Header } from '../Entity'
 import { EntityNotFound } from './EntityNotFound'
 
@@ -7,15 +9,19 @@ const CHANNEL = 'Repository'
 
 export interface Repository {
   readonly insert: <A extends Entity>(entity: A) => Effect.IO<Error, void>
-  readonly find: <A extends Entity>(entity: {
-    readonly _: Pick<Header<A>, 'type' | 'id'>
-  }) => Effect.IO<EntityNotFound | Error, A>
+  readonly find: <A extends Entity>(
+    entity: {
+      readonly _: Pick<Header<A>, 'type'> & Partial<Header<A>>
+    } & Partial<Body<A>>,
+  ) => Effect.IO<Error, Array.Array<A>>
   readonly update: <A extends Entity>(
     entity: { readonly _: Pick<Header<A>, 'type' | 'id'> } & Partial<Body<A>>,
   ) => Effect.IO<EntityNotFound | Error, A>
-  readonly delete: <A extends Entity>(entity: {
-    readonly _: Pick<Header<A>, 'type' | 'id'>
-  }) => Effect.IO<EntityNotFound | Error, void>
+  readonly delete: <A extends Entity>(
+    entity: {
+      readonly _: Pick<Header<A>, 'type' | 'id'>
+    } & Partial<Body<A>>,
+  ) => Effect.IO<EntityNotFound | Error, void>
 }
 
 export const HasRepository = Has.tag<Repository>()
@@ -48,11 +54,46 @@ const insert = <A extends Entity>(entity: A) =>
     ),
   )
 
-const find = <A extends Entity>(entity: {
-  readonly _: Pick<Header<A>, 'type' | 'id'>
-}) =>
-  pipe(
-    _find((f) => f(entity)),
+function find<A extends Entity>(
+  entity: { readonly _: Pick<Header<A>, 'type' | 'id'> } & Partial<Body<A>>,
+): Effect.Effect<
+  HasClock & Has.Has<Logger> & Has.Has<Repository>,
+  EntityNotFound | Error,
+  NonEmptyArray.NonEmptyArray<A>
+>
+function find<A extends Entity>(
+  entity: {
+    readonly _: Pick<Header<A>, 'type'> & Partial<Header<A>>
+  } & Partial<Body<A>>,
+): Effect.Effect<
+  HasClock & Has.Has<Logger> & Has.Has<Repository>,
+  EntityNotFound | Error,
+  Array.Array<A>
+>
+function find<A extends Entity>(
+  entity:
+    | ({ readonly _: Pick<Header<A>, 'type' | 'id'> } & Partial<Body<A>>)
+    | ({
+        readonly _: Pick<Header<A>, 'type'> & Partial<Header<A>>
+      } & Partial<Body<A>>),
+): Effect.Effect<
+  HasClock & Has.Has<Logger> & Has.Has<Repository>,
+  EntityNotFound | Error,
+  NonEmptyArray.NonEmptyArray<A> | Array.Array<A>
+> {
+  return pipe(
+    gen(function* (_) {
+      const entities = yield* _(_find((f) => f(entity)))
+      if (undefined !== entity._.id) {
+        const id = entity._.id
+
+        return yield* _(NonEmptyArray.fromArray(entities), () =>
+          EntityNotFound.build(entity._.type, id),
+        )
+      }
+
+      return entities
+    }),
     Effect.tapBoth(
       (error) =>
         $Logger.error('Entity not found', {
@@ -69,6 +110,7 @@ const find = <A extends Entity>(entity: {
         }),
     ),
   )
+}
 
 const update = <A extends Entity>(
   entity: { readonly _: Pick<Header<A>, 'type' | 'id'> } & Partial<Body<A>>,

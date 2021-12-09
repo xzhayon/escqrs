@@ -28,6 +28,15 @@ describe('Storage', () => {
       seed++
     })
 
+    test('listing files of nonexistent directory', async () => {
+      await expect(
+        pipe(
+          $Storage.list(`foo.${seed}`),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).rejects.toThrow(FileNotFound.build(`foo.${seed}`))
+    })
     test('checking for a nonexistent file', async () => {
       await expect(
         pipe(
