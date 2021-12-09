@@ -22,21 +22,14 @@ export const $Fs = (
   const storage: Storage = {
     list: (path, type = $Storage.File | $Storage.Directory) =>
       pipe(
-        Effect.tryCatchPromise(
-          () =>
-            new Promise<Array.Array<string>>((resolve, reject) =>
-              fs.readdir(path, (error, files) =>
-                error ? reject(error) : resolve(files),
-              ),
-            ),
-          $Error.fromUnknown(Error(`Cannot list files of directory "${path}"`)),
-        ),
+        path,
+        Effect.fromNodeCb<string, Error, Array.Array<string>>(fs.readdir),
         Effect.chain(
-          Array.compactF(Effect.Applicative)((file) =>
+          Array.compactF(Effect.Applicative)((fileName) =>
             pipe(
-              storage.exists(join(path, file), type),
+              storage.exists(join(path, fileName), type),
               Effect.ifM(
-                () => Effect.succeed(Option.some(file)),
+                () => Effect.succeed(Option.some(fileName)),
                 () => Effect.succeed(Option.none),
               ),
             ),

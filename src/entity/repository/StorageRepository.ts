@@ -70,13 +70,18 @@ export const $StorageRepository = (location: string) =>
                 return [entity as A]
               }
 
-              const ids = yield* _(
-                $Storage.list(getLocation(location, header.type)),
+              const fileNames = yield* _(
+                $Storage.list(
+                  getLocation(location, header.type),
+                  $Storage.File,
+                ),
               )
               const entities = []
-              for (const id of ids) {
+              for (const fileName of fileNames) {
                 const buffer = yield* _(
-                  $Storage.read(join(getLocation(location, header.type), id)),
+                  $Storage.read(
+                    join(getLocation(location, header.type), fileName),
+                  ),
                 )
                 const entity = JSON.parse(buffer.toString())
                 if (pipe(body, Record.isSubrecord(Equal.strict())(entity))) {
@@ -123,7 +128,10 @@ export const $StorageRepository = (location: string) =>
           ),
         delete: (entity) =>
           pipe(
-            $Storage.exists(getLocation(location, entity._.type, entity._.id)),
+            $Storage.exists(
+              getLocation(location, entity._.type, entity._.id),
+              $Storage.File,
+            ),
             Effect.ifM(
               () =>
                 $Storage.delete(
