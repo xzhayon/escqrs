@@ -51,19 +51,50 @@ describe('Storage', () => {
         ),
       ).rejects.toThrow()
     })
-    test('listing files of a directory', async () => {
+    test('listing entries of a directory', async () => {
       await expect(
         pipe(
           gen(function* (_) {
             yield* _($Storage.write(`foo.${seed}/mad`)(Buffer.from('mad')))
             yield* _($Storage.write(`foo.${seed}/max`)(Buffer.from('max')))
+            yield* _($Storage.write(`foo.${seed}/bar/qux`)(Buffer.from('qux')))
 
             return yield* _($Storage.list(`foo.${seed}`))
           }),
           Effect.provideSomeLayer(layer()),
           Effect.runPromise,
         ),
+      ).resolves.toStrictEqual(['bar', 'mad', 'max'])
+    })
+    test('listing files of a directory', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}/mad`)(Buffer.from('mad')))
+            yield* _($Storage.write(`foo.${seed}/max`)(Buffer.from('max')))
+            yield* _($Storage.write(`foo.${seed}/bar/qux`)(Buffer.from('qux')))
+
+            return yield* _($Storage.list(`foo.${seed}`, $Storage.File))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
       ).resolves.toStrictEqual(['mad', 'max'])
+    })
+    test('listing subdirectories', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}/mad`)(Buffer.from('mad')))
+            yield* _($Storage.write(`foo.${seed}/max`)(Buffer.from('max')))
+            yield* _($Storage.write(`foo.${seed}/bar/qux`)(Buffer.from('qux')))
+
+            return yield* _($Storage.list(`foo.${seed}`, $Storage.Directory))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).resolves.toStrictEqual(['bar'])
     })
     test('checking for a nonexistent file', async () => {
       await expect(
@@ -86,6 +117,40 @@ describe('Storage', () => {
           Effect.runPromise,
         ),
       ).resolves.toBeTruthy()
+    })
+    test('checking for an existent directory', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}/bar`)(Buffer.from('bar')))
+
+            return yield* _($Storage.exists(`foo.${seed}`, $Storage.Directory))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).resolves.toBeTruthy()
+    })
+    test('checking for a file of the wrong kind', async () => {
+      await expect(
+        pipe(
+          gen(function* (_) {
+            yield* _($Storage.write(`foo.${seed}/bar`)(Buffer.from('bar')))
+
+            return yield* _($Storage.exists(`foo.${seed}`, $Storage.File))
+          }),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).resolves.toBeFalsy()
+
+      await expect(
+        pipe(
+          $Storage.exists(`foo.${seed}/bar`, $Storage.Directory),
+          Effect.provideSomeLayer(layer()),
+          Effect.runPromise,
+        ),
+      ).resolves.toBeFalsy()
     })
     test('reading stream of a nonexistent file', async () => {
       await expect(

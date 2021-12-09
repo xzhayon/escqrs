@@ -1,6 +1,6 @@
 import { Array, Effect, Option, pipe } from '@effect-ts/core'
-import _fs, { Dirent, Stats } from 'fs'
-import { dirname } from 'path'
+import _fs, { Stats } from 'fs'
+import { dirname, join } from 'path'
 import { $Error } from '../Error'
 import { DirectoryNotFound } from './DirectoryNotFound'
 import { FileNotFound } from './FileNotFound'
@@ -18,105 +18,110 @@ export const $Fs = (
     | 'unlink'
     | 'writeFile'
   >,
-): Storage => ({
-  list: (path, type = $Storage.File | $Storage.Directory) =>
-    pipe(
-      Effect.tryCatchPromise(
-        () =>
-          new Promise<Array.Array<Dirent>>((resolve, reject) =>
-            fs.readdir(path, { withFileTypes: true }, (error, files) =>
-              error ? reject(error) : resolve(files),
+): Storage => {
+  const storage: Storage = {
+    list: (path, type = $Storage.File | $Storage.Directory) =>
+      pipe(
+        Effect.tryCatchPromise(
+          () =>
+            new Promise<Array.Array<string>>((resolve, reject) =>
+              fs.readdir(path, (error, files) =>
+                error ? reject(error) : resolve(files),
+              ),
+            ),
+          $Error.fromUnknown(Error(`Cannot list files of directory "${path}"`)),
+        ),
+        Effect.chain(
+          Array.compactF(Effect.Applicative)((file) =>
+            pipe(
+              storage.exists(join(path, file), type),
+              Effect.ifM(
+                () => Effect.succeed(Option.some(file)),
+                () => Effect.succeed(Option.none),
+              ),
             ),
           ),
-        $Error.fromUnknown(Error(`Cannot list files of directory "${path}"`)),
-      ),
-      Effect.map(
-        Array.filter((dirent) =>
-          type & ($Storage.File | $Storage.Directory)
-            ? dirent.isFile() || dirent.isDirectory()
-            : type & $Storage.File
-            ? dirent.isFile()
-            : dirent.isDirectory(),
+        ),
+        Effect.mapError((error) =>
+          /^ENOENT/.test(error.message) ? DirectoryNotFound.build(path) : error,
         ),
       ),
-      Effect.map(Array.map((dirent) => dirent.name)),
-      Effect.mapError((error) =>
-        /^ENOENT/.test(error.message) ? DirectoryNotFound.build(path) : error,
-      ),
-    ),
-  exists: (path, type = $Storage.File | $Storage.Directory) =>
-    pipe(
-      path,
-      Effect.fromNodeCb<string, Error, Stats>(fs.lstat),
-      Effect.map((stats) =>
-        type & ($Storage.File | $Storage.Directory)
-          ? stats.isFile() || stats.isDirectory()
-          : type & $Storage.File
-          ? stats.isFile()
-          : stats.isDirectory(),
-      ),
-      Effect.catchSome((error) =>
-        /^ENOENT/.test(error.message)
-          ? Option.some(Effect.succeed(false))
-          : Option.none,
-      ),
-    ),
-  readStream: (path) =>
-    pipe(
-      Effect.tryCatchPromise(
-        () =>
-          new Promise<NodeJS.ReadableStream>((resolve, reject) => {
-            const stream: NodeJS.ReadableStream = fs
-              .createReadStream(path)
-              .on('error', reject)
-              .on('open', () => resolve(stream))
-          }),
-        $Error.fromUnknown(
-          Error(`Cannot open readable stream for file "${path}"`),
+    exists: (path, type = $Storage.File | $Storage.Directory) =>
+      pipe(
+        path,
+        Effect.fromNodeCb<string, Error, Stats>(fs.lstat),
+        Effect.map(
+          (stats) =>
+            ((type & $Storage.File) > 0 && stats.isFile()) ||
+            ((type & $Storage.Directory) > 0 && stats.isDirectory()),
+        ),
+        Effect.catchSome((error) =>
+          /^ENOENT/.test(error.message)
+            ? Option.some(Effect.succeed(false))
+            : /^EISDIR/.test(error.message)
+            ? Option.some(Effect.succeed((type & $Storage.Directory) > 0))
+            : Option.none,
         ),
       ),
-      Effect.mapError((error) =>
-        /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
+    readStream: (path) =>
+      pipe(
+        Effect.tryCatchPromise(
+          () =>
+            new Promise<NodeJS.ReadableStream>((resolve, reject) => {
+              const stream: NodeJS.ReadableStream = fs
+                .createReadStream(path)
+                .on('error', reject)
+                .on('open', () => resolve(stream))
+            }),
+          $Error.fromUnknown(
+            Error(`Cannot open readable stream for file "${path}"`),
+          ),
+        ),
+        Effect.mapError((error) =>
+          /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
+        ),
       ),
-    ),
-  read: (path) =>
-    pipe(
-      path,
-      Effect.fromNodeCb(fs.readFile),
-      Effect.mapError((error) =>
-        /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
+    read: (path) =>
+      pipe(
+        path,
+        Effect.fromNodeCb(fs.readFile),
+        Effect.mapError((error) =>
+          /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
+        ),
       ),
-    ),
-  writeStream: (path, options) =>
-    Effect.tryCatchPromise(async () => {
-      await fs.promises.mkdir(dirname(path), { recursive: true })
+    writeStream: (path, options) =>
+      Effect.tryCatchPromise(async () => {
+        await fs.promises.mkdir(dirname(path), { recursive: true })
 
-      return new Promise((resolve, reject) => {
-        const stream: NodeJS.WritableStream = fs
-          .createWriteStream(path, { flags: options?.append ? 'a' : 'w' })
-          .on('error', reject)
-          .on('open', () => resolve(stream))
-      })
-    }, $Error.fromUnknown(Error(`Cannot open writable stream for file "${path}"`))),
-  write: (path, options) => (data) =>
-    Effect.tryCatchPromise(async () => {
-      await fs.promises.mkdir(dirname(path), { recursive: true })
+        return new Promise((resolve, reject) => {
+          const stream: NodeJS.WritableStream = fs
+            .createWriteStream(path, { flags: options?.append ? 'a' : 'w' })
+            .on('error', reject)
+            .on('open', () => resolve(stream))
+        })
+      }, $Error.fromUnknown(Error(`Cannot open writable stream for file "${path}"`))),
+    write: (path, options) => (data) =>
+      Effect.tryCatchPromise(async () => {
+        await fs.promises.mkdir(dirname(path), { recursive: true })
 
-      return new Promise((resolve, reject) =>
-        fs.writeFile(
-          path,
-          data,
-          { flag: options?.append ? 'a' : 'w' },
-          (error) => (error ? reject(error) : resolve()),
+        return new Promise((resolve, reject) =>
+          fs.writeFile(
+            path,
+            data,
+            { flag: options?.append ? 'a' : 'w' },
+            (error) => (error ? reject(error) : resolve()),
+          ),
+        )
+      }, $Error.fromUnknown(Error(`Cannot write to file "${path}"`))),
+    delete: (path) =>
+      pipe(
+        path,
+        Effect.fromNodeCb(fs.unlink),
+        Effect.mapError((error) =>
+          /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
         ),
-      )
-    }, $Error.fromUnknown(Error(`Cannot write to file "${path}"`))),
-  delete: (path) =>
-    pipe(
-      path,
-      Effect.fromNodeCb(fs.unlink),
-      Effect.mapError((error) =>
-        /^ENOENT/.test(error.message) ? FileNotFound.build(path) : error,
       ),
-    ),
-})
+  }
+
+  return storage
+}

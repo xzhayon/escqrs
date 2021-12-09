@@ -6,8 +6,8 @@ import { FileNotFound } from './FileNotFound'
 
 const CHANNEL = 'Storage'
 
-const File = 0b1
-const Directory = 0b10
+const File = 0b1 as const
+const Directory = 0b10 as const
 export interface Storage {
   readonly list: (
     path: string,
