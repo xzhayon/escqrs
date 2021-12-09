@@ -1,15 +1,15 @@
 import { Array, Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import { $Logger } from '../logger/Logger'
+import { DirectoryNotFound } from './DirectoryNotFound'
 import { FileNotFound } from './FileNotFound'
-import { NotADirectory } from './NotADirectory'
 
 const CHANNEL = 'Storage'
 
 export interface Storage {
   readonly list: (
     path: string,
-  ) => Effect.IO<FileNotFound | NotADirectory | Error, Array.Array<string>>
+  ) => Effect.IO<DirectoryNotFound | Error, Array.Array<string>>
   readonly exists: (path: string) => Effect.IO<Error, boolean>
   readonly readStream: (
     path: string,

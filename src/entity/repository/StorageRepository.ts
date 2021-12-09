@@ -11,6 +11,7 @@ import { HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { join } from 'path'
 import { $Logger, HasLogger } from '../../logger/Logger'
+import { DirectoryNotFound } from '../../storage/DirectoryNotFound'
 import { FileNotFound } from '../../storage/FileNotFound'
 import { $Storage, HasStorage } from '../../storage/Storage'
 import { Body, Entity, Header } from '../Entity'
@@ -91,7 +92,7 @@ export const $StorageRepository = (location: string) =>
                 : error,
             ),
             Effect.catchSome((error) =>
-              error instanceof FileNotFound
+              error instanceof DirectoryNotFound
                 ? Option.some(Effect.succeed([]))
                 : Option.none,
             ),

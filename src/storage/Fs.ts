@@ -2,8 +2,8 @@ import { Array, Effect, Option, pipe } from '@effect-ts/core'
 import _fs from 'fs'
 import { dirname } from 'path'
 import { $Error } from '../Error'
+import { DirectoryNotFound } from './DirectoryNotFound'
 import { FileNotFound } from './FileNotFound'
-import { NotADirectory } from './NotADirectory'
 import { Storage } from './Storage'
 
 export const $Fs = (
@@ -24,11 +24,7 @@ export const $Fs = (
       path,
       Effect.fromNodeCb<string, Error, Array.Array<string>>(fs.readdir),
       Effect.mapError((error) =>
-        /^ENOENT/.test(error.message)
-          ? FileNotFound.build(path)
-          : /^ENOTDIR/.test(error.message)
-          ? NotADirectory.build(path)
-          : error,
+        /^ENOENT/.test(error.message) ? DirectoryNotFound.build(path) : error,
       ),
     ),
   exists: (path) =>

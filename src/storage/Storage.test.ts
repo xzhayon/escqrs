@@ -4,9 +4,9 @@ import * as Layer from '@effect-ts/system/Layer'
 import _fs from 'fs'
 import { fs } from 'memfs'
 import { $Layer } from '../../config/Layer.testing'
+import { DirectoryNotFound } from './DirectoryNotFound'
 import { FileNotFound } from './FileNotFound'
 import { $Fs } from './Fs'
-import { NotADirectory } from './NotADirectory'
 import { $Storage, HasStorage } from './Storage'
 
 describe('Storage', () => {
@@ -36,7 +36,7 @@ describe('Storage', () => {
           Effect.provideSomeLayer(layer()),
           Effect.runPromise,
         ),
-      ).rejects.toThrow(FileNotFound.build(`foo.${seed}`))
+      ).rejects.toThrow(DirectoryNotFound.build(`foo.${seed}`))
     })
     test('listing files of a non-directory', async () => {
       await expect(
@@ -49,7 +49,7 @@ describe('Storage', () => {
           Effect.provideSomeLayer(layer()),
           Effect.runPromise,
         ),
-      ).rejects.toThrow(NotADirectory.build(`foo.${seed}`))
+      ).rejects.toThrow()
     })
     test('listing files of a directory', async () => {
       await expect(
