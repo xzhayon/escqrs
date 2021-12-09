@@ -1,17 +1,17 @@
 import { Array, Effect, Option, pipe } from '@effect-ts/core'
-import _fs from 'fs'
+import _fs, { Dirent, Stats } from 'fs'
 import { dirname } from 'path'
 import { $Error } from '../Error'
 import { DirectoryNotFound } from './DirectoryNotFound'
 import { FileNotFound } from './FileNotFound'
-import { Storage } from './Storage'
+import { $Storage, Storage } from './Storage'
 
 export const $Fs = (
   fs: Pick<
     typeof _fs,
-    | 'access'
     | 'createReadStream'
     | 'createWriteStream'
+    | 'lstat'
     | 'promises'
     | 'readdir'
     | 'readFile'
@@ -19,19 +19,42 @@ export const $Fs = (
     | 'writeFile'
   >,
 ): Storage => ({
-  list: (path) =>
+  list: (path, type = $Storage.File | $Storage.Directory) =>
     pipe(
-      path,
-      Effect.fromNodeCb<string, Error, Array.Array<string>>(fs.readdir),
+      Effect.tryCatchPromise(
+        () =>
+          new Promise<Array.Array<Dirent>>((resolve, reject) =>
+            fs.readdir(path, { withFileTypes: true }, (error, files) =>
+              error ? reject(error) : resolve(files),
+            ),
+          ),
+        $Error.fromUnknown(Error(`Cannot list files of directory "${path}"`)),
+      ),
+      Effect.map(
+        Array.filter((dirent) =>
+          type & ($Storage.File | $Storage.Directory)
+            ? dirent.isFile() || dirent.isDirectory()
+            : type & $Storage.File
+            ? dirent.isFile()
+            : dirent.isDirectory(),
+        ),
+      ),
+      Effect.map(Array.map((dirent) => dirent.name)),
       Effect.mapError((error) =>
         /^ENOENT/.test(error.message) ? DirectoryNotFound.build(path) : error,
       ),
     ),
-  exists: (path) =>
+  exists: (path, type = $Storage.File | $Storage.Directory) =>
     pipe(
       path,
-      Effect.fromNodeCb(fs.access),
-      Effect.as(true),
+      Effect.fromNodeCb<string, Error, Stats>(fs.lstat),
+      Effect.map((stats) =>
+        type & ($Storage.File | $Storage.Directory)
+          ? stats.isFile() || stats.isDirectory()
+          : type & $Storage.File
+          ? stats.isFile()
+          : stats.isDirectory(),
+      ),
       Effect.catchSome((error) =>
         /^ENOENT/.test(error.message)
           ? Option.some(Effect.succeed(false))

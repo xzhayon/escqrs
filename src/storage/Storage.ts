@@ -6,11 +6,14 @@ import { FileNotFound } from './FileNotFound'
 
 const CHANNEL = 'Storage'
 
+const File = 0b1
+const Directory = 0b10
 export interface Storage {
   readonly list: (
     path: string,
+    type?: number,
   ) => Effect.IO<DirectoryNotFound | Error, Array.Array<string>>
-  readonly exists: (path: string) => Effect.IO<Error, boolean>
+  readonly exists: (path: string, type?: number) => Effect.IO<Error, boolean>
   readonly readStream: (
     path: string,
   ) => Effect.IO<FileNotFound | Error, NodeJS.ReadableStream>
@@ -36,10 +39,9 @@ const _storage = Effect.deriveLifted(HasStorage)(
   ['write'],
 )
 
-const list = (path: string) =>
+const list = (path: string, type = File | Directory) =>
   pipe(
-    path,
-    _storage.list,
+    _storage.list(path, type),
     Effect.tapBoth(
       (error) =>
         $Logger.error('Files not listed', {
@@ -56,10 +58,9 @@ const list = (path: string) =>
     ),
   )
 
-const exists = (path: string) =>
+const exists = (path: string, type = File | Directory) =>
   pipe(
-    path,
-    _storage.exists,
+    _storage.exists(path, type),
     Effect.tapBoth(
       (error) =>
         $Logger.error('File not found', {
@@ -172,6 +173,8 @@ const _delete = (path: string) =>
   )
 
 export const $Storage = {
+  File,
+  Directory,
   list,
   exists,
   readStream,
