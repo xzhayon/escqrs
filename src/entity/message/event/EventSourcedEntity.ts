@@ -1,4 +1,4 @@
-import { Array, Option, pipe } from '@effect-ts/core'
+import { Array as _Array, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { PartialDeep } from '../../../PartialDeep'
@@ -18,7 +18,7 @@ export interface EventSourcedEntity<
 > extends MutableEntity<
     T,
     I,
-    H & { readonly events: { readonly uncommitted: Array.Array<Event> } }
+    H & { readonly events: { readonly uncommitted: _Array.Array<Event> } }
   > {}
 
 export const $EventSourcedEntityC = <
@@ -74,13 +74,13 @@ const fold =
   <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
   (id: Id<A>) =>
   (entity: A | undefined) =>
-  (events: Array.Array<Event>, uncommitted = false) =>
+  (events: _Array.Array<Event>, uncommitted = false) =>
     pipe(
       events,
-      Array.filter(
+      _Array.filter(
         (event) => id === event.aggregateId || id === event._.correlationId,
       ),
-      Array.reduceWithIndex(
+      _Array.reduceWithIndex(
         [
           Option.fromNullable(entity?._),
           Option.fromNullable(entity),
@@ -119,7 +119,7 @@ const fold =
 $EventSourcedEntity.reduce =
   <A extends EventSourcedEntity>(type: Type<A>, reducer: Reducer<A>) =>
   (id: Id<A>) =>
-  (events: Array.Array<Event>) =>
+  (events: _Array.Array<Event>) =>
     Option.gen(function* (_) {
       const [header, body] = fold(type, reducer)(id)(undefined)(events)
 

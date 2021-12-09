@@ -10,8 +10,9 @@ export const $HttpArcadiaClient = (url: string): ArcadiaClient => ({
   },
   getScreens: async () => {
     const response = await fetch(`${url}/v1/screens`)
+    const json = await response.json()
 
-    return response.json()
+    return json.data
   },
   createFilm: async (film) => {
     await fetch(`${url}/v1/films`, {
@@ -22,7 +23,8 @@ export const $HttpArcadiaClient = (url: string): ArcadiaClient => ({
   },
   getFilms: async () => {
     const response = await fetch(`${url}/v1/films`)
+    const json = await response.json()
 
-    return response.json()
+    return json.data
   },
 })

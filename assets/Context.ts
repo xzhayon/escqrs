@@ -6,7 +6,7 @@ export type Context = typeof $Context
 
 export const $Context = {
   arcadiaClient: $HttpArcadiaClient(
-    process.env.ARCADIA_URL || window.location.origin,
+    process.env.ARCADIA_URL || `${window.location.origin}/api`,
   ),
   uuidService: $Rfc4122UuidService({ $uuid: $Rfc4122 }),
 }

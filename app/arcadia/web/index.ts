@@ -6,8 +6,10 @@ import { $Effect } from '../../../src/Effect'
 import { $CreateFilm } from './command/CreateFilm'
 import { $CreateScreen } from './command/CreateScreen'
 import { $UpdateScreen } from './command/UpdateScreen'
+import { $GetFilms } from './query/GetFilms'
+import { $GetScreens } from './query/GetScreens'
 
-const fastify = _fastify({ logger: true })
+const fastify = _fastify()
 
 fastify.register(fastifyCors)
 
@@ -18,12 +20,14 @@ fastify.addHook('preSerialization', async (_request, _reply, payload) =>
 )
 
 fastify.register($CreateScreen)
+fastify.register($GetScreens)
 fastify.register($UpdateScreen)
 fastify.register($CreateFilm)
+fastify.register($GetFilms)
 
 const start = async () => {
   try {
-    await fastify.listen(process.argv[2] ?? 0)
+    await fastify.listen(process.argv[2] ?? 0, '::')
   } catch (error) {
     fastify.log.error(error)
     throw error

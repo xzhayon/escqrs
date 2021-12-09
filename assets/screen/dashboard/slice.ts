@@ -1,7 +1,7 @@
 import { Array } from '@effect-ts/core'
 import { createSlice } from '@reduxjs/toolkit'
 import { Screen } from '../../../app/arcadia/Screen'
-import { Id } from '../../../src/Entity'
+import { Id } from '../../../src/entity/Entity'
 import { Command, Event } from '../../Message'
 
 export interface ScreenDashboardState {

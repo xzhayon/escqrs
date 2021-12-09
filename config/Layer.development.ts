@@ -20,7 +20,7 @@ export const $Layer = pipe(
     ),
     Layer.fromManaged(HasRepository)($StorageRepository('./var/repository')),
   ),
-  Layer.usingAnd(Layer.fromValue(HasLogger)($Console(true))),
+  Layer.usingAnd(Layer.fromValue(HasLogger)($Console())),
   Layer.usingAnd(Layer.fromValue(HasStorage)($Fs(fs))),
   Layer.main,
 )

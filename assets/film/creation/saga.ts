@@ -7,7 +7,7 @@ import {
   takeLeading,
 } from 'typed-redux-saga'
 import { $Film, Film } from '../../../app/arcadia/Film'
-import { Id } from '../../../src/Entity'
+import { Id } from '../../../src/entity/Entity'
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { UuidService } from '../../UuidService'
 import { $FilmCreation } from './slice'

@@ -1,28 +1,38 @@
 services:
+  nginx:
+    image: nginx:1.21-alpine
+    links:
+      - browser
+      - web
+    ports:
+      - ${COMPOSE_PORT_NGINX}:8080
+    volumes:
+      - ./config/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+
   browser:
     image: node:16.13-alpine
     user: node
-    ports:
-      - ${COMPOSE_PORT_BROWSER}:8080
+    expose:
+      - 8080
     env_file:
       - ./.env
     working_dir: /dist/
-    entrypoint: ['npm', 'run', 'start-browser', '--', "--client-web-socket-url-port=${COMPOSE_PORT_BROWSER}", '--port=8080']
+    entrypoint: ['npm', 'run', 'start-browser', '--', '--allowed-hosts=all', "--client-web-socket-url-port=${COMPOSE_PORT_NGINX}", '--port=8080']
     volumes:
       - ./:/dist/
 
   web:
     image: node:16.13-alpine
     user: node
-    ports:
-      - ${COMPOSE_PORT_WEB}:8081
+    expose:
+      - 8080
     env_file:
       - ./.env
     environment:
       EVENT_STORE_PATH: '/tmp/eventstore/'
       REPOSITORY_PATH: '/tmp/repository/'
     working_dir: /dist/
-    entrypoint: ['npm', 'run', 'start-web', '8081']
+    entrypoint: ['npm', 'run', 'start-web', '8080']
     volumes:
       - ./:/dist/
       - ./var/eventstore/:/tmp/eventstore/
