@@ -1,9 +1,9 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
+import { $HttpServer } from '../../../../../src/http/server/HttpServer'
 import { $Film, $FilmC } from '../../../Film'
-import { $Fastify } from '../../Fastify'
 
-export const $CreateFilm = $Fastify.post(
+export const $CreateFilm = $HttpServer.post(
   '/api/v1/films',
   {
     body: t.type({
@@ -11,7 +11,7 @@ export const $CreateFilm = $Fastify.post(
     }),
     response: t.type({ data: $FilmC }),
   },
-  async (request) =>
+  (request) =>
     gen(function* (_) {
       const film = yield* _(
         $Film()(request.body.data, {

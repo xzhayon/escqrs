@@ -1,9 +1,9 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
+import { $HttpServer } from '../../../../../src/http/server/HttpServer'
 import { $Screen, $ScreenC } from '../../../Screen'
-import { $Fastify } from '../../Fastify'
 
-export const $CreateScreen = $Fastify.post(
+export const $CreateScreen = $HttpServer.post(
   '/api/v1/screens',
   {
     body: t.type({
@@ -15,7 +15,7 @@ export const $CreateScreen = $Fastify.post(
     }),
     response: t.type({ data: $ScreenC }),
   },
-  async (request) =>
+  (request) =>
     gen(function* (_) {
       const screen = yield* _(
         $Screen()(request.body.data, {

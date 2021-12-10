@@ -1,8 +1,7 @@
-import { Effect, pipe } from '@effect-ts/core'
-import _fastify from 'fastify'
-import fastifyCors from 'fastify-cors'
+import { Effect, Managed, pipe } from '@effect-ts/core'
+import * as Layer from '@effect-ts/system/Layer'
 import { $Layer } from '../../../config/Layer.local'
-import { $Effect } from '../../../src/Effect'
+import { $HttpServer } from '../../../src/http/server/HttpServer'
 import { $CreateFilm } from './film/command/CreateFilm'
 import { $EditFilm } from './film/command/EditFilm'
 import { $RemoveFilm } from './film/command/RemoveFilm'
@@ -14,36 +13,24 @@ import { $RemoveScreen } from './screen/command/RemoveScreen'
 import { $GetScreen } from './screen/query/GetScreen'
 import { $GetScreens } from './screen/query/GetScreens'
 
-const fastify = _fastify()
+pipe(
+  Managed.gen(function* (_) {
+    yield* _($CreateScreen)
+    yield* _($GetScreens)
+    yield* _($GetScreen)
+    yield* _($EditScreen)
+    yield* _($RemoveScreen)
 
-fastify.register(fastifyCors)
+    yield* _($CreateFilm)
+    yield* _($GetFilms)
+    yield* _($GetFilm)
+    yield* _($EditFilm)
+    yield* _($RemoveFilm)
 
-fastify.addHook('preSerialization', async (_request, _reply, payload) =>
-  $Effect.is(payload)
-    ? pipe(payload, Effect.provideLayer($Layer), Effect.runPromise)
-    : payload,
+    yield* _($HttpServer.run)
+  }),
+  Layer.fromRawManaged,
+  Layer.using($Layer),
+  Layer.launch,
+  Effect.runPromise,
 )
-
-fastify.register($CreateScreen)
-fastify.register($GetScreens)
-fastify.register($GetScreen)
-fastify.register($EditScreen)
-fastify.register($RemoveScreen)
-fastify.register($CreateFilm)
-fastify.register($GetFilms)
-fastify.register($GetFilm)
-fastify.register($EditFilm)
-fastify.register($RemoveFilm)
-
-const start = async () => {
-  try {
-    await fastify.listen(process.argv[2] ?? 0, '::')
-    console.log('server started')
-  } catch (error) {
-    console.error('server failed', error)
-    fastify.log.error(error)
-    throw error
-  }
-}
-
-start()
