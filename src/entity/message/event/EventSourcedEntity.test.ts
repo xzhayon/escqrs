@@ -1,5 +1,5 @@
 import { Branded, Option } from '@effect-ts/core'
-import { PartialDeep } from '../../../PartialDeep'
+import { DeepPartial } from '../../../DeepPartial'
 import { Header, Id } from '../../Entity'
 import { $Message } from '../Message'
 import { Event } from './Event'
@@ -20,7 +20,7 @@ const reducer: Reducer<Foo> = (entity, event) =>
 const event = (
   aggregateId: Event['aggregateId'],
   body?: object,
-  header?: PartialDeep<Header<Event>>,
+  header?: DeepPartial<Header<Event>>,
 ): Event =>
   Branded.makeBranded({
     _: {
@@ -37,7 +37,7 @@ const event = (
 
 const entity = (
   id: Id<EventSourcedEntity>,
-  header?: PartialDeep<Header<EventSourcedEntity>>,
+  header?: DeepPartial<Header<EventSourcedEntity>>,
 ): Foo => ({
   _: {
     ...header,

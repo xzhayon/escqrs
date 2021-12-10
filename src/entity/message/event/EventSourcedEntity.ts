@@ -1,7 +1,7 @@
 import { Array as _Array, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { PartialDeep } from '../../../PartialDeep'
+import { DeepPartial } from '../../../DeepPartial'
 import { Body, Header, Id, Type } from '../../Entity'
 import {
   $MutableEntity,
@@ -56,7 +56,7 @@ export const $EventSourcedEntityC = <
 export function $EventSourcedEntity<A extends EventSourcedEntity>(
   type: Type<A>,
 ) {
-  return (body: Body<A>, header?: PartialDeep<Omit<Header<A>, 'type'>>) =>
+  return (body: Body<A>, header?: DeepPartial<Omit<Header<A>, 'type'>>) =>
     gen(function* (_) {
       return yield* _(
         $MutableEntity(type)(body, {
@@ -65,7 +65,7 @@ export function $EventSourcedEntity<A extends EventSourcedEntity>(
             ...header?.events,
             uncommitted: header?.events?.uncommitted ?? [],
           },
-        } as PartialDeep<Omit<Header<A>, 'type'>>),
+        } as DeepPartial<Omit<Header<A>, 'type'>>),
       )
     })
 }

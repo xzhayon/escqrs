@@ -1,7 +1,7 @@
 import { Branded } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { PartialDeep } from '../PartialDeep'
+import { DeepPartial } from '../DeepPartial'
 import { $Uuid } from '../uuid/Uuid'
 
 export interface Entity<
@@ -45,7 +45,7 @@ export type Id<A extends Entity> = Meta<A, 'id'>
 export type Data<A extends Entity, P extends keyof Body<A>> = Body<A>[P]
 
 export function $Entity<A extends Entity>(type: Type<A>) {
-  return (body: Body<A>, header?: PartialDeep<Omit<Header<A>, 'type'>>) =>
+  return (body: Body<A>, header?: DeepPartial<Omit<Header<A>, 'type'>>) =>
     gen(function* (_) {
       const id = header?.id ?? (yield* _($Uuid.v4))
 

@@ -2,7 +2,7 @@ import { Clock } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { DateFromISOString } from 'io-ts-types'
-import { PartialDeep } from '../PartialDeep'
+import { DeepPartial } from '../DeepPartial'
 import { $Entity, $EntityC, Body, Entity, Header, Type } from './Entity'
 
 export interface ImmutableEntity<
@@ -35,12 +35,12 @@ export const $ImmutableEntityC = <
   )
 
 export function $ImmutableEntity<A extends ImmutableEntity>(type: Type<A>) {
-  return (body: Body<A>, header?: PartialDeep<Omit<Header<A>, 'type'>>) =>
+  return (body: Body<A>, header?: DeepPartial<Omit<Header<A>, 'type'>>) =>
     gen(function* (_) {
       const date = header?.date ?? new Date(yield* _(Clock.currentTime))
 
       return yield* _(
-        $Entity(type)(body, { ...header, date } as PartialDeep<
+        $Entity(type)(body, { ...header, date } as DeepPartial<
           Omit<Header<A>, 'type'>
         >),
       )

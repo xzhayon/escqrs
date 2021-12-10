@@ -1,7 +1,7 @@
 import { Branded } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { PartialDeep } from '../../PartialDeep'
+import { DeepPartial } from '../../DeepPartial'
 import { $Uuid } from '../../uuid/Uuid'
 import { Body, Entity, Header, Id, Type } from '../Entity'
 import {
@@ -38,7 +38,7 @@ export const $MessageC = <A extends Entity, T extends t.Type<string>>(
   ])
 
 export function $Message<A extends Message>(type: Type<A>) {
-  return (body: Body<A>, header?: PartialDeep<Omit<Header<A>, 'type'>>) =>
+  return (body: Body<A>, header?: DeepPartial<Omit<Header<A>, 'type'>>) =>
     <B extends Message>(cause?: B) =>
       gen(function* (_) {
         const id = header?.id ?? $Message.id(yield* _($Uuid.v4))
@@ -52,7 +52,7 @@ export function $Message<A extends Message>(type: Type<A>) {
             id,
             correlationId,
             causationId,
-          } as PartialDeep<Omit<Header<A>, 'type'>>),
+          } as DeepPartial<Omit<Header<A>, 'type'>>),
         )
       })
 }

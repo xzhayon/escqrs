@@ -13,7 +13,7 @@ import { $Message } from './entity/message/Message'
 import { $MutableEntity, MutableEntity } from './entity/MutableEntity'
 import { EntityNotFound } from './entity/repository/EntityNotFound'
 import { $Repository } from './entity/repository/Repository'
-import { PartialDeep } from './PartialDeep'
+import { DeepPartial } from './DeepPartial'
 import { WrongEntityVersion } from './WrongEntityVersion'
 
 interface Foo extends EventSourcedEntity<'foo'> {
@@ -32,7 +32,7 @@ const aggregate = $Aggregate<Foo, Event<Foo>>('foo', {
 const event = (
   aggregateId: Event['aggregateId'],
   body?: object,
-  header?: PartialDeep<Header<Event>>,
+  header?: DeepPartial<Header<Event>>,
 ): Event =>
   Branded.makeBranded({
     _: {
@@ -49,7 +49,7 @@ const event = (
 
 const entity = (
   id: Id<EventSourcedEntity>,
-  header?: PartialDeep<Header<EventSourcedEntity>>,
+  header?: DeepPartial<Header<EventSourcedEntity>>,
 ): Foo => ({
   _: {
     ...header,
