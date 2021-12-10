@@ -6,7 +6,8 @@ import { $Effect } from '../../../src/Effect'
 import { $CreateFilm } from './film/command/CreateFilm'
 import { $GetFilms } from './film/query/GetFilms'
 import { $CreateScreen } from './screen/command/CreateScreen'
-import { $UpdateScreen } from './screen/command/UpdateScreen'
+import { $EditScreen } from './screen/command/EditScreen'
+import { $RemoveScreen } from './screen/command/RemoveScreen'
 import { $GetScreen } from './screen/query/GetScreen'
 import { $GetScreens } from './screen/query/GetScreens'
 
@@ -23,7 +24,8 @@ fastify.addHook('preSerialization', async (_request, _reply, payload) =>
 fastify.register($CreateScreen)
 fastify.register($GetScreens)
 fastify.register($GetScreen)
-fastify.register($UpdateScreen)
+fastify.register($EditScreen)
+fastify.register($RemoveScreen)
 fastify.register($CreateFilm)
 fastify.register($GetFilms)
 

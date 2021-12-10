@@ -49,7 +49,7 @@ export const $ScreenEditingSlice = createSlice({
     EditingStarted(state) {
       state.state = 'Editing'
     },
-    NotEdited(state, event: Event<Error>) {
+    NotEdited(state, _event: Event<Error>) {
       state.state = undefined
       state.error = new NotEdited()
     },

@@ -1,4 +1,4 @@
-import { Add, Edit } from '@mui/icons-material'
+import { Add, Delete, Edit } from '@mui/icons-material'
 import {
   Alert,
   Box,
@@ -77,6 +77,7 @@ export const ScreenDashboard: FC = () => {
                     </TableCell>
                     <TableCell align="right">Seats</TableCell>
                     <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -93,9 +94,20 @@ export const ScreenDashboard: FC = () => {
                           <IconButton
                             component={Link}
                             disabled={isLoading}
-                            to={screen.id}
+                            to={`${screen.id}/edit`}
                           >
                             <Edit />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {screen && (
+                          <IconButton
+                            component={Link}
+                            disabled={isLoading}
+                            to={`${screen.id}/remove`}
+                          >
+                            <Delete />
                           </IconButton>
                         )}
                       </TableCell>

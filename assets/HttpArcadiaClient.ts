@@ -100,6 +100,17 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
+    removeScreen: (id) =>
+      pipe(
+        $HttpClient.delete(`${url}/api/v1/screens/${id}`, {
+          json: true,
+        }),
+        Effect.asUnit,
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
     createFilm: (film) =>
       pipe(
         gen(function* (_) {
@@ -171,6 +182,15 @@ export const $HttpArcadiaClient =
 
           return body.data
         }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    removeFilm: (id) =>
+      pipe(
+        $HttpClient.delete(`${url}/api/v1/films/${id}`, { json: true }),
+        Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
         Effect.provideService(HasLogger)($logger),

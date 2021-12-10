@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $Screen, $ScreenC } from '../../../Screen'
 import { $Fastify } from '../../Fastify'
 
-export const $UpdateScreen = $Fastify.patch(
+export const $EditScreen = $Fastify.patch(
   '/api/v1/screens/:id',
   {
     body: t.type({

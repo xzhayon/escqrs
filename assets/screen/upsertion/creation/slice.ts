@@ -26,7 +26,7 @@ export const $ScreenCreationSlice = createSlice({
     CreationStarted(state) {
       state.state = 'Creating'
     },
-    NotCreated(state, event: Event<Error>) {
+    NotCreated(state, _event: Event<Error>) {
       state.state = undefined
       state.error = new NotCreated()
     },
