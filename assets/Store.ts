@@ -4,8 +4,9 @@ import { $Context } from './Context'
 import { $FilmCreationSlice } from './film/creation/slice'
 import { $FilmDashboardSlice } from './film/dashboard/slice'
 import { $Saga } from './Saga'
-import { $ScreenCreationSlice } from './screen/creation/slice'
 import { $ScreenDashboardSlice } from './screen/dashboard/slice'
+import { $ScreenCreationSlice } from './screen/upsertion/creation/slice'
+import { $ScreenEditingSlice } from './screen/upsertion/editing/slice'
 
 const sagaMiddleware = createSagaMiddleware({ context: $Context })
 
@@ -13,6 +14,7 @@ export const $Store = configureStore({
   reducer: {
     [$ScreenDashboardSlice.name]: $ScreenDashboardSlice.reducer,
     [$ScreenCreationSlice.name]: $ScreenCreationSlice.reducer,
+    [$ScreenEditingSlice.name]: $ScreenEditingSlice.reducer,
     [$FilmDashboardSlice.name]: $FilmDashboardSlice.reducer,
     [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
   },

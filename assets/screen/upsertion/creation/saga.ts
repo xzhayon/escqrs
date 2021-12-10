@@ -6,14 +6,14 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $Screen, Screen } from '../../../app/arcadia/Screen'
-import { Id } from '../../../src/entity/Entity'
-import { ArcadiaClient } from '../../ArcadiaClient'
-import { UuidService } from '../../UuidService'
+import { $Screen, Screen } from '../../../../app/arcadia/Screen'
+import { Id } from '../../../../src/entity/Entity'
+import { ArcadiaClient } from '../../../ArcadiaClient'
+import { UuidService } from '../../../UuidService'
 import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
-  function* (command: ReturnType<typeof $ScreenCreation['Create']>) {
+  function* (command: ReturnType<typeof $ScreenCreation.Create>) {
     yield* put($ScreenCreation.CreationStarted())
     try {
       const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')

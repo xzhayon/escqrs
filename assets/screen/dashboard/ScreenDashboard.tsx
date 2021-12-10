@@ -1,10 +1,11 @@
-import { Add } from '@mui/icons-material'
+import { Add, Edit } from '@mui/icons-material'
 import {
   Alert,
   Box,
   Button,
   Fab,
   Grid,
+  IconButton,
   Paper,
   Skeleton,
   Snackbar,
@@ -75,6 +76,7 @@ export const ScreenDashboard: FC = () => {
                       Name
                     </TableCell>
                     <TableCell align="right">Seats</TableCell>
+                    <TableCell align="right"></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -85,6 +87,17 @@ export const ScreenDashboard: FC = () => {
                       </TableCell>
                       <TableCell align="right">
                         {screen ? screen.seats : <Skeleton variant="text" />}
+                      </TableCell>
+                      <TableCell align="right">
+                        {screen && (
+                          <IconButton
+                            component={Link}
+                            disabled={isLoading}
+                            to={screen.id}
+                          >
+                            <Edit />
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

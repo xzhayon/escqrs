@@ -7,6 +7,7 @@ import { $CreateFilm } from './command/CreateFilm'
 import { $CreateScreen } from './command/CreateScreen'
 import { $UpdateScreen } from './command/UpdateScreen'
 import { $GetFilms } from './query/GetFilms'
+import { $GetScreen } from './query/GetScreen'
 import { $GetScreens } from './query/GetScreens'
 
 const fastify = _fastify()
@@ -21,6 +22,7 @@ fastify.addHook('preSerialization', async (_request, _reply, payload) =>
 
 fastify.register($CreateScreen)
 fastify.register($GetScreens)
+fastify.register($GetScreen)
 fastify.register($UpdateScreen)
 fastify.register($CreateFilm)
 fastify.register($GetFilms)

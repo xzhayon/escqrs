@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Screen } from '../../../app/arcadia/Screen'
-import { Command, Event } from '../../Message'
+import { Screen } from '../../../../app/arcadia/Screen'
+import { Command, Event } from '../../../Message'
 
 export interface ScreenCreationState {
-  isLoading?: boolean
+  state?: 'Creating'
   error?: Error
 }
 
@@ -24,18 +24,25 @@ export const $ScreenCreationSlice = createSlice({
     Stop() {},
     Started() {},
     CreationStarted(state) {
-      state.isLoading = true
+      state.state = 'Creating'
     },
     NotCreated(state, event: Event<Error>) {
-      state.isLoading = false
-      state.error = event.payload
+      state.state = undefined
+      state.error = new NotCreated()
     },
     Created(state, _event: Event<Screen>) {
-      state.isLoading = false
+      state.state = undefined
       state.error = undefined
     },
-    Stopped() {},
+    Stopped: () => initialState,
   },
 })
 
 export const $ScreenCreation = $ScreenCreationSlice.actions
+
+export class NotCreated extends Error {
+  constructor() {
+    super()
+    Object.setPrototypeOf(this, NotCreated.prototype)
+  }
+}

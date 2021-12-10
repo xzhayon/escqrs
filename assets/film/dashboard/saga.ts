@@ -9,7 +9,7 @@ import {
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $FilmDashboard } from './slice'
 
-function* fetchList(command: ReturnType<typeof $FilmDashboard['FetchList']>) {
+function* fetchList(command: ReturnType<typeof $FilmDashboard.FetchList>) {
   yield* put($FilmDashboard.ListFetchingStarted())
   try {
     const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')

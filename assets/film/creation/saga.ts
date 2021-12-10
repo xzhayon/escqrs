@@ -13,7 +13,7 @@ import { UuidService } from '../../UuidService'
 import { $FilmCreation } from './slice'
 
 const createFilm = (filmId: Id<Film>) =>
-  function* (command: ReturnType<typeof $FilmCreation['Create']>) {
+  function* (command: ReturnType<typeof $FilmCreation.Create>) {
     yield* put($FilmCreation.CreationStarted())
     try {
       const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
