@@ -14,9 +14,7 @@ export const $CreateFilm = $HttpServer.post(
   (request) =>
     gen(function* (_) {
       const film = yield* _(
-        $Film()(request.body.data, {
-          id: $Film.id(request.body.data._.id),
-        }),
+        $Film()(request.body.data, { id: $Film.id(request.body.data._.id) }),
       )
       yield* _($Film.save(film))
 
