@@ -34,7 +34,7 @@ describe('Repository', () => {
         pipe(
           $Layer,
           Layer.and(
-            Layer.fromManaged(HasRepository)(
+            Layer.fromEffect(HasRepository)(
               $StorageRepository(resolve(tmpdir(), `repository.${seed}`)),
             ),
           ),

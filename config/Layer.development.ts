@@ -56,7 +56,7 @@ export const $Layer = pipe(
           Layer.fromManaged(HasHttpServer)(
             $FastifyHttpServer(fastify, HTTP_PORT, HTTP_ADDRESS),
           ),
-          Layer.fromManaged(HasRepository)($StorageRepository(REPOSITORY_PATH)),
+          Layer.fromEffect(HasRepository)($StorageRepository(REPOSITORY_PATH)),
         ),
         Layer.usingAnd(Layer.fromValue(HasLogger)($Console(true))),
         Layer.usingAnd(Layer.fromValue(HasStorage)($Fs(fs))),

@@ -21,11 +21,11 @@ const CHANNEL = 'InMemoryRepository'
 export const $InMemoryRepository = pipe(
   gen(function* (_) {
     const entities = yield* _(
-      Ref.makeRef(Record.empty as Record.Dictionary<Record.Dictionary<Entity>>),
+      Ref.makeRef<Record.Dictionary<Record.Dictionary<Entity>>>(Record.empty),
     )
 
     yield* _(
-      $Logger.debug('Connection to in-memory repository opened', {
+      $Logger.debug('Repository created', {
         entitiesCount: 0,
         channel: CHANNEL,
       }),
@@ -121,14 +121,16 @@ export const $InMemoryRepository = pipe(
         }),
     }
 
-    return { ...repository, entities }
+    return { repository, _entities: entities }
   }),
-  Managed.make(({ entities }) =>
+  Managed.make(({ _entities }) =>
     gen(function* (_) {
+      const entities = yield* _(_entities.get)
+      yield* _(_entities.set(Record.empty))
       yield* _(
-        $Logger.debug('Connection to in-memory repository closed', {
+        $Logger.debug('Repository destroyed', {
           entitiesCount: pipe(
-            yield* _(entities.get),
+            entities,
             Record.reduce(0, (count, type) => count + Record.size(type)),
           ),
           channel: CHANNEL,
@@ -136,5 +138,5 @@ export const $InMemoryRepository = pipe(
       )
     }),
   ),
-  Managed.map(({ entities, ...repository }) => repository),
+  Managed.map(({ repository }) => repository),
 )

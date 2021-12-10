@@ -8,7 +8,7 @@ import {
   Ref,
 } from '@effect-ts/core'
 import { HasClock } from '@effect-ts/system/Clock'
-import { flow } from '@effect-ts/system/Function'
+import { gen } from '@effect-ts/system/Effect'
 import { HasRandom } from '@effect-ts/system/Random'
 import EventEmitter from 'events'
 import { join } from 'path'
@@ -59,7 +59,12 @@ export const $StorageEventStore = (
 ) =>
   pipe(
     Effect.do,
-    Effect.let('_emitter', emitter),
+    Effect.bind('_emitter', () =>
+      Effect.tryCatch(
+        emitter,
+        $Error.fromUnknown(Error('Cannot create event emitter instance')),
+      ),
+    ),
     Effect.bindAllPar(() => ({
       handlers: Ref.makeRef(Array.emptyOf<EventHandler>()),
       writable: !replay
@@ -93,13 +98,13 @@ export const $StorageEventStore = (
     })),
     Effect.tapBoth(
       (error) =>
-        $Logger.error('Connection to storage event store failed', {
+        $Logger.error('Event store not opened', {
           storagePath: location,
           error,
           channel: CHANNEL,
         }),
       ({ __pointer }) =>
-        $Logger.debug('Connection to storage event store opened', {
+        $Logger.debug('Event store opened', {
           storagePath: location,
           pointer: __pointer,
           channel: CHANNEL,
@@ -254,21 +259,22 @@ export const $StorageEventStore = (
           ),
         }
 
-        return { ...eventStore, pointer }
+        return { eventStore, _emitter, _handlers: handlers, _pointer: pointer }
       },
     ),
-    Managed.make(
-      flow(
-        Effect.succeed,
-        Effect.bindAllPar(({ pointer }) => ({ _pointer: pointer.get })),
-        Effect.tap(({ _pointer }) =>
-          $Logger.debug('Connection to storage event store closed', {
+    Managed.make(({ _emitter, _handlers, _pointer }) =>
+      gen(function* (_) {
+        _emitter.removeAllListeners()
+        yield* _(_handlers.set(Array.empty))
+        yield* _(
+          $Logger.debug('Event store closed', {
             storagePath: location,
-            pointer: _pointer,
+            pointer: yield* _(_pointer.get),
             channel: CHANNEL,
           }),
-        ),
-        Effect.delay(100),
-      ),
+        )
+        yield* _(Effect.sleep(100))
+      }),
     ),
+    Managed.map(({ eventStore }) => eventStore),
   )
