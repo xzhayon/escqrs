@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:1.21-alpine
+    restart: on-failure
     links:
       - browser
       - web
@@ -12,6 +13,7 @@ services:
   browser:
     image: node:16.13-alpine
     user: node
+    restart: on-failure
     expose:
       - 8080
     env_file:
@@ -24,6 +26,7 @@ services:
   web:
     image: node:16.13-alpine
     user: node
+    restart: on-failure
     expose:
       - 8080
     env_file:

@@ -1,8 +1,8 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { $Repository } from '../../../../src/entity/repository/Repository'
-import { $ScreenC, Screen } from '../../Screen'
-import { $Fastify } from '../Fastify'
+import { $Repository } from '../../../../../src/entity/repository/Repository'
+import { $ScreenC, Screen } from '../../../Screen'
+import { $Fastify } from '../../Fastify'
 
 export const $GetScreens = $Fastify.get(
   '/api/v1/screens',

@@ -17,7 +17,7 @@ const fetchDetail = (screenId: Id<Screen>) =>
   function* (command: ReturnType<typeof $ScreenEditing.FetchDetail>) {
     yield* put($ScreenEditing.DetailFetchingStarted())
     try {
-      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       const screen = yield* call(arcadiaClient.getScreen, screenId)
       yield* put($ScreenEditing.DetailFetched(screen))
       command.payload?.onSuccess &&
@@ -33,7 +33,7 @@ const editScreen = (screenId: Id<Screen>) =>
   function* (command: ReturnType<typeof $ScreenEditing.Edit>) {
     yield* put($ScreenEditing.EditingStarted())
     try {
-      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       const screen = yield* call(arcadiaClient.editScreen, {
         _: { id: screenId },
         name: command.payload.name,

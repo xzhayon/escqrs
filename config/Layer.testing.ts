@@ -13,7 +13,7 @@ import { HasLogger } from '../src/logger/Logger'
 import { $NilLogger } from '../src/logger/NilLogger'
 import { $Fs } from '../src/storage/Fs'
 import { HasStorage } from '../src/storage/Storage'
-import { $Rfc4122 } from '../src/uuid/Rfc4122'
+import { $Rfc4122Uuid } from '../src/uuid/Rfc4122Uuid'
 import { HasUuid } from '../src/uuid/Uuid'
 
 export const $Layer = pipe(
@@ -26,7 +26,7 @@ export const $Layer = pipe(
       $InMemoryServiceBus(() => new EventEmitter()),
     ),
     Layer.fromValue(HasStorage)($Fs(fs as unknown as typeof _fs)),
-    Layer.fromValue(HasUuid)($Rfc4122),
+    Layer.fromValue(HasUuid)($Rfc4122Uuid),
   ),
   Layer.usingAnd(Layer.fromValue(HasLogger)($NilLogger)),
   Layer.main,

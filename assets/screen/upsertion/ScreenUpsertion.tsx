@@ -88,7 +88,21 @@ export const ScreenUpsertion: FC = () => {
             <Grid container spacing={2}>
               {error && (
                 <Grid item xs={12}>
-                  <Alert severity="error">
+                  <Alert
+                    action={
+                      error instanceof DetailNotFetched ? (
+                        <Button
+                          color="inherit"
+                          disabled={'FetchingDetail' === state}
+                          size="small"
+                          onClick={() => dispatch($ScreenEditing.FetchDetail())}
+                        >
+                          Retry
+                        </Button>
+                      ) : null
+                    }
+                    severity="error"
+                  >
                     {error instanceof NotCreated
                       ? 'Cannot create screen.'
                       : error instanceof DetailNotFetched

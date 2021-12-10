@@ -9,14 +9,14 @@ import {
 import { $Screen, Screen } from '../../../../app/arcadia/Screen'
 import { Id } from '../../../../src/entity/Entity'
 import { ArcadiaClient } from '../../../ArcadiaClient'
-import { UuidService } from '../../../UuidService'
+import { Uuid } from '../../../uuid/Uuid'
 import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
   function* (command: ReturnType<typeof $ScreenCreation.Create>) {
     yield* put($ScreenCreation.CreationStarted())
     try {
-      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       const date = new Date()
       const screen: Screen = {
         _: {
@@ -42,11 +42,11 @@ const createScreen = (screenId: Id<Screen>) =>
 export function* $ScreenCreationSaga() {
   yield* takeLeading($ScreenCreation.Start.type, function* () {
     yield* put($ScreenCreation.Started())
-    const uuidService: UuidService = yield getContext('uuidService')
-    const uuid = yield* call(uuidService.v4)
+    const uuid = yield* getContext<Uuid>('uuid')
+    const id = yield* call(uuid.v4)
     const task = yield* takeLeading(
       $ScreenCreation.Create.type,
-      createScreen($Screen.id(uuid)),
+      createScreen($Screen.id(id)),
     )
     yield* take($ScreenCreation.Stop.type)
     yield* cancel(task)

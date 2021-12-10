@@ -9,14 +9,14 @@ import {
 import { $Film, Film } from '../../../app/arcadia/Film'
 import { Id } from '../../../src/entity/Entity'
 import { ArcadiaClient } from '../../ArcadiaClient'
-import { UuidService } from '../../UuidService'
+import { Uuid } from '../../uuid/Uuid'
 import { $FilmCreation } from './slice'
 
 const createFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmCreation.Create>) {
     yield* put($FilmCreation.CreationStarted())
     try {
-      const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       const date = new Date()
       const film: Film = {
         _: {
@@ -41,11 +41,11 @@ const createFilm = (filmId: Id<Film>) =>
 export function* $FilmCreationSaga() {
   yield* takeLeading($FilmCreation.Start.type, function* () {
     yield* put($FilmCreation.Started())
-    const uuidService: UuidService = yield getContext('uuidService')
-    const uuid = yield* call(uuidService.v4)
+    const uuid = yield* getContext<Uuid>('uuid')
+    const id = yield* call(uuid.v4)
     const task = yield* takeLeading(
       $FilmCreation.Create.type,
-      createFilm($Film.id(uuid)),
+      createFilm($Film.id(id)),
     )
     yield* take($FilmCreation.Stop.type)
     yield* cancel(task)

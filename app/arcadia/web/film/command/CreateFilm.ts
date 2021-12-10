@@ -1,7 +1,7 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { $Film, $FilmC } from '../../Film'
-import { $Fastify } from '../Fastify'
+import { $Film, $FilmC } from '../../../Film'
+import { $Fastify } from '../../Fastify'
 
 export const $CreateFilm = $Fastify.post(
   '/api/v1/films',

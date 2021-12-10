@@ -6,12 +6,12 @@ import { $ScreenEditing } from './upsertion/editing/slice'
 import { $ScreenUpsertionSaga } from './upsertion/saga'
 
 function* coordinate() {
-  yield* takeLatest($ScreenCreation.Created.type, function* () {
-    yield* put($ScreenDashboard.FetchList())
-  })
-  yield* takeLatest($ScreenEditing.Edited.type, function* () {
-    yield* put($ScreenDashboard.FetchList())
-  })
+  yield* takeLatest(
+    [$ScreenCreation.Created.type, $ScreenEditing.Edited.type],
+    function* () {
+      yield* put($ScreenDashboard.FetchList())
+    },
+  )
 }
 
 export function* $ScreenSaga() {

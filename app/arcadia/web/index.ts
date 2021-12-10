@@ -3,12 +3,12 @@ import _fastify from 'fastify'
 import fastifyCors from 'fastify-cors'
 import { $Layer } from '../../../config/Layer.local'
 import { $Effect } from '../../../src/Effect'
-import { $CreateFilm } from './command/CreateFilm'
-import { $CreateScreen } from './command/CreateScreen'
-import { $UpdateScreen } from './command/UpdateScreen'
-import { $GetFilms } from './query/GetFilms'
-import { $GetScreen } from './query/GetScreen'
-import { $GetScreens } from './query/GetScreens'
+import { $CreateFilm } from './film/command/CreateFilm'
+import { $GetFilms } from './film/query/GetFilms'
+import { $CreateScreen } from './screen/command/CreateScreen'
+import { $UpdateScreen } from './screen/command/UpdateScreen'
+import { $GetScreen } from './screen/query/GetScreen'
+import { $GetScreens } from './screen/query/GetScreens'
 
 const fastify = _fastify()
 

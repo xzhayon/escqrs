@@ -12,7 +12,7 @@ import { $FilmDashboard } from './slice'
 function* fetchList(command: ReturnType<typeof $FilmDashboard.FetchList>) {
   yield* put($FilmDashboard.ListFetchingStarted())
   try {
-    const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+    const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
     const films = yield* call(arcadiaClient.getFilms)
     yield* put($FilmDashboard.ListFetched(films))
     command.payload?.onSuccess &&

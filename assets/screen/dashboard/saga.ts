@@ -12,7 +12,7 @@ import { $ScreenDashboard } from './slice'
 function* fetchList(command: ReturnType<typeof $ScreenDashboard.FetchList>) {
   yield* put($ScreenDashboard.ListFetchingStarted())
   try {
-    const arcadiaClient: ArcadiaClient = yield getContext('arcadiaClient')
+    const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
     const screens = yield* call(arcadiaClient.getScreens)
     yield* put($ScreenDashboard.ListFetched(screens))
     command.payload?.onSuccess &&
