@@ -5,7 +5,9 @@ import { DeepPartial } from '../src/DeepPartial'
 import { Body, Header, Id } from '../src/entity/Entity'
 
 export interface ArcadiaClient {
-  readonly createScreen: (screen: Screen) => Promise<Screen>
+  readonly createScreen: (
+    screen: { _: Pick<Header<Screen>, 'id'> } & Body<Screen>,
+  ) => Promise<Screen>
   readonly getScreens: () => Promise<Array.Array<Screen>>
   readonly getScreen: (id: Id<Screen>) => Promise<Screen>
   readonly editScreen: (

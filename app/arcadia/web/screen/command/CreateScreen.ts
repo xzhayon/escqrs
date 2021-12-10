@@ -5,11 +5,25 @@ import { $Fastify } from '../../Fastify'
 
 export const $CreateScreen = $Fastify.post(
   '/api/v1/screens',
-  { body: t.type({ data: $ScreenC }), response: t.type({ data: $ScreenC }) },
+  {
+    body: t.type({
+      data: t.strict({
+        _: t.strict({ id: t.string }),
+        name: t.string,
+        seats: t.type({ rows: t.number, columns: t.number }),
+      }),
+    }),
+    response: t.type({ data: $ScreenC }),
+  },
   async (request) =>
     gen(function* (_) {
-      yield* _($Screen.save(request.body.data))
+      const screen = yield* _(
+        $Screen()(request.body.data, {
+          id: $Screen.id(request.body.data._.id),
+        }),
+      )
+      yield* _($Screen.save(screen))
 
-      return { data: yield* _($Screen.load(request.body.data._.id)) }
+      return { data: yield* _($Screen.load(screen._.id)) }
     }),
 )

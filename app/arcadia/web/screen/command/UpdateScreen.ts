@@ -19,8 +19,7 @@ export const $UpdateScreen = $Fastify.patch(
   },
   async (request) =>
     gen(function* (_) {
-      const id = $Screen.id(request.params.id)
-      const screen = yield* _($Screen.load(id))
+      const screen = yield* _($Screen.load($Screen.id(request.params.id)))
       const _screen = {
         ...screen,
         ...request.body.data,
@@ -28,6 +27,6 @@ export const $UpdateScreen = $Fastify.patch(
       }
       yield* _($Screen.save(_screen))
 
-      return { data: yield* _($Screen.load(id)) }
+      return { data: yield* _($Screen.load(screen._.id)) }
     }),
 )
