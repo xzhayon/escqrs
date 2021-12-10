@@ -1,10 +1,11 @@
-import { Add } from '@mui/icons-material'
+import { Add, Delete, Edit } from '@mui/icons-material'
 import {
   Alert,
   Box,
   Button,
   Fab,
   Grid,
+  IconButton,
   Paper,
   Skeleton,
   Snackbar,
@@ -19,8 +20,8 @@ import {
 import React, { FC, useEffect } from 'react'
 import { Outlet } from 'react-router'
 import { Link } from 'react-router-dom'
-import { $FilmDashboard, $FilmDashboardSlice } from './slice'
 import { use$Dispatch, use$Selector } from '../../Hook'
+import { $FilmDashboard, $FilmDashboardSlice } from './slice'
 
 export const FilmDashboard: FC = () => {
   const dispatch = use$Dispatch()
@@ -69,7 +70,9 @@ export const FilmDashboard: FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Title</TableCell>
+                    <TableCell sx={{ width: '100%' }}>Title</TableCell>
+                    <TableCell align="right"></TableCell>
+                    <TableCell align="right"></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -77,6 +80,28 @@ export const FilmDashboard: FC = () => {
                     <TableRow key={i}>
                       <TableCell>
                         {film ? film.title : <Skeleton variant="text" />}
+                      </TableCell>
+                      <TableCell align="right">
+                        {film && (
+                          <IconButton
+                            component={Link}
+                            disabled={isLoading}
+                            to={`${film.id}/edit`}
+                          >
+                            <Edit />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {film && (
+                          <IconButton
+                            component={Link}
+                            disabled={isLoading}
+                            to={`${film.id}/remove`}
+                          >
+                            <Delete />
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

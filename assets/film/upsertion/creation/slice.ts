@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Film } from '../../../app/arcadia/Film'
-import { Command, Event } from '../../Message'
+import { Film } from '../../../../app/arcadia/Film'
+import { Command, Event } from '../../../Message'
 
 export interface FilmCreationState {
-  isLoading?: boolean
+  state?: 'Creating'
   error?: Error
 }
 
@@ -18,14 +18,14 @@ export const $FilmCreationSlice = createSlice({
     Stop() {},
     Started() {},
     CreationStarted(state) {
-      state.isLoading = true
+      state.state = 'Creating'
     },
-    NotCreated(state, event: Event<Error>) {
-      state.isLoading = false
-      state.error = event.payload
+    NotCreated(state, _event: Event<Error>) {
+      state.state = undefined
+      state.error = new NotCreated()
     },
     Created(state, _event: Event<Film>) {
-      state.isLoading = false
+      state.state = undefined
       state.error = undefined
     },
     Stopped: () => initialState,
@@ -33,3 +33,10 @@ export const $FilmCreationSlice = createSlice({
 })
 
 export const $FilmCreation = $FilmCreationSlice.actions
+
+export class NotCreated extends Error {
+  constructor() {
+    super()
+    Object.setPrototypeOf(this, NotCreated.prototype)
+  }
+}

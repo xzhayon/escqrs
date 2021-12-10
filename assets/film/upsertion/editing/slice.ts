@@ -1,33 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Screen } from '../../../../app/arcadia/Screen'
+import { Film } from '../../../../app/arcadia/Film'
 import { Id } from '../../../../src/entity/Entity'
 import { Command, Event } from '../../../Message'
 
-export interface ScreenEditingState {
+export interface FilmEditingState {
   state?: 'FetchingDetail' | 'Editing'
   error?: Error
-  screen?: {
-    id: Id<Screen>
-    name: string
-    seats: { rows: number; columns: number }
-  }
+  film?: { id: Id<Film>; title: string }
 }
 
-const initialState: ScreenEditingState = {}
+const initialState: FilmEditingState = {}
 
-export const $ScreenEditingSlice = createSlice({
-  name: 'ScreenEditing',
+export const $FilmEditingSlice = createSlice({
+  name: 'FilmEditing',
   initialState,
   reducers: {
-    Start(_, _command: Command<{ id: Id<Screen> }>) {},
-    FetchDetail(_, _command: Command<void, Screen>) {},
-    Edit(
-      _,
-      _command: Command<
-        { name: string; seats: { rows: number; columns: number } },
-        Screen
-      >,
-    ) {},
+    Start(_, _command: Command<{ id: Id<Film> }>) {},
+    FetchDetail(_, _command: Command<void, Film>) {},
+    Edit(_, _command: Command<{ title: string }, Film>) {},
     Stop() {},
     Started() {},
     DetailFetchingStarted(state) {
@@ -37,14 +27,10 @@ export const $ScreenEditingSlice = createSlice({
       state.state = undefined
       state.error = new DetailNotFetched()
     },
-    DetailFetched(state, event: Event<Screen>) {
+    DetailFetched(state, event: Event<Film>) {
       state.state = undefined
       state.error = undefined
-      state.screen = {
-        id: event.payload._.id,
-        name: event.payload.name,
-        seats: event.payload.seats,
-      }
+      state.film = { id: event.payload._.id, title: event.payload.title }
     },
     EditingStarted(state) {
       state.state = 'Editing'
@@ -53,7 +39,7 @@ export const $ScreenEditingSlice = createSlice({
       state.state = undefined
       state.error = new NotEdited()
     },
-    Edited(state, _event: Event<Screen>) {
+    Edited(state, _event: Event<Film>) {
       state.state = undefined
       state.error = undefined
     },
@@ -61,7 +47,7 @@ export const $ScreenEditingSlice = createSlice({
   },
 })
 
-export const $ScreenEditing = $ScreenEditingSlice.actions
+export const $FilmEditing = $FilmEditingSlice.actions
 
 export class DetailNotFetched extends Error {
   constructor() {

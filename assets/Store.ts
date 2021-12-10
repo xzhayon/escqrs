@@ -1,8 +1,10 @@
 import { configureStore, isPlain } from '@reduxjs/toolkit'
 import createSagaMiddleware from 'redux-saga'
 import { $Context } from './Context'
-import { $FilmCreationSlice } from './film/creation/slice'
 import { $FilmDashboardSlice } from './film/dashboard/slice'
+import { $FilmRemovalSlice } from './film/removal/slice'
+import { $FilmCreationSlice } from './film/upsertion/creation/slice'
+import { $FilmEditingSlice } from './film/upsertion/editing/slice'
 import { $Saga } from './Saga'
 import { $ScreenDashboardSlice } from './screen/dashboard/slice'
 import { $ScreenRemovalSlice } from './screen/removal/slice'
@@ -19,6 +21,8 @@ export const $Store = configureStore({
     [$ScreenRemovalSlice.name]: $ScreenRemovalSlice.reducer,
     [$FilmDashboardSlice.name]: $FilmDashboardSlice.reducer,
     [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
+    [$FilmEditingSlice.name]: $FilmEditingSlice.reducer,
+    [$FilmRemovalSlice.name]: $FilmRemovalSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

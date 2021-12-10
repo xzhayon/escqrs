@@ -23,9 +23,9 @@ export const $ScreenDashboardSlice = createSlice({
     ListFetchingStarted(state) {
       state.isLoading = true
     },
-    ListNotFetched(state, event: Event<Error>) {
+    ListNotFetched(state, _event: Event<Error>) {
       state.isLoading = false
-      state.error = event.payload
+      state.error = new ListNotFetched()
     },
     ListFetched(state, event: Event<Array.Array<Screen>>) {
       state.isLoading = false
@@ -41,3 +41,10 @@ export const $ScreenDashboardSlice = createSlice({
 })
 
 export const $ScreenDashboard = $ScreenDashboardSlice.actions
+
+export class ListNotFetched extends Error {
+  constructor() {
+    super()
+    Object.setPrototypeOf(this, ListNotFetched.prototype)
+  }
+}

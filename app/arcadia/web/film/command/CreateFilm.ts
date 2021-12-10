@@ -5,11 +5,21 @@ import { $Fastify } from '../../Fastify'
 
 export const $CreateFilm = $Fastify.post(
   '/api/v1/films',
-  { body: t.type({ data: $FilmC }), response: t.type({ data: $FilmC }) },
+  {
+    body: t.type({
+      data: t.strict({ _: t.strict({ id: t.string }), title: t.string }),
+    }),
+    response: t.type({ data: $FilmC }),
+  },
   async (request) =>
     gen(function* (_) {
-      yield* _($Film.save(request.body.data))
+      const film = yield* _(
+        $Film()(request.body.data, {
+          id: $Film.id(request.body.data._.id),
+        }),
+      )
+      yield* _($Film.save(film))
 
-      return { data: yield* _($Film.load(request.body.data._.id)) }
+      return { data: yield* _($Film.load(film._.id)) }
     }),
 )

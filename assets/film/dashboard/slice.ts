@@ -23,9 +23,9 @@ export const $FilmDashboardSlice = createSlice({
     ListFetchingStarted(state) {
       state.isLoading = true
     },
-    ListNotFetched(state, event: Event<Error>) {
+    ListNotFetched(state, _event: Event<Error>) {
       state.isLoading = false
-      state.error = event.payload
+      state.error = new ListNotFetched()
     },
     ListFetched(state, event: Event<Array.Array<Film>>) {
       state.isLoading = false
@@ -40,3 +40,10 @@ export const $FilmDashboardSlice = createSlice({
 })
 
 export const $FilmDashboard = $FilmDashboardSlice.actions
+
+export class ListNotFetched extends Error {
+  constructor() {
+    super()
+    Object.setPrototypeOf(this, ListNotFetched.prototype)
+  }
+}

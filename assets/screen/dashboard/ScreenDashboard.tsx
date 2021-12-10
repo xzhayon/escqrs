@@ -72,9 +72,7 @@ export const ScreenDashboard: FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ width: 'calc(100% * 2 / 3)' }}>
-                      Name
-                    </TableCell>
+                    <TableCell sx={{ width: '100%' }}>Name</TableCell>
                     <TableCell align="right">Seats</TableCell>
                     <TableCell align="right"></TableCell>
                     <TableCell align="right"></TableCell>

@@ -20,7 +20,7 @@ export interface ArcadiaClient {
   readonly getFilms: () => Promise<Array.Array<Film>>
   readonly getFilm: (id: Id<Film>) => Promise<Film>
   readonly editFilm: (
-    film: { _: Pick<Header<Film>, 'id'> } & DeepPartial<Film>,
+    film: { _: Pick<Header<Film>, 'id'> } & DeepPartial<Body<Film>>,
   ) => Promise<Film>
   readonly removeFilm: (id: Id<Film>) => Promise<void>
 }

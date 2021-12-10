@@ -6,10 +6,10 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $Film, Film } from '../../../app/arcadia/Film'
-import { Id } from '../../../src/entity/Entity'
-import { ArcadiaClient } from '../../ArcadiaClient'
-import { Uuid } from '../../uuid/Uuid'
+import { $Film, Film } from '../../../../app/arcadia/Film'
+import { Id } from '../../../../src/entity/Entity'
+import { ArcadiaClient } from '../../../ArcadiaClient'
+import { Uuid } from '../../../uuid/Uuid'
 import { $FilmCreation } from './slice'
 
 const createFilm = (filmId: Id<Film>) =>
