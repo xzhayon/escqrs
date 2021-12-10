@@ -69,9 +69,15 @@ const route =
   async (instance: FastifyInstance<RawServer, any, any>) => {
     const _handler: typeof handler = async (request, reply) =>
       gen(function* (_) {
-        yield* _($Any.decode(schema.body ?? t.unknown)(request.body))
-        yield* _($Any.decode(schema.querystring ?? t.unknown)(request.query))
-        yield* _($Any.decode(schema.params ?? t.unknown)(request.params))
+        request.body = yield* _(
+          $Any.decode(schema.body ?? t.unknown)(request.body),
+        )
+        request.query = yield* _(
+          $Any.decode(schema.querystring ?? t.unknown)(request.query),
+        )
+        request.params = yield* _(
+          $Any.decode(schema.params ?? t.unknown)(request.params),
+        )
         yield* _($Any.decode(schema.headers ?? t.unknown)(request.headers))
 
         const promise = handler.call(instance, request, reply)
