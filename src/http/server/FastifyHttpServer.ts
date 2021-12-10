@@ -1,17 +1,18 @@
 import { Effect, Function, Managed, pipe } from '@effect-ts/core'
-import { HasClock } from '@effect-ts/system/Clock'
+import { Clock, HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { FastifyInstance } from 'fastify'
 import * as t from 'io-ts'
 import { $Any } from '../../Any'
 import { $Error } from '../../Error'
-import { $Logger, HasLogger } from '../../logger/Logger'
+import { $Logger, HasLogger, Logger } from '../../logger/Logger'
 import { HttpMethod } from '../Http'
 import { HttpServer, HttpServerHandler, HttpServerRoute } from './HttpServer'
 
 const CHANNEL = 'FastifyHttpServer'
 
 const route =
+  ($clock: Clock, $logger: Logger) =>
   (fastify: FastifyInstance, method: HttpMethod): HttpServerRoute =>
   <
     R,
@@ -53,6 +54,23 @@ const route =
 
                   return yield* _(handler(request))
                 }),
+                Effect.tapBoth(
+                  (error) =>
+                    $Logger.error('HTTP request not handled', {
+                      method: method.toUpperCase(),
+                      path,
+                      error,
+                      channel: CHANNEL,
+                    }),
+                  () =>
+                    $Logger.debug('HTTP request handled', {
+                      method: method.toUpperCase(),
+                      path,
+                      channel: CHANNEL,
+                    }),
+                ),
+                Effect.provideService(HasClock)($clock),
+                Effect.provideService(HasLogger)($logger),
                 Effect.provideAll(r),
                 Effect.runPromise,
               ),
@@ -88,13 +106,13 @@ export const $FastifyHttpServer = (
         const $logger = yield* _(HasLogger)
 
         const server: HttpServer = {
-          delete: route(_fastify, 'delete'),
-          get: route(_fastify, 'get'),
-          head: route(_fastify, 'head'),
-          options: route(_fastify, 'options'),
-          patch: route(_fastify, 'patch'),
-          post: route(_fastify, 'post'),
-          put: route(_fastify, 'put'),
+          delete: route($clock, $logger)(_fastify, 'delete'),
+          get: route($clock, $logger)(_fastify, 'get'),
+          head: route($clock, $logger)(_fastify, 'head'),
+          options: route($clock, $logger)(_fastify, 'options'),
+          patch: route($clock, $logger)(_fastify, 'patch'),
+          post: route($clock, $logger)(_fastify, 'post'),
+          put: route($clock, $logger)(_fastify, 'put'),
           run: pipe(
             Effect.tryCatchPromise(
               () => _fastify.listen(port, address),
