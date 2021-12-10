@@ -1,4 +1,4 @@
-import { Effect, Managed, pipe } from '@effect-ts/core'
+import { Effect, Function, Managed, pipe } from '@effect-ts/core'
 import { HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { FastifyInstance } from 'fastify'
@@ -65,66 +65,78 @@ const route =
     )
 
 export const $FastifyHttpServer = (
-  fastify: FastifyInstance,
+  fastify: Function.Lazy<FastifyInstance>,
   port = 0,
   address = '::',
 ) =>
-  gen(function* (_) {
-    const $clock = yield* _(HasClock)
-    const $logger = yield* _(HasLogger)
+  pipe(
+    Effect.tryCatch(
+      fastify,
+      $Error.fromUnknown(Error('Cannot create Fastify instance')),
+    ),
+    Effect.tapBoth(
+      (error) =>
+        $Logger.error('Fastify instance not created', {
+          error,
+          channel: CHANNEL,
+        }),
+      () => $Logger.debug('Fastify instance created', { channel: CHANNEL }),
+    ),
+    Effect.chain((_fastify) =>
+      gen(function* (_) {
+        const $clock = yield* _(HasClock)
+        const $logger = yield* _(HasLogger)
 
-    const server: HttpServer = {
-      run: pipe(
-        Effect.tryCatchPromise(
-          () => fastify.listen(port, address),
-          $Error.fromUnknown(Error('Cannot start Fastify HTTP server')),
-        ),
-        Effect.tapBoth(
-          (error) =>
-            $Logger.debug('Fastify HTTP server not started', {
-              error,
-              channel: CHANNEL,
-            }),
-          (_address) =>
-            $Logger.debug('Fastify HTTP server started', {
-              address: _address,
-              channel: CHANNEL,
-            }),
-        ),
-        Managed.make((_address) =>
-          pipe(
+        const server: HttpServer = {
+          delete: route(_fastify, 'delete'),
+          get: route(_fastify, 'get'),
+          head: route(_fastify, 'head'),
+          options: route(_fastify, 'options'),
+          patch: route(_fastify, 'patch'),
+          post: route(_fastify, 'post'),
+          put: route(_fastify, 'put'),
+          run: pipe(
             Effect.tryCatchPromise(
-              () => fastify.close(),
-              $Error.fromUnknown(Error('Cannot stop Fastify HTTP server')),
+              () => _fastify.listen(port, address),
+              $Error.fromUnknown(Error('Cannot start Fastify HTTP server')),
             ),
             Effect.tapBoth(
               (error) =>
-                $Logger.error('Fastify HTTP server not stopped', {
-                  address: _address,
+                $Logger.debug('Server not started', {
                   error,
                   channel: CHANNEL,
                 }),
-              () =>
-                $Logger.debug('Fastify HTTP server stopped', {
+              (_address) =>
+                $Logger.debug('Server started', {
                   address: _address,
                   channel: CHANNEL,
                 }),
             ),
-            Effect.orElse(() => Effect.unit),
+            Effect.asUnit,
+            Effect.provideService(HasClock)($clock),
+            Effect.provideService(HasLogger)($logger),
           ),
-        ),
-        Managed.asUnit,
-        Managed.provideService(HasClock)($clock),
-        Managed.provideService(HasLogger)($logger),
-      ),
-      delete: route(fastify, 'delete'),
-      get: route(fastify, 'get'),
-      head: route(fastify, 'head'),
-      options: route(fastify, 'options'),
-      patch: route(fastify, 'patch'),
-      post: route(fastify, 'post'),
-      put: route(fastify, 'put'),
-    }
+        }
 
-    return server
-  })
+        return { server, _fastify }
+      }),
+    ),
+    Managed.make(({ _fastify }) =>
+      pipe(
+        Effect.tryCatchPromise(
+          () => _fastify.close(),
+          $Error.fromUnknown(Error('Cannot stop Fastify HTTP server')),
+        ),
+        Effect.tapBoth(
+          (error) =>
+            $Logger.warning('Server not stopped', {
+              error,
+              channel: CHANNEL,
+            }),
+          () => $Logger.debug('Server stopped', { channel: CHANNEL }),
+        ),
+        Effect.orElse(() => Effect.unit),
+      ),
+    ),
+    Managed.map(({ server }) => server),
+  )

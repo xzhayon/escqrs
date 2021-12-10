@@ -53,8 +53,8 @@ export const $Layer = pipe(
           Layer.fromManaged(HasEventStore)(
             $StorageEventStore(EVENT_STORE_PATH, () => new EventEmitter()),
           ),
-          Layer.fromEffect(HasHttpServer)(
-            $FastifyHttpServer(fastify(), HTTP_PORT, HTTP_ADDRESS),
+          Layer.fromManaged(HasHttpServer)(
+            $FastifyHttpServer(fastify, HTTP_PORT, HTTP_ADDRESS),
           ),
           Layer.fromManaged(HasRepository)($StorageRepository(REPOSITORY_PATH)),
         ),

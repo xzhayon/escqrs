@@ -1,4 +1,4 @@
-import { Effect, Has, Managed, pipe } from '@effect-ts/core'
+import { Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $Logger } from '../../logger/Logger'
@@ -14,7 +14,7 @@ export interface HttpServer {
   readonly patch: HttpServerRoute
   readonly post: HttpServerRoute
   readonly put: HttpServerRoute
-  readonly run: Managed.IO<Error, void>
+  readonly run: Effect.IO<Error, void>
 }
 
 export interface HttpServerRoute {
@@ -85,24 +85,6 @@ const {
   ['run', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put'],
 )
 
-const run = pipe(
-  Managed.gen(function* (_) {
-    const __run = yield* _(_run)
-
-    return yield* _(__run)
-  }),
-  Managed.tapBoth(
-    (error) =>
-      Managed.fromEffect(
-        $Logger.error('HTTP server not started', { error, channel: CHANNEL }),
-      ),
-    () =>
-      Managed.fromEffect(
-        $Logger.info('HTTP server started', { channel: CHANNEL }),
-      ),
-  ),
-)
-
 const _route =
   (
     method: HttpMethod,
@@ -149,8 +131,20 @@ const _route =
       ),
     )
 
+const run = pipe(
+  gen(function* (_) {
+    const __run = yield* _(_run)
+
+    return yield* _(__run)
+  }),
+  Effect.tapBoth(
+    (error) =>
+      $Logger.error('HTTP server not started', { error, channel: CHANNEL }),
+    () => $Logger.info('HTTP server started', { channel: CHANNEL }),
+  ),
+)
+
 export const $HttpServer = {
-  run,
   delete: _route('delete', _delete),
   get: _route('get', get),
   head: _route('head', head),
@@ -158,4 +152,5 @@ export const $HttpServer = {
   patch: _route('patch', patch),
   post: _route('post', post),
   put: _route('put', put),
+  run,
 }

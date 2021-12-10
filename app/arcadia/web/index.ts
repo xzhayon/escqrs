@@ -1,4 +1,5 @@
-import { Effect, Managed, pipe } from '@effect-ts/core'
+import { Effect, pipe } from '@effect-ts/core'
+import { gen } from '@effect-ts/system/Effect'
 import * as Layer from '@effect-ts/system/Layer'
 import { $Layer } from '../../../config/Layer.local'
 import { $HttpServer } from '../../../src/http/server/HttpServer'
@@ -14,7 +15,7 @@ import { $GetScreen } from './screen/query/GetScreen'
 import { $GetScreens } from './screen/query/GetScreens'
 
 pipe(
-  Managed.gen(function* (_) {
+  gen(function* (_) {
     yield* _($CreateScreen)
     yield* _($GetScreens)
     yield* _($GetScreen)
@@ -29,7 +30,7 @@ pipe(
 
     yield* _($HttpServer.run)
   }),
-  Layer.fromRawManaged,
+  Layer.fromRawEffect,
   Layer.using($Layer),
   Layer.launch,
   Effect.runPromise,
