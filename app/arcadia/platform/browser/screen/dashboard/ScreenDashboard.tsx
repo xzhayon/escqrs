@@ -35,9 +35,9 @@ export const ScreenDashboard: FC = () => {
   )
 
   useEffect(() => {
-    dispatch($ScreenDashboard.Start())
+    dispatch($ScreenDashboard.start())
     return () => {
-      dispatch($ScreenDashboard.Stop())
+      dispatch($ScreenDashboard.stop())
     }
   }, [])
 
@@ -56,7 +56,7 @@ export const ScreenDashboard: FC = () => {
                     color="inherit"
                     disabled={isLoading}
                     size="small"
-                    onClick={() => dispatch($ScreenDashboard.FetchList())}
+                    onClick={() => dispatch($ScreenDashboard.fetchScreens())}
                   >
                     Retry
                   </Button>

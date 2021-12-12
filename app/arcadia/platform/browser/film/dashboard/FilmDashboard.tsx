@@ -33,9 +33,9 @@ export const FilmDashboard: FC = () => {
   const films = use$Selector((state) => state[$FilmDashboardSlice.name].films)
 
   useEffect(() => {
-    dispatch($FilmDashboard.Start())
+    dispatch($FilmDashboard.start())
     return () => {
-      dispatch($FilmDashboard.Stop())
+      dispatch($FilmDashboard.stop())
     }
   }, [])
 
@@ -54,7 +54,7 @@ export const FilmDashboard: FC = () => {
                     color="inherit"
                     disabled={isLoading}
                     size="small"
-                    onClick={() => dispatch($FilmDashboard.FetchList())}
+                    onClick={() => dispatch($FilmDashboard.fetchFilms())}
                   >
                     Retry
                   </Button>

@@ -3,7 +3,7 @@ import { Film } from '../../../../../film/Film'
 import { Command, Event } from '../../../Message'
 
 export interface FilmCreationState {
-  state?: 'Creating'
+  state?: 'CreatingFilm'
   error?: Error
 }
 
@@ -13,30 +13,30 @@ export const $FilmCreationSlice = createSlice({
   name: 'FilmCreation',
   initialState,
   reducers: {
-    Start() {},
-    Create(_, _command: Command<{ title: string }, Film>) {},
-    Stop() {},
+    start() {},
     Started() {},
-    CreationStarted(state) {
-      state.state = 'Creating'
+    stop() {},
+    Stopped: () => initialState,
+    createFilm(_, _command: Command<{ title: string }, Film>) {},
+    FilmCreationStarted(state) {
+      state.state = 'CreatingFilm'
     },
-    NotCreated(state, _event: Event<Error>) {
+    FilmNotCreated(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new NotCreated()
+      state.error = new FilmNotCreated()
     },
-    Created(state, _event: Event<Film>) {
+    FilmCreated(state, _event: Event<Film>) {
       state.state = undefined
       state.error = undefined
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $FilmCreation = $FilmCreationSlice.actions
 
-export class NotCreated extends Error {
+export class FilmNotCreated extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, NotCreated.prototype)
+    Object.setPrototypeOf(this, FilmNotCreated.prototype)
   }
 }

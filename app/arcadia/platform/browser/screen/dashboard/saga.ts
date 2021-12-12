@@ -9,27 +9,32 @@ import {
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $ScreenDashboard } from './slice'
 
-function* fetchList(command: ReturnType<typeof $ScreenDashboard.FetchList>) {
-  yield* put($ScreenDashboard.ListFetchingStarted())
+function* fetchScreens(
+  command: ReturnType<typeof $ScreenDashboard.fetchScreens>,
+) {
+  yield* put($ScreenDashboard.ScreensFetchingStarted())
   try {
-    const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-    const screens = yield* call(arcadiaClient.getScreens)
-    yield* put($ScreenDashboard.ListFetched(screens))
+    const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+    const screens = yield* call(arcadia.getScreens)
+    yield* put($ScreenDashboard.ScreensFetched(screens))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, screens))
   } catch (error: any) {
-    yield* put($ScreenDashboard.ListNotFetched(error))
+    yield* put($ScreenDashboard.ScreensNotFetched(error))
     command.payload?.onFailure &&
       (yield* call(command.payload.onFailure, error))
   }
 }
 
 export function* $ScreenDashboardSaga() {
-  yield* takeLeading($ScreenDashboard.Start.type, function* () {
+  yield* takeLeading($ScreenDashboard.start.type, function* () {
     yield* put($ScreenDashboard.Started())
-    const task = yield* takeLeading($ScreenDashboard.FetchList.type, fetchList)
-    yield* put($ScreenDashboard.FetchList())
-    yield* take($ScreenDashboard.Stop.type)
+    const task = yield* takeLeading(
+      $ScreenDashboard.fetchScreens.type,
+      fetchScreens,
+    )
+    yield* put($ScreenDashboard.fetchScreens())
+    yield* take($ScreenDashboard.stop.type)
     yield* cancel(task)
     yield* put($ScreenDashboard.Stopped())
   })

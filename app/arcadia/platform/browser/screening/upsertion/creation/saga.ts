@@ -14,27 +14,29 @@ import { ArcadiaClient } from '../../../ArcadiaClient'
 import { Uuid } from '../../../uuid/Uuid'
 import { $ScreeningCreation } from './slice'
 
-function* fetch(command: ReturnType<typeof $ScreeningCreation.Fetch>) {
-  yield* put($ScreeningCreation.FetchingStarted())
+function* fetchFilmsAndScreens(
+  command: ReturnType<typeof $ScreeningCreation.fetchFilmsAndScreens>,
+) {
+  yield* put($ScreeningCreation.FilmsAndScreensFetchingStarted())
   try {
-    const client = yield* getContext<ArcadiaClient>('arcadiaClient')
+    const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
     const [films, screens] = yield* all([
-      call(client.getFilms),
-      call(client.getScreens),
+      call(arcadia.getFilms),
+      call(arcadia.getScreens),
     ] as const)
-    yield* put($ScreeningCreation.Fetched({ films, screens }))
+    yield* put($ScreeningCreation.FilmsAndScreensFetched({ films, screens }))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, { films, screens }))
   } catch (error: any) {
-    yield* put($ScreeningCreation.NotFetched(error))
+    yield* put($ScreeningCreation.FilmsAndScreensNotFetched(error))
     command.payload?.onFailure &&
       (yield* call(command.payload.onFailure, error))
   }
 }
 
 const createScreening = (screeningId: Id<Screening>) =>
-  function* (command: ReturnType<typeof $ScreeningCreation.Create>) {
-    yield* put($ScreeningCreation.CreationStarted())
+  function* (command: ReturnType<typeof $ScreeningCreation.createScreening>) {
+    yield* put($ScreeningCreation.ScreeningCreationStarted())
     try {
       const client = yield* getContext<ArcadiaClient>('arcadiaClient')
       yield* call(
@@ -44,31 +46,34 @@ const createScreening = (screeningId: Id<Screening>) =>
         command.payload.screenId,
         command.payload.date,
       )
-      yield* put($ScreeningCreation.Created())
+      yield* put($ScreeningCreation.ScreeningCreated())
       command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($ScreeningCreation.NotCreated(error))
+      yield* put($ScreeningCreation.ScreeningNotCreated(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
 export function* $ScreeningCreationSaga() {
-  yield* takeLeading($ScreeningCreation.Start.type, function* () {
+  yield* takeLeading($ScreeningCreation.start.type, function* () {
     yield* put($ScreeningCreation.Started())
     const uuid = yield* getContext<Uuid>('uuid')
     const id = yield* call(uuid.v4)
     const task = yield* fork(function* () {
       yield* all([
-        takeLeading($ScreeningCreation.Fetch.type, fetch),
         takeLeading(
-          $ScreeningCreation.Create.type,
+          $ScreeningCreation.fetchFilmsAndScreens.type,
+          fetchFilmsAndScreens,
+        ),
+        takeLeading(
+          $ScreeningCreation.createScreening.type,
           createScreening($Screening.id(id)),
         ),
       ])
     })
-    yield* put($ScreeningCreation.Fetch())
-    yield* take($ScreeningCreation.Stop.type)
+    yield* put($ScreeningCreation.fetchFilmsAndScreens())
+    yield* take($ScreeningCreation.stop.type)
     yield* cancel(task)
     yield* put($ScreeningCreation.Stopped())
   })

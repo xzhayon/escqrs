@@ -9,27 +9,27 @@ import {
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $FilmDashboard } from './slice'
 
-function* fetchList(command: ReturnType<typeof $FilmDashboard.FetchList>) {
-  yield* put($FilmDashboard.ListFetchingStarted())
+function* fetchFilms(command: ReturnType<typeof $FilmDashboard.fetchFilms>) {
+  yield* put($FilmDashboard.FilmsFetchingStarted())
   try {
-    const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-    const films = yield* call(arcadiaClient.getFilms)
-    yield* put($FilmDashboard.ListFetched(films))
+    const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+    const films = yield* call(arcadia.getFilms)
+    yield* put($FilmDashboard.FilmsFetched(films))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, films))
   } catch (error: any) {
-    yield* put($FilmDashboard.ListNotFetched(error))
+    yield* put($FilmDashboard.FilmsNotFetched(error))
     command.payload?.onFailure &&
       (yield* call(command.payload.onFailure, error))
   }
 }
 
 export function* $FilmDashboardSaga() {
-  yield* takeLeading($FilmDashboard.Start.type, function* () {
+  yield* takeLeading($FilmDashboard.start.type, function* () {
     yield* put($FilmDashboard.Started())
-    const task = yield* takeLeading($FilmDashboard.FetchList.type, fetchList)
-    yield* put($FilmDashboard.FetchList())
-    yield* take($FilmDashboard.Stop.type)
+    const task = yield* takeLeading($FilmDashboard.fetchFilms.type, fetchFilms)
+    yield* put($FilmDashboard.fetchFilms())
+    yield* take($FilmDashboard.stop.type)
     yield* cancel(task)
     yield* put($FilmDashboard.Stopped())
   })

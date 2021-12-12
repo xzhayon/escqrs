@@ -10,12 +10,12 @@ import { $ScreenUpsertionSaga } from './upsertion/saga'
 function* coordinate() {
   yield* takeLatest(
     [
-      $ScreenCreation.Created.type,
-      $ScreenEditing.Edited.type,
-      $ScreenRemoval.Removed.type,
+      $ScreenCreation.ScreenCreated.type,
+      $ScreenEditing.ScreenEdited.type,
+      $ScreenRemoval.ScreenRemoved.type,
     ],
     function* () {
-      yield* put($ScreenDashboard.FetchList())
+      yield* put($ScreenDashboard.fetchScreens())
     },
   )
 }

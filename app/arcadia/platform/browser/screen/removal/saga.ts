@@ -13,32 +13,32 @@ import { Screen } from '../../../../screen/Screen'
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $ScreenRemoval } from './slice'
 
-const fetchDetail = (screenId: Id<Screen>) =>
-  function* (command: ReturnType<typeof $ScreenRemoval.FetchDetail>) {
-    yield* put($ScreenRemoval.DetailFetchingStarted())
+const fetchScreen = (screenId: Id<Screen>) =>
+  function* (command: ReturnType<typeof $ScreenRemoval.fetchScreen>) {
+    yield* put($ScreenRemoval.ScreenFetchingStarted())
     try {
       const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       const screen = yield* call(arcadiaClient.getScreen, screenId)
-      yield* put($ScreenRemoval.DetailFetched(screen))
+      yield* put($ScreenRemoval.ScreenFetched(screen))
       command.payload?.onSuccess &&
         (yield* call(command.payload.onSuccess, screen))
     } catch (error: any) {
-      yield* put($ScreenRemoval.DetailNotFetched(error))
+      yield* put($ScreenRemoval.ScreenNotFetched(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
 const removeScreen = (screenId: Id<Screen>) =>
-  function* (command: ReturnType<typeof $ScreenRemoval.Remove>) {
-    yield* put($ScreenRemoval.RemovalStarted())
+  function* (command: ReturnType<typeof $ScreenRemoval.removeScreen>) {
+    yield* put($ScreenRemoval.ScreenRemovalStarted())
     try {
-      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-      yield* call(arcadiaClient.removeScreen, screenId)
-      yield* put($ScreenRemoval.Removed())
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      yield* call(arcadia.removeScreen, screenId)
+      yield* put($ScreenRemoval.ScreenRemoved())
       command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($ScreenRemoval.NotRemoved(error))
+      yield* put($ScreenRemoval.ScreenNotRemoved(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
@@ -46,17 +46,17 @@ const removeScreen = (screenId: Id<Screen>) =>
 
 export function* $ScreenRemovalSaga() {
   yield* takeLeading(
-    $ScreenRemoval.Start.type,
-    function* ({ payload: { id } }: ReturnType<typeof $ScreenRemoval.Start>) {
+    $ScreenRemoval.start.type,
+    function* ({ payload: { id } }: ReturnType<typeof $ScreenRemoval.start>) {
       yield* put($ScreenRemoval.Started())
       const task = yield* fork(function* () {
         yield* all([
-          takeLeading($ScreenRemoval.FetchDetail.type, fetchDetail(id)),
-          takeLeading($ScreenRemoval.Remove.type, removeScreen(id)),
+          takeLeading($ScreenRemoval.fetchScreen.type, fetchScreen(id)),
+          takeLeading($ScreenRemoval.removeScreen.type, removeScreen(id)),
         ])
       })
-      yield* put($ScreenRemoval.FetchDetail())
-      yield* take($ScreenRemoval.Stop.type)
+      yield* put($ScreenRemoval.fetchScreen())
+      yield* take($ScreenRemoval.stop.type)
       yield* cancel(task)
       yield* put($ScreenRemoval.Stopped())
     },

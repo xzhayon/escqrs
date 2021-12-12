@@ -6,7 +6,7 @@ import { Screen } from '../../../../../screen/Screen'
 import { Command, Event } from '../../../Message'
 
 export interface ScreeningCreationState {
-  state?: 'Fetching' | 'Creating'
+  state?: 'FetchingFilmsAndScreens' | 'CreatingScreening'
   error?: Error
   films?: Array.Array<{ id: Id<Film>; title: string }>
   screens?: Array.Array<{ id: Id<Screen>; name: string }>
@@ -18,28 +18,25 @@ export const $ScreeningCreationSlice = createSlice({
   name: 'ScreeningCreationSlice',
   initialState,
   reducers: {
-    Start() {},
-    Fetch(
+    start() {},
+    Started() {},
+    stop() {},
+    Stopped: () => initialState,
+    fetchFilmsAndScreens(
       _,
       _command: Command<
         void,
         { films: Array.Array<Film>; screens: Array.Array<Screen> }
       >,
     ) {},
-    Create(
-      _,
-      _command: Command<{ filmId: Id<Film>; screenId: Id<Screen>; date: Date }>,
-    ) {},
-    Stop() {},
-    Started() {},
-    FetchingStarted(state) {
-      state.state = 'Fetching'
+    FilmsAndScreensFetchingStarted(state) {
+      state.state = 'FetchingFilmsAndScreens'
     },
-    NotFetched(state, _event: Event<Error>) {
+    FilmsAndScreensNotFetched(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new NotFetched()
+      state.error = new FilmsAndScreensNotFetched()
     },
-    Fetched(
+    FilmsAndScreensFetched(
       state,
       event: Event<{ films: Array.Array<Film>; screens: Array.Array<Screen> }>,
     ) {
@@ -53,33 +50,36 @@ export const $ScreeningCreationSlice = createSlice({
         name,
       }))
     },
-    CreationStarted(state) {
-      state.state = 'Creating'
+    createScreening(
+      _,
+      _command: Command<{ filmId: Id<Film>; screenId: Id<Screen>; date: Date }>,
+    ) {},
+    ScreeningCreationStarted(state) {
+      state.state = 'CreatingScreening'
     },
-    NotCreated(state, _event: Event<Error>) {
+    ScreeningNotCreated(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new NotCreated()
+      state.error = new ScreeningNotCreated()
     },
-    Created(state, _event: Event) {
+    ScreeningCreated(state, _event: Event) {
       state.state = undefined
       state.error = undefined
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $ScreeningCreation = $ScreeningCreationSlice.actions
 
-export class NotFetched extends Error {
+export class FilmsAndScreensNotFetched extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, NotFetched.prototype)
+    Object.setPrototypeOf(this, FilmsAndScreensNotFetched.prototype)
   }
 }
 
-export class NotCreated extends Error {
+export class ScreeningNotCreated extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, NotCreated.prototype)
+    Object.setPrototypeOf(this, ScreeningNotCreated.prototype)
   }
 }

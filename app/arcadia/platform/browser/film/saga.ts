@@ -10,12 +10,12 @@ import { $FilmUpsertionSaga } from './upsertion/saga'
 function* coordinate() {
   yield* takeLatest(
     [
-      $FilmCreation.Created.type,
-      $FilmEditing.Edited.type,
-      $FilmRemoval.Removed.type,
+      $FilmCreation.FilmCreated.type,
+      $FilmEditing.FilmEdited.type,
+      $FilmRemoval.FilmRemoved.type,
     ],
     function* () {
-      yield* put($FilmDashboard.FetchList())
+      yield* put($FilmDashboard.fetchFilms())
     },
   )
 }

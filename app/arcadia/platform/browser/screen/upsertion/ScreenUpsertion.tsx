@@ -16,13 +16,13 @@ import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $ScreenCreation,
   $ScreenCreationSlice,
-  NotCreated,
+  ScreenNotCreated,
 } from './creation/slice'
 import {
   $ScreenEditing,
   $ScreenEditingSlice,
-  DetailNotFetched,
-  NotEdited,
+  ScreenNotEdited,
+  ScreenNotFetched,
 } from './editing/slice'
 
 export const ScreenUpsertion: FC = () => {
@@ -45,12 +45,12 @@ export const ScreenUpsertion: FC = () => {
 
   useEffect(() => {
     isEditing
-      ? dispatch($ScreenEditing.Start({ id: $Screen.id(id) }))
-      : dispatch($ScreenCreation.Start())
+      ? dispatch($ScreenEditing.start({ id: $Screen.id(id) }))
+      : dispatch($ScreenCreation.start())
     return () => {
       isEditing
-        ? dispatch($ScreenEditing.Stop())
-        : dispatch($ScreenCreation.Stop())
+        ? dispatch($ScreenEditing.stop())
+        : dispatch($ScreenCreation.stop())
     }
   }, [])
 
@@ -77,8 +77,8 @@ export const ScreenUpsertion: FC = () => {
               onSuccess: () => navigate(-1),
             }
             isEditing
-              ? dispatch($ScreenEditing.Edit(payload))
-              : dispatch($ScreenCreation.Create(payload))
+              ? dispatch($ScreenEditing.editScreen(payload))
+              : dispatch($ScreenCreation.createScreen(payload))
           }}
         >
           <DialogTitle>
@@ -90,12 +90,12 @@ export const ScreenUpsertion: FC = () => {
                 <Grid item xs={12}>
                   <Alert
                     action={
-                      error instanceof DetailNotFetched ? (
+                      error instanceof ScreenNotFetched ? (
                         <Button
                           color="inherit"
-                          disabled={'FetchingDetail' === state}
+                          disabled={'FetchingScreen' === state}
                           size="small"
-                          onClick={() => dispatch($ScreenEditing.FetchDetail())}
+                          onClick={() => dispatch($ScreenEditing.fetchScreen())}
                         >
                           Retry
                         </Button>
@@ -103,11 +103,11 @@ export const ScreenUpsertion: FC = () => {
                     }
                     severity="error"
                   >
-                    {error instanceof NotCreated
+                    {error instanceof ScreenNotCreated
                       ? 'Cannot create screen.'
-                      : error instanceof DetailNotFetched
+                      : error instanceof ScreenNotFetched
                       ? 'Cannot fetch screen detail.'
-                      : error instanceof NotEdited
+                      : error instanceof ScreenNotEdited
                       ? 'Cannot edit screen.'
                       : undefined}
                   </Alert>
@@ -193,9 +193,9 @@ export const ScreenUpsertion: FC = () => {
         message={
           state &&
           {
-            Creating: 'Creating screen...',
-            FetchingDetail: 'Fetching screen detail...',
-            Editing: 'Editing screen...',
+            CreatingScreen: 'Creating screen...',
+            FetchingScreen: 'Fetching screen detail...',
+            EditingScreen: 'Editing screen...',
           }[state]
         }
       />

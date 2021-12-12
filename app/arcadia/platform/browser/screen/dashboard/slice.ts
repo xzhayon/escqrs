@@ -16,18 +16,19 @@ export const $ScreenDashboardSlice = createSlice({
   name: 'ScreenDashboard',
   initialState,
   reducers: {
-    Start() {},
-    FetchList(_, _command: Command<void, Array.Array<Screen>>) {},
-    Stop() {},
+    start() {},
     Started() {},
-    ListFetchingStarted(state) {
+    stop() {},
+    Stopped: () => initialState,
+    fetchScreens(_, _command: Command<void, Array.Array<Screen>>) {},
+    ScreensFetchingStarted(state) {
       state.isLoading = true
     },
-    ListNotFetched(state, _event: Event<Error>) {
+    ScreensNotFetched(state, _event: Event<Error>) {
       state.isLoading = false
-      state.error = new ListNotFetched()
+      state.error = new ScreensNotFetched()
     },
-    ListFetched(state, event: Event<Array.Array<Screen>>) {
+    ScreensFetched(state, event: Event<Array.Array<Screen>>) {
       state.isLoading = false
       state.error = undefined
       state.screens = event.payload.map((screen) => ({
@@ -36,15 +37,14 @@ export const $ScreenDashboardSlice = createSlice({
         seats: screen.seats.rows * screen.seats.columns,
       }))
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $ScreenDashboard = $ScreenDashboardSlice.actions
 
-export class ListNotFetched extends Error {
+export class ScreensNotFetched extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, ListNotFetched.prototype)
+    Object.setPrototypeOf(this, ScreensNotFetched.prototype)
   }
 }

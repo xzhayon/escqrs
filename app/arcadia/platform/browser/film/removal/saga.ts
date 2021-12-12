@@ -13,32 +13,32 @@ import { Film } from '../../../../film/Film'
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $FilmRemoval } from './slice'
 
-const fetchDetail = (filmId: Id<Film>) =>
-  function* (command: ReturnType<typeof $FilmRemoval.FetchDetail>) {
-    yield* put($FilmRemoval.DetailFetchingStarted())
+const fetchFilm = (filmId: Id<Film>) =>
+  function* (command: ReturnType<typeof $FilmRemoval.fetchFilm>) {
+    yield* put($FilmRemoval.FilmFetchingStarted())
     try {
-      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const film = yield* call(arcadiaClient.getFilm, filmId)
-      yield* put($FilmRemoval.DetailFetched(film))
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      const film = yield* call(arcadia.getFilm, filmId)
+      yield* put($FilmRemoval.FilmFetched(film))
       command.payload?.onSuccess &&
         (yield* call(command.payload.onSuccess, film))
     } catch (error: any) {
-      yield* put($FilmRemoval.DetailNotFetched(error))
+      yield* put($FilmRemoval.FilmNotFetched(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
 const removeFilm = (filmId: Id<Film>) =>
-  function* (command: ReturnType<typeof $FilmRemoval.Remove>) {
-    yield* put($FilmRemoval.RemovalStarted())
+  function* (command: ReturnType<typeof $FilmRemoval.removeFilm>) {
+    yield* put($FilmRemoval.FilmRemovalStarted())
     try {
       const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       yield* call(arcadiaClient.removeFilm, filmId)
-      yield* put($FilmRemoval.Removed())
+      yield* put($FilmRemoval.FilmRemoved())
       command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($FilmRemoval.NotRemoved(error))
+      yield* put($FilmRemoval.FilmNotRemoved(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
@@ -46,17 +46,17 @@ const removeFilm = (filmId: Id<Film>) =>
 
 export function* $FilmRemovalSaga() {
   yield* takeLeading(
-    $FilmRemoval.Start.type,
-    function* ({ payload: { id } }: ReturnType<typeof $FilmRemoval.Start>) {
+    $FilmRemoval.start.type,
+    function* ({ payload: { id } }: ReturnType<typeof $FilmRemoval.start>) {
       yield* put($FilmRemoval.Started())
       const task = yield* fork(function* () {
         yield* all([
-          takeLeading($FilmRemoval.FetchDetail.type, fetchDetail(id)),
-          takeLeading($FilmRemoval.Remove.type, removeFilm(id)),
+          takeLeading($FilmRemoval.fetchFilm.type, fetchFilm(id)),
+          takeLeading($FilmRemoval.removeFilm.type, removeFilm(id)),
         ])
       })
-      yield* put($FilmRemoval.FetchDetail())
-      yield* take($FilmRemoval.Stop.type)
+      yield* put($FilmRemoval.fetchFilm())
+      yield* take($FilmRemoval.stop.type)
       yield* cancel(task)
       yield* put($FilmRemoval.Stopped())
     },

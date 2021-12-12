@@ -17,8 +17,8 @@ import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $ScreenRemoval,
   $ScreenRemovalSlice,
-  DetailNotFetched,
-  NotRemoved,
+  ScreenNotFetched,
+  ScreenNotRemoved,
 } from './slice'
 
 export const ScreenRemoval: FC = () => {
@@ -36,9 +36,9 @@ export const ScreenRemoval: FC = () => {
       return
     }
 
-    dispatch($ScreenRemoval.Start({ id: $Screen.id(id) }))
+    dispatch($ScreenRemoval.start({ id: $Screen.id(id) }))
     return () => {
-      dispatch($ScreenRemoval.Stop())
+      dispatch($ScreenRemoval.stop())
     }
   }, [])
 
@@ -52,12 +52,12 @@ export const ScreenRemoval: FC = () => {
               <Grid item xs={12}>
                 <Alert
                   action={
-                    error instanceof DetailNotFetched ? (
+                    error instanceof ScreenNotFetched ? (
                       <Button
                         color="inherit"
-                        disabled={'FetchingDetail' === state}
+                        disabled={'FetchingScreen' === state}
                         size="small"
-                        onClick={() => dispatch($ScreenRemoval.FetchDetail())}
+                        onClick={() => dispatch($ScreenRemoval.fetchScreen())}
                       >
                         Retry
                       </Button>
@@ -65,9 +65,9 @@ export const ScreenRemoval: FC = () => {
                   }
                   severity="error"
                 >
-                  {error instanceof DetailNotFetched
+                  {error instanceof ScreenNotFetched
                     ? 'Cannot fetch screen detail.'
-                    : error instanceof NotRemoved
+                    : error instanceof ScreenNotRemoved
                     ? 'Cannot remove screen.'
                     : undefined}
                 </Alert>
@@ -89,7 +89,9 @@ export const ScreenRemoval: FC = () => {
             color="primary"
             disabled={undefined !== state}
             onClick={() =>
-              dispatch($ScreenRemoval.Remove({ onSuccess: () => navigate(-1) }))
+              dispatch(
+                $ScreenRemoval.removeScreen({ onSuccess: () => navigate(-1) }),
+              )
             }
           >
             Remove
@@ -101,8 +103,8 @@ export const ScreenRemoval: FC = () => {
         message={
           state &&
           {
-            FetchingDetail: 'Fetching screen detail...',
-            Removing: 'Removing screen...',
+            FetchingScreen: 'Fetching screen detail...',
+            RemovingScreen: 'Removing screen...',
           }[state]
         }
       />

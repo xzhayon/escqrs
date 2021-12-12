@@ -4,7 +4,7 @@ import { Screen } from '../../../../../screen/Screen'
 import { Command, Event } from '../../../Message'
 
 export interface ScreenEditingState {
-  state?: 'FetchingDetail' | 'Editing'
+  state?: 'FetchingScreen' | 'EditingScreen'
   error?: Error
   screen?: { name: string; seats: { rows: number; columns: number } }
 }
@@ -15,56 +15,56 @@ export const $ScreenEditingSlice = createSlice({
   name: 'ScreenEditing',
   initialState,
   reducers: {
-    Start(_, _command: Command<{ id: Id<Screen> }>) {},
-    FetchDetail(_, _command: Command<void, Screen>) {},
-    Edit(
+    start(_, _command: Command<{ id: Id<Screen> }>) {},
+    Started() {},
+    stop() {},
+    Stopped: () => initialState,
+    fetchScreen(_, _command: Command<void, Screen>) {},
+    ScreenFetchingStarted(state) {
+      state.state = 'FetchingScreen'
+    },
+    ScreenNotFetched(state, _event: Event<Error>) {
+      state.state = undefined
+      state.error = new ScreenNotFetched()
+    },
+    ScreenFetched(state, event: Event<Screen>) {
+      state.state = undefined
+      state.error = undefined
+      state.screen = { name: event.payload.name, seats: event.payload.seats }
+    },
+    editScreen(
       _,
       _command: Command<
         { name: string; seats: { rows: number; columns: number } },
         Screen
       >,
     ) {},
-    Stop() {},
-    Started() {},
-    DetailFetchingStarted(state) {
-      state.state = 'FetchingDetail'
+    ScreenEditingStarted(state) {
+      state.state = 'EditingScreen'
     },
-    DetailNotFetched(state, _event: Event<Error>) {
+    ScreenNotEdited(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new DetailNotFetched()
+      state.error = new ScreenNotEdited()
     },
-    DetailFetched(state, event: Event<Screen>) {
-      state.state = undefined
-      state.error = undefined
-      state.screen = { name: event.payload.name, seats: event.payload.seats }
-    },
-    EditingStarted(state) {
-      state.state = 'Editing'
-    },
-    NotEdited(state, _event: Event<Error>) {
-      state.state = undefined
-      state.error = new NotEdited()
-    },
-    Edited(state, _event: Event<Screen>) {
+    ScreenEdited(state, _event: Event<Screen>) {
       state.state = undefined
       state.error = undefined
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $ScreenEditing = $ScreenEditingSlice.actions
 
-export class DetailNotFetched extends Error {
+export class ScreenNotFetched extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, DetailNotFetched.prototype)
+    Object.setPrototypeOf(this, ScreenNotFetched.prototype)
   }
 }
 
-export class NotEdited extends Error {
+export class ScreenNotEdited extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, NotEdited.prototype)
+    Object.setPrototypeOf(this, ScreenNotEdited.prototype)
   }
 }

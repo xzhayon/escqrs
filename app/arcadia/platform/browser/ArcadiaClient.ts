@@ -17,7 +17,9 @@ export interface ArcadiaClient {
     } & DeepPartial<Body<Screen>>,
   ) => Promise<Screen>
   readonly removeScreen: (id: Id<Screen>) => Promise<void>
-  readonly createFilm: (film: Film) => Promise<Film>
+  readonly createFilm: (
+    film: { _: Pick<Header<Film>, 'id'> } & Body<Film>,
+  ) => Promise<Film>
   readonly getFilms: () => Promise<Array.Array<Film>>
   readonly getFilm: (id: Id<Film>) => Promise<Film>
   readonly editFilm: (

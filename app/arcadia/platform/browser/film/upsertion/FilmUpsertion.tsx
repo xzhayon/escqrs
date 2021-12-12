@@ -13,12 +13,16 @@ import React, { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import { $FilmCreation, $FilmCreationSlice, NotCreated } from './creation/slice'
+import {
+  $FilmCreation,
+  $FilmCreationSlice,
+  FilmNotCreated,
+} from './creation/slice'
 import {
   $FilmEditing,
   $FilmEditingSlice,
-  DetailNotFetched,
-  NotEdited,
+  FilmNotFetched,
+  FilmNotEdited,
 } from './editing/slice'
 
 export const FilmUpsertion: FC = () => {
@@ -37,10 +41,10 @@ export const FilmUpsertion: FC = () => {
 
   useEffect(() => {
     isEditing
-      ? dispatch($FilmEditing.Start({ id: $Film.id(id) }))
-      : dispatch($FilmCreation.Start())
+      ? dispatch($FilmEditing.start({ id: $Film.id(id) }))
+      : dispatch($FilmCreation.start())
     return () => {
-      isEditing ? dispatch($FilmEditing.Stop()) : dispatch($FilmCreation.Stop())
+      isEditing ? dispatch($FilmEditing.stop()) : dispatch($FilmCreation.stop())
     }
   }, [])
 
@@ -57,8 +61,8 @@ export const FilmUpsertion: FC = () => {
 
             const payload = { title: _title, onSuccess: () => navigate(-1) }
             isEditing
-              ? dispatch($FilmEditing.Edit(payload))
-              : dispatch($FilmCreation.Create(payload))
+              ? dispatch($FilmEditing.editFilm(payload))
+              : dispatch($FilmCreation.createFilm(payload))
           }}
         >
           <DialogTitle>{isEditing ? 'Edit film' : 'Create film'}</DialogTitle>
@@ -68,12 +72,12 @@ export const FilmUpsertion: FC = () => {
                 <Grid item xs={12}>
                   <Alert
                     action={
-                      error instanceof DetailNotFetched ? (
+                      error instanceof FilmNotFetched ? (
                         <Button
                           color="inherit"
-                          disabled={'FetchingDetail' === state}
+                          disabled={'FetchingFilm' === state}
                           size="small"
-                          onClick={() => dispatch($FilmEditing.FetchDetail())}
+                          onClick={() => dispatch($FilmEditing.fetchFilm())}
                         >
                           Retry
                         </Button>
@@ -81,11 +85,11 @@ export const FilmUpsertion: FC = () => {
                     }
                     severity="error"
                   >
-                    {error instanceof NotCreated
+                    {error instanceof FilmNotCreated
                       ? 'Cannot create film.'
-                      : error instanceof DetailNotFetched
+                      : error instanceof FilmNotFetched
                       ? 'Cannot fetch film detail.'
-                      : error instanceof NotEdited
+                      : error instanceof FilmNotEdited
                       ? 'Cannot edit film.'
                       : undefined}
                   </Alert>
@@ -125,9 +129,9 @@ export const FilmUpsertion: FC = () => {
         message={
           state &&
           {
-            Creating: 'Creating film...',
-            FetchingDetail: 'Fetching film detail...',
-            Editing: 'Editing film...',
+            CreatingFilm: 'Creating film...',
+            FetchingFilm: 'Fetching film detail...',
+            EditingFilm: 'Editing film...',
           }[state]
         }
       />

@@ -17,8 +17,8 @@ import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $FilmRemoval,
   $FilmRemovalSlice,
-  DetailNotFetched,
-  NotRemoved,
+  FilmNotFetched,
+  FilmNotRemoved,
 } from './slice'
 
 export const FilmRemoval: FC = () => {
@@ -36,9 +36,9 @@ export const FilmRemoval: FC = () => {
       return
     }
 
-    dispatch($FilmRemoval.Start({ id: $Film.id(id) }))
+    dispatch($FilmRemoval.start({ id: $Film.id(id) }))
     return () => {
-      dispatch($FilmRemoval.Stop())
+      dispatch($FilmRemoval.stop())
     }
   }, [])
 
@@ -52,12 +52,12 @@ export const FilmRemoval: FC = () => {
               <Grid item xs={12}>
                 <Alert
                   action={
-                    error instanceof DetailNotFetched ? (
+                    error instanceof FilmNotFetched ? (
                       <Button
                         color="inherit"
-                        disabled={'FetchingDetail' === state}
+                        disabled={'FetchingFilm' === state}
                         size="small"
-                        onClick={() => dispatch($FilmRemoval.FetchDetail())}
+                        onClick={() => dispatch($FilmRemoval.fetchFilm())}
                       >
                         Retry
                       </Button>
@@ -65,9 +65,9 @@ export const FilmRemoval: FC = () => {
                   }
                   severity="error"
                 >
-                  {error instanceof DetailNotFetched
+                  {error instanceof FilmNotFetched
                     ? 'Cannot fetch film detail.'
-                    : error instanceof NotRemoved
+                    : error instanceof FilmNotRemoved
                     ? 'Cannot remove film.'
                     : undefined}
                 </Alert>
@@ -89,7 +89,9 @@ export const FilmRemoval: FC = () => {
             color="primary"
             disabled={undefined !== state}
             onClick={() =>
-              dispatch($FilmRemoval.Remove({ onSuccess: () => navigate(-1) }))
+              dispatch(
+                $FilmRemoval.removeFilm({ onSuccess: () => navigate(-1) }),
+              )
             }
           >
             Remove
@@ -101,8 +103,8 @@ export const FilmRemoval: FC = () => {
         message={
           state &&
           {
-            FetchingDetail: 'Fetching film detail...',
-            Removing: 'Removing film...',
+            FetchingFilm: 'Fetching film detail...',
+            RemovingFilm: 'Removing film...',
           }[state]
         }
       />

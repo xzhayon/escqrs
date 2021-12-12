@@ -16,18 +16,19 @@ export const $FilmDashboardSlice = createSlice({
   name: 'FilmDashboard',
   initialState,
   reducers: {
-    Start() {},
-    FetchList(_, _command: Command<void, Array.Array<Film>>) {},
-    Stop() {},
+    start() {},
     Started() {},
-    ListFetchingStarted(state) {
+    stop() {},
+    Stopped: () => initialState,
+    fetchFilms(_, _command: Command<void, Array.Array<Film>>) {},
+    FilmsFetchingStarted(state) {
       state.isLoading = true
     },
-    ListNotFetched(state, _event: Event<Error>) {
+    FilmsNotFetched(state, _event: Event<Error>) {
       state.isLoading = false
-      state.error = new ListNotFetched()
+      state.error = new FilmsNotFetched()
     },
-    ListFetched(state, event: Event<Array.Array<Film>>) {
+    FilmsFetched(state, event: Event<Array.Array<Film>>) {
       state.isLoading = false
       state.error = undefined
       state.films = event.payload.map((film) => ({
@@ -35,15 +36,14 @@ export const $FilmDashboardSlice = createSlice({
         title: film.title,
       }))
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $FilmDashboard = $FilmDashboardSlice.actions
 
-export class ListNotFetched extends Error {
+export class FilmsNotFetched extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, ListNotFetched.prototype)
+    Object.setPrototypeOf(this, FilmsNotFetched.prototype)
   }
 }

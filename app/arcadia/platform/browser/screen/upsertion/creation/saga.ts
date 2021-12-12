@@ -13,35 +13,35 @@ import { Uuid } from '../../../uuid/Uuid'
 import { $ScreenCreation } from './slice'
 
 const createScreen = (screenId: Id<Screen>) =>
-  function* (command: ReturnType<typeof $ScreenCreation.Create>) {
-    yield* put($ScreenCreation.CreationStarted())
+  function* (command: ReturnType<typeof $ScreenCreation.createScreen>) {
+    yield* put($ScreenCreation.ScreenCreationStarted())
     try {
-      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const screen = yield* call(arcadiaClient.createScreen, {
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      const screen = yield* call(arcadia.createScreen, {
         _: { id: screenId },
         name: command.payload.name,
         seats: command.payload.seats,
       })
-      yield* put($ScreenCreation.Created(screen))
+      yield* put($ScreenCreation.ScreenCreated(screen))
       command.payload.onSuccess &&
         (yield* call(command.payload.onSuccess, screen))
     } catch (error: any) {
-      yield* put($ScreenCreation.NotCreated(error))
+      yield* put($ScreenCreation.ScreenNotCreated(error))
       command.payload.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
 export function* $ScreenCreationSaga() {
-  yield* takeLeading($ScreenCreation.Start.type, function* () {
+  yield* takeLeading($ScreenCreation.start.type, function* () {
     yield* put($ScreenCreation.Started())
     const uuid = yield* getContext<Uuid>('uuid')
     const id = yield* call(uuid.v4)
     const task = yield* takeLeading(
-      $ScreenCreation.Create.type,
+      $ScreenCreation.createScreen.type,
       createScreen($Screen.id(id)),
     )
-    yield* take($ScreenCreation.Stop.type)
+    yield* take($ScreenCreation.stop.type)
     yield* cancel(task)
     yield* put($ScreenCreation.Stopped())
   })

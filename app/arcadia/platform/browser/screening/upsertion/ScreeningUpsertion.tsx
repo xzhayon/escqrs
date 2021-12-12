@@ -17,8 +17,8 @@ import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $ScreeningCreation,
   $ScreeningCreationSlice,
-  NotCreated,
-  NotFetched,
+  FilmsAndScreensNotFetched,
+  ScreeningNotCreated,
 } from './creation/slice'
 
 export const ScreenUpsertion: FC = () => {
@@ -43,9 +43,9 @@ export const ScreenUpsertion: FC = () => {
   const [date, setDate] = useState<Date>()
 
   useEffect(() => {
-    dispatch($ScreeningCreation.Start())
+    dispatch($ScreeningCreation.start())
     return () => {
-      dispatch($ScreeningCreation.Stop())
+      dispatch($ScreeningCreation.stop())
     }
   }, [])
 
@@ -64,7 +64,7 @@ export const ScreenUpsertion: FC = () => {
             }
 
             dispatch(
-              $ScreeningCreation.Create({
+              $ScreeningCreation.createScreening({
                 filmId: $Film.id(filmId),
                 screenId: $Screen.id(screenId),
                 date,
@@ -79,12 +79,14 @@ export const ScreenUpsertion: FC = () => {
                 <Grid item xs={12}>
                   <Alert
                     action={
-                      error instanceof NotFetched ? (
+                      error instanceof FilmsAndScreensNotFetched ? (
                         <Button
                           color="inherit"
-                          disabled={'Fetching' === state}
+                          disabled={'FetchingFilmsAndScreens' === state}
                           size="small"
-                          onClick={() => dispatch($ScreeningCreation.Fetch())}
+                          onClick={() =>
+                            dispatch($ScreeningCreation.fetchFilmsAndScreens())
+                          }
                         >
                           Retry
                         </Button>
@@ -92,9 +94,9 @@ export const ScreenUpsertion: FC = () => {
                     }
                     severity="error"
                   >
-                    {error instanceof NotCreated
+                    {error instanceof ScreeningNotCreated
                       ? 'Cannot create screening.'
-                      : error instanceof NotFetched
+                      : error instanceof FilmsAndScreensNotFetched
                       ? 'Cannot fetch films and/or screens.'
                       : undefined}
                   </Alert>
@@ -158,8 +160,8 @@ export const ScreenUpsertion: FC = () => {
         message={
           state &&
           {
-            Creating: 'Creating screening...',
-            Fetching: 'Fetching films and screens...',
+            CreatingScreening: 'Creating screening...',
+            FetchingFilmsAndScreens: 'Fetching films and screens...',
           }[state]
         }
       />

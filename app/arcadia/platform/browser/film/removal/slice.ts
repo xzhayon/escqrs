@@ -4,7 +4,7 @@ import { Film } from '../../../../film/Film'
 import { Command, Event } from '../../Message'
 
 export interface FilmRemovalState {
-  state?: 'FetchingDetail' | 'Removing'
+  state?: 'FetchingFilm' | 'RemovingFilm'
   error?: Error
   film?: { title: string }
 }
@@ -15,50 +15,50 @@ export const $FilmRemovalSlice = createSlice({
   name: 'FilmRemoval',
   initialState,
   reducers: {
-    Start(_, _command: Command<{ id: Id<Film> }>) {},
-    FetchDetail(_, _command: Command<void, Film>) {},
-    Remove(_, _command: Command) {},
-    Stop() {},
+    start(_, _command: Command<{ id: Id<Film> }>) {},
     Started() {},
-    DetailFetchingStarted(state) {
-      state.state = 'FetchingDetail'
+    stop() {},
+    Stopped: () => initialState,
+    fetchFilm(_, _command: Command<void, Film>) {},
+    FilmFetchingStarted(state) {
+      state.state = 'FetchingFilm'
     },
-    DetailNotFetched(state, _event: Event<Error>) {
+    FilmNotFetched(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new DetailNotFetched()
+      state.error = new FilmNotFetched()
     },
-    DetailFetched(state, event: Event<Film>) {
+    FilmFetched(state, event: Event<Film>) {
       state.state = undefined
       state.error = undefined
       state.film = { title: event.payload.title }
     },
-    RemovalStarted(state) {
-      state.state = 'Removing'
+    removeFilm(_, _command: Command) {},
+    FilmRemovalStarted(state) {
+      state.state = 'RemovingFilm'
     },
-    NotRemoved(state, _event: Event<Error>) {
+    FilmNotRemoved(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new NotRemoved()
+      state.error = new FilmNotRemoved()
     },
-    Removed(state) {
+    FilmRemoved(state) {
       state.state = undefined
       state.error = undefined
     },
-    Stopped: () => initialState,
   },
 })
 
 export const $FilmRemoval = $FilmRemovalSlice.actions
 
-export class DetailNotFetched extends Error {
+export class FilmNotFetched extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, DetailNotFetched.prototype)
+    Object.setPrototypeOf(this, FilmNotFetched.prototype)
   }
 }
 
-export class NotRemoved extends Error {
+export class FilmNotRemoved extends Error {
   constructor() {
     super()
-    Object.setPrototypeOf(this, NotRemoved.prototype)
+    Object.setPrototypeOf(this, FilmNotRemoved.prototype)
   }
 }

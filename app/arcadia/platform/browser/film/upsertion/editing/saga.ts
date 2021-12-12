@@ -13,36 +13,36 @@ import { Film } from '../../../../../film/Film'
 import { ArcadiaClient } from '../../../ArcadiaClient'
 import { $FilmEditing } from './slice'
 
-const fetchDetail = (filmId: Id<Film>) =>
-  function* (command: ReturnType<typeof $FilmEditing.FetchDetail>) {
-    yield* put($FilmEditing.DetailFetchingStarted())
+const fetchFilm = (filmId: Id<Film>) =>
+  function* (command: ReturnType<typeof $FilmEditing.fetchFilm>) {
+    yield* put($FilmEditing.FilmFetchingStarted())
     try {
-      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const film = yield* call(arcadiaClient.getFilm, filmId)
-      yield* put($FilmEditing.DetailFetched(film))
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      const film = yield* call(arcadia.getFilm, filmId)
+      yield* put($FilmEditing.FilmFetched(film))
       command.payload?.onSuccess &&
         (yield* call(command.payload.onSuccess, film))
     } catch (error: any) {
-      yield* put($FilmEditing.DetailNotFetched(error))
+      yield* put($FilmEditing.FilmNotFetched(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
   }
 
-const editScreen = (filmId: Id<Film>) =>
-  function* (command: ReturnType<typeof $FilmEditing.Edit>) {
-    yield* put($FilmEditing.EditingStarted())
+const editFilm = (filmId: Id<Film>) =>
+  function* (command: ReturnType<typeof $FilmEditing.editFilm>) {
+    yield* put($FilmEditing.FilmEditingStarted())
     try {
-      const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const film = yield* call(arcadiaClient.editFilm, {
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      const film = yield* call(arcadia.editFilm, {
         _: { id: filmId },
         title: command.payload.title,
       })
-      yield* put($FilmEditing.Edited(film))
+      yield* put($FilmEditing.FilmEdited(film))
       command.payload.onSuccess &&
         (yield* call(command.payload.onSuccess, film))
     } catch (error: any) {
-      yield* put($FilmEditing.NotEdited(error))
+      yield* put($FilmEditing.FilmNotEdited(error))
       command.payload.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }
@@ -50,17 +50,17 @@ const editScreen = (filmId: Id<Film>) =>
 
 export function* $FilmEditingSaga() {
   yield* takeLeading(
-    $FilmEditing.Start.type,
-    function* ({ payload: { id } }: ReturnType<typeof $FilmEditing.Start>) {
+    $FilmEditing.start.type,
+    function* ({ payload: { id } }: ReturnType<typeof $FilmEditing.start>) {
       yield* put($FilmEditing.Started())
       const task = yield* fork(function* () {
         yield* all([
-          takeLeading($FilmEditing.FetchDetail.type, fetchDetail(id)),
-          takeLeading($FilmEditing.Edit.type, editScreen(id)),
+          takeLeading($FilmEditing.fetchFilm.type, fetchFilm(id)),
+          takeLeading($FilmEditing.editFilm.type, editFilm(id)),
         ])
       })
-      yield* put($FilmEditing.FetchDetail())
-      yield* take($FilmEditing.Stop.type)
+      yield* put($FilmEditing.fetchFilm())
+      yield* take($FilmEditing.stop.type)
       yield* cancel(task)
       yield* put($FilmEditing.Stopped())
     },
