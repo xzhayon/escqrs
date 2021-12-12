@@ -1,17 +1,20 @@
 import { Effect, NonEmptyArray, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
-import { Id } from '../../../src/entity/Entity'
-import { $Command, Command } from '../../../src/entity/message/command/Command'
-import { $CommandHandler } from '../../../src/entity/message/command/CommandHandler'
-import { HasEventStore } from '../../../src/entity/message/event/eventstore/EventStore'
+import { Id } from '../../../../src/entity/Entity'
+import {
+  $Command,
+  Command,
+} from '../../../../src/entity/message/command/Command'
+import { $CommandHandler } from '../../../../src/entity/message/command/CommandHandler'
+import { HasEventStore } from '../../../../src/entity/message/event/eventstore/EventStore'
 import {
   $Repository,
   HasRepository,
-} from '../../../src/entity/repository/Repository'
-import { HasLogger } from '../../../src/logger/Logger'
-import { HasUuid } from '../../../src/uuid/Uuid'
-import { Film } from '../Film'
-import { Screen } from '../Screen'
+} from '../../../../src/entity/repository/Repository'
+import { HasLogger } from '../../../../src/logger/Logger'
+import { HasUuid } from '../../../../src/uuid/Uuid'
+import { Film } from '../../film/Film'
+import { Screen } from '../../screen/Screen'
 import { $Screening, Screening } from '../Screening'
 
 export interface CreateScreening extends Command<Screening, 'CreateScreening'> {

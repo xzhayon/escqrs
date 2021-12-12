@@ -1,7 +1,7 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../src/http/server/HttpServer'
-import { $Screen, $ScreenC } from '../../../Screen'
+import { $Screen, $ScreenC } from '../../../screen/Screen'
 
 export const $CreateScreen = $HttpServer.post(
   '/api/v1/screens',

@@ -8,7 +8,7 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { Screen } from '../../../app/arcadia/Screen'
+import { Screen } from '../../../app/arcadia/screen/Screen'
 import { Id } from '../../../src/entity/Entity'
 import { ArcadiaClient } from '../../ArcadiaClient'
 import { $ScreenRemoval } from './slice'

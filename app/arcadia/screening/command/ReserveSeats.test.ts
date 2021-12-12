@@ -1,12 +1,12 @@
-import { EntityNotFound } from '../../../src/entity/repository/EntityNotFound'
-import { Gwt } from '../../../src/Gwt'
-import { ScreeningExpired } from '../error/ScreeningExpired'
-import { SeatsOutOfBounds } from '../error/SeatsOutOfBounds'
+import { EntityNotFound } from '../../../../src/entity/repository/EntityNotFound'
+import { Gwt } from '../../../../src/Gwt'
+import { ScreeningExpired } from '../../error/ScreeningExpired'
+import { SeatsOutOfBounds } from '../../error/SeatsOutOfBounds'
+import { $Seat } from '../../Seat'
 import { $ScreeningCreated } from '../event/ScreeningCreated'
 import { $SeatsAlreadyTaken } from '../event/SeatsAlreadyTaken'
 import { $SeatsReserved } from '../event/SeatsReserved'
 import { $Screening } from '../Screening'
-import { $Seat } from '../Seat'
 import { $ReserveSeats } from './ReserveSeats'
 
 describe('ReserveSeats', () => {

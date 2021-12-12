@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import React, { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { $Film } from '../../../app/arcadia/Film'
+import { $Film } from '../../../app/arcadia/film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $FilmRemoval,

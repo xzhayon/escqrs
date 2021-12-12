@@ -1,7 +1,7 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../src/http/server/HttpServer'
-import { $Film, $FilmC } from '../../../Film'
+import { $Film, $FilmC } from '../../../film/Film'
 
 export const $EditFilm = $HttpServer.patch(
   '/api/v1/films/:id',

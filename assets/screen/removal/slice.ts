@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Screen } from '../../../app/arcadia/Screen'
+import { Screen } from '../../../app/arcadia/screen/Screen'
 import { Id } from '../../../src/entity/Entity'
 import { Command, Event } from '../../Message'
 

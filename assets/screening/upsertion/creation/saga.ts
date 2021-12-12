@@ -8,7 +8,10 @@ import {
   take,
   takeLeading,
 } from 'typed-redux-saga'
-import { $Screening, Screening } from '../../../../app/arcadia/Screening'
+import {
+  $Screening,
+  Screening,
+} from '../../../../app/arcadia/screening/Screening'
 import { Id } from '../../../../src/entity/Entity'
 import { ArcadiaClient } from '../../../ArcadiaClient'
 import { Uuid } from '../../../uuid/Uuid'

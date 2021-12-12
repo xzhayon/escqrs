@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Film } from '../../../../app/arcadia/Film'
+import { Film } from '../../../../app/arcadia/film/Film'
 import { Command, Event } from '../../../Message'
 
 export interface FilmCreationState {

@@ -11,8 +11,8 @@ import {
 } from '@mui/material'
 import React, { FC, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { $Film } from '../../../app/arcadia/Film'
-import { $Screen } from '../../../app/arcadia/Screen'
+import { $Film } from '../../../app/arcadia/film/Film'
+import { $Screen } from '../../../app/arcadia/screen/Screen'
 import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $ScreeningCreation,

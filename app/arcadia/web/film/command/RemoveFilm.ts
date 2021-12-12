@@ -1,7 +1,7 @@
 import * as t from 'io-ts'
 import { $Repository } from '../../../../../src/entity/repository/Repository'
 import { $HttpServer } from '../../../../../src/http/server/HttpServer'
-import { $Film, Film } from '../../../Film'
+import { $Film, Film } from '../../../film/Film'
 
 export const $RemoveFilm = $HttpServer.delete(
   '/api/v1/films/:id',

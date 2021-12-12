@@ -1,7 +1,7 @@
 import { Array } from '@effect-ts/core'
-import { Film } from '../app/arcadia/Film'
-import { Screen } from '../app/arcadia/Screen'
-import { Screening } from '../app/arcadia/Screening'
+import { Film } from '../app/arcadia/film/Film'
+import { Screen } from '../app/arcadia/screen/Screen'
+import { Screening } from '../app/arcadia/screening/Screening'
 import { DeepPartial } from '../src/DeepPartial'
 import { Body, Header, Id } from '../src/entity/Entity'
 

@@ -1,5 +1,5 @@
-import { $Event, Event } from '../../../src/entity/message/event/Event'
-import { Screen } from '../Screen'
+import { $Event, Event } from '../../../../src/entity/message/event/Event'
+import { Screen } from '../../screen/Screen'
 import { Screening } from '../Screening'
 
 export interface ScreeningCreated extends Event<Screening, 'ScreeningCreated'> {

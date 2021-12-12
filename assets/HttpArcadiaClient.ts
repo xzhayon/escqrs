@@ -2,8 +2,8 @@ import { Effect, pipe } from '@effect-ts/core'
 import { Clock, HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
-import { $FilmC } from '../app/arcadia/Film'
-import { $ScreenC } from '../app/arcadia/Screen'
+import { $FilmC } from '../app/arcadia/film/Film'
+import { $ScreenC } from '../app/arcadia/screen/Screen'
 import { $Any } from '../src/Any'
 import {
   $HttpClient,

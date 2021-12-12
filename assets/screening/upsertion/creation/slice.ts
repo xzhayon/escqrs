@@ -1,8 +1,8 @@
 import { Array } from '@effect-ts/core'
 import { createSlice } from '@reduxjs/toolkit'
-import { Film } from '../../../../app/arcadia/Film'
-import { Screen } from '../../../../app/arcadia/Screen'
-import { Screening } from '../../../../app/arcadia/Screening'
+import { Film } from '../../../../app/arcadia/film/Film'
+import { Screen } from '../../../../app/arcadia/screen/Screen'
+import { Screening } from '../../../../app/arcadia/screening/Screening'
 import { Id } from '../../../../src/entity/Entity'
 import { Command, Event } from '../../../Message'
 

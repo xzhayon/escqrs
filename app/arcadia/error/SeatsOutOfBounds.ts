@@ -1,5 +1,5 @@
 import { Id } from '../../../src/entity/Entity'
-import { Screening } from '../Screening'
+import { Screening } from '../screening/Screening'
 import { Seat } from '../Seat'
 
 export class SeatsOutOfBounds extends Error {

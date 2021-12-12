@@ -1,5 +1,5 @@
 import { Id } from '../../../src/entity/Entity'
-import { Screening } from '../Screening'
+import { Screening } from '../screening/Screening'
 
 export class ScreeningExpired extends Error {
   constructor(message: string) {

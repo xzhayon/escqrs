@@ -1,11 +1,11 @@
 import { Branded } from '@effect-ts/core'
 import * as t from 'io-ts'
-import { $Aggregate } from '../../src/Aggregate'
+import { $Aggregate } from '../../../src/Aggregate'
 import {
   $MutableEntity,
   $MutableEntityC,
   MutableEntity,
-} from '../../src/entity/MutableEntity'
+} from '../../../src/entity/MutableEntity'
 
 export interface Film
   extends MutableEntity<'Film', Branded.Branded<string, 'FilmId'>> {

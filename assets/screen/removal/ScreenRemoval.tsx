@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import React, { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { $Screen } from '../../../app/arcadia/Screen'
+import { $Screen } from '../../../app/arcadia/screen/Screen'
 import { use$Dispatch, use$Selector } from '../../Hook'
 import {
   $ScreenRemoval,

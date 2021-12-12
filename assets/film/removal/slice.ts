@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Film } from '../../../app/arcadia/Film'
+import { Film } from '../../../app/arcadia/film/Film'
 import { Id } from '../../../src/entity/Entity'
 import { Command, Event } from '../../Message'
 
