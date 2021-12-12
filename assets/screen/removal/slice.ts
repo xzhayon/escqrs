@@ -6,7 +6,7 @@ import { Command, Event } from '../../Message'
 export interface ScreenRemovalState {
   state?: 'FetchingDetail' | 'Removing'
   error?: Error
-  screen?: { id: Id<Screen>; name: string }
+  screen?: { name: string }
 }
 
 const initialState: ScreenRemovalState = {}
@@ -30,7 +30,7 @@ export const $ScreenRemovalSlice = createSlice({
     DetailFetched(state, event: Event<Screen>) {
       state.state = undefined
       state.error = undefined
-      state.screen = { id: event.payload._.id, name: event.payload.name }
+      state.screen = { name: event.payload.name }
     },
     RemovalStarted(state) {
       state.state = 'Removing'

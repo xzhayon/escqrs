@@ -6,7 +6,7 @@ import { Command, Event } from '../../Message'
 export interface FilmRemovalState {
   state?: 'FetchingDetail' | 'Removing'
   error?: Error
-  film?: { id: Id<Film>; title: string }
+  film?: { title: string }
 }
 
 const initialState: FilmRemovalState = {}
@@ -30,7 +30,7 @@ export const $FilmRemovalSlice = createSlice({
     DetailFetched(state, event: Event<Film>) {
       state.state = undefined
       state.error = undefined
-      state.film = { id: event.payload._.id, title: event.payload.title }
+      state.film = { title: event.payload.title }
     },
     RemovalStarted(state) {
       state.state = 'Removing'

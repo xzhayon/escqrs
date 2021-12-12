@@ -6,11 +6,7 @@ import { Command, Event } from '../../../Message'
 export interface ScreenEditingState {
   state?: 'FetchingDetail' | 'Editing'
   error?: Error
-  screen?: {
-    id: Id<Screen>
-    name: string
-    seats: { rows: number; columns: number }
-  }
+  screen?: { name: string; seats: { rows: number; columns: number } }
 }
 
 const initialState: ScreenEditingState = {}
@@ -40,11 +36,7 @@ export const $ScreenEditingSlice = createSlice({
     DetailFetched(state, event: Event<Screen>) {
       state.state = undefined
       state.error = undefined
-      state.screen = {
-        id: event.payload._.id,
-        name: event.payload.name,
-        seats: event.payload.seats,
-      }
+      state.screen = { name: event.payload.name, seats: event.payload.seats }
     },
     EditingStarted(state) {
       state.state = 'Editing'

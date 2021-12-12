@@ -1,6 +1,7 @@
 import { Array } from '@effect-ts/core'
 import { Film } from '../app/arcadia/Film'
 import { Screen } from '../app/arcadia/Screen'
+import { Screening } from '../app/arcadia/Screening'
 import { DeepPartial } from '../src/DeepPartial'
 import { Body, Header, Id } from '../src/entity/Entity'
 
@@ -23,4 +24,10 @@ export interface ArcadiaClient {
     film: { _: Pick<Header<Film>, 'id'> } & DeepPartial<Body<Film>>,
   ) => Promise<Film>
   readonly removeFilm: (id: Id<Film>) => Promise<void>
+  readonly createScreening: (
+    screeningId: Id<Screening>,
+    filmId: Id<Film>,
+    screenId: Id<Screen>,
+    date: Date,
+  ) => Promise<Screening>
 }
