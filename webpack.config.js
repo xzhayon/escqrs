@@ -1,13 +1,6 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const DotEnv = require('dotenv-webpack')
-const path = require('path')
 
 module.exports = (env, argv) => ({
-  entry: path.resolve(__dirname, 'assets', 'index.tsx'),
-  output: {
-    filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, 'dist', 'assets'),
-  },
   module: {
     rules: [
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
@@ -40,12 +33,6 @@ module.exports = (env, argv) => ({
       },
     },
   },
-  plugins: [
-    new DotEnv(),
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'public', 'index.html'),
-      inject: 'body',
-    }),
-  ],
+  plugins: [new DotEnv()],
   devtool: 'development' === argv.mode ? 'inline-source-map' : 'source-map',
 })

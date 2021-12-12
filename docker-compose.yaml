@@ -32,8 +32,8 @@ services:
     env_file:
       - ./.env
     environment:
-      EVENT_STORE_PATH: '/tmp/eventstore/'
-      REPOSITORY_PATH: '/tmp/repository/'
+      EVENT_STORE_PATH: /tmp/eventstore/
+      REPOSITORY_PATH: /tmp/repository/
     working_dir: /dist/
     entrypoint: ['npm', 'run', 'start-web', '8080']
     volumes:
