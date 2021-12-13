@@ -9,6 +9,8 @@ import { Layout } from './Layout'
 import { ScreenDashboard } from './screen/dashboard/ScreenDashboard'
 import { ScreenRemoval } from './screen/removal/ScreenRemoval'
 import { ScreenUpsertion } from './screen/upsertion/ScreenUpsertion'
+import { ScreeningDashboard } from './screening/dashboard/ScreeningDashboard'
+import { ScreeningUpsertion } from './screening/upsertion/ScreeningUpsertion'
 
 export const App: FC = () => (
   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -28,6 +30,9 @@ export const App: FC = () => (
               <Route path="edit" element={<FilmUpsertion />} />
               <Route path="remove" element={<FilmRemoval />} />
             </Route>
+          </Route>
+          <Route path="screenings" element={<ScreeningDashboard />}>
+            <Route path="create" element={<ScreeningUpsertion />} />
           </Route>
         </Route>
       </Routes>

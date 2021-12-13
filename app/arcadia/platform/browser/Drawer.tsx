@@ -23,6 +23,9 @@ export const Drawer: FC<DrawerProps> = (props) => {
         <ListItem button component={Link} to="/films">
           <ListItemText primary="Films" />
         </ListItem>
+        <ListItem button component={Link} to="/screenings">
+          <ListItemText primary="Screenings" />
+        </ListItem>
       </List>
     </MuiDrawer>
   )

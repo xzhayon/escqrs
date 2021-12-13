@@ -3,6 +3,7 @@ import { gen } from '@effect-ts/system/Effect'
 import * as Layer from '@effect-ts/system/Layer'
 import { $Layer } from '../../../../config/Layer.local'
 import { $ServiceBus } from '../../../../src/entity/message/command/servicebus/ServiceBus'
+import { $EventStore } from '../../../../src/entity/message/event/eventstore/EventStore'
 import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
 import { $EditFilm } from '../../film/message/command/EditFilm'
@@ -43,6 +44,7 @@ pipe(
     yield* _(GetScreens)
     yield* _(GetScreen)
 
+    yield* _($EventStore.run)
     yield* _($ServiceBus.run)
     yield* _($HttpServer.run)
   }),

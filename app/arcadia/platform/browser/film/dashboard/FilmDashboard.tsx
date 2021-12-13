@@ -122,7 +122,7 @@ export const FilmDashboard: FC = () => {
         </Fab>
       </Box>
       <Outlet />
-      <Snackbar open={isLoading} message="Fetching list of films..." />
+      <Snackbar open={isLoading} message="Fetching films..." />
     </>
   )
 }

@@ -20,7 +20,7 @@ import { use$Dispatch, use$Selector } from '../../Hook'
 import { ScreeningCreationRejected } from '../error/ScreeningCreationRejected'
 import { $ScreeningCreation, $ScreeningCreationSlice } from './creation/slice'
 
-export const ScreenUpsertion: FC = () => {
+export const ScreeningUpsertion: FC = () => {
   const dispatch = use$Dispatch()
   const navigate = useNavigate()
 
@@ -67,6 +67,7 @@ export const ScreenUpsertion: FC = () => {
                 filmId: $Film.id(filmId),
                 screenId: $Screen.id(screenId),
                 date,
+                onSuccess: () => navigate(-1),
               }),
             )
           }}
@@ -112,37 +113,17 @@ export const ScreenUpsertion: FC = () => {
                   required
                   select
                   variant="filled"
-                  value={filmId}
+                  value={filmId ?? ''}
                   onChange={(event) => setFilmId(event.target.value)}
                 >
-                  {films?.map(({ id, title }) => (
+                  {(films ?? []).map(({ id, title }) => (
                     <MenuItem key={id} value={id}>
                       {title}
                     </MenuItem>
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  disabled={undefined !== state}
-                  fullWidth
-                  inputProps={{ required: true }}
-                  label="Screen"
-                  name="screen"
-                  required
-                  select
-                  variant="filled"
-                  value={screenId}
-                  onChange={(event) => setScreenId(event.target.value)}
-                >
-                  {screens?.map(({ id, name }) => (
-                    <MenuItem key={id} value={id}>
-                      {name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12}>
                 <DateTimePicker
                   disabled={undefined !== state}
                   label="Date"
@@ -155,9 +136,31 @@ export const ScreenUpsertion: FC = () => {
                       variant="filled"
                     />
                   )}
-                  value={date}
-                  onChange={(_value) => null != _value && setDate(_value)}
+                  value={date ?? ''}
+                  onChange={(_value) =>
+                    _value instanceof Date && setDate(_value)
+                  }
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  disabled={undefined !== state}
+                  fullWidth
+                  inputProps={{ required: true }}
+                  label="Screen"
+                  name="screen"
+                  required
+                  select
+                  variant="filled"
+                  value={screenId ?? ''}
+                  onChange={(event) => setScreenId(event.target.value)}
+                >
+                  {(screens ?? []).map(({ id, name }) => (
+                    <MenuItem key={id} value={id}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
             </Grid>
           </DialogContent>

@@ -128,7 +128,7 @@ export const ScreenDashboard: FC = () => {
         </Fab>
       </Box>
       <Outlet />
-      <Snackbar open={isLoading} message="Fetching list of screens..." />
+      <Snackbar open={isLoading} message="Fetching screens..." />
     </>
   )
 }
