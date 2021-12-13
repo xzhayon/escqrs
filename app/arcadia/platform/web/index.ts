@@ -18,14 +18,19 @@ import { GetScreens } from './screen/query/GetScreens'
 
 pipe(
   gen(function* (_) {
+    for (const [routeHandler, commandHandler] of [
+      [CreateFilm, $CreateFilm] as const,
+    ]) {
+      yield* _($ServiceBus.registerHandler(yield* _(commandHandler.handler)))
+      yield* _(routeHandler)
+    }
+
     yield* _(CreateScreen)
     yield* _(GetScreens)
     yield* _(GetScreen)
     yield* _(EditScreen)
     yield* _(RemoveScreen)
 
-    yield* _(CreateFilm)
-    yield* _($ServiceBus.registerHandler(yield* _($CreateFilm.handler)))
     yield* _(GetFilms)
     yield* _(GetFilm)
     yield* _(EditFilm)

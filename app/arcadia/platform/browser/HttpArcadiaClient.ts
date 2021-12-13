@@ -24,6 +24,91 @@ export const $HttpArcadiaClient =
     $logger: Logger
   }) =>
   (url: string): ArcadiaClient => ({
+    createFilm: (film) =>
+      pipe(
+        gen(function* (_) {
+          const response = yield* _(
+            $HttpClient.post(`${url}/api/v1/films/${film._.id}/create`, {
+              body: { data: film },
+              json: true,
+            }),
+          )
+          const body = yield* _(
+            $Any.decode(t.type({ data: $FilmC }))(response.body),
+          )
+
+          return body.data
+        }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    getFilms: () =>
+      pipe(
+        gen(function* (_) {
+          const response = yield* _(
+            $HttpClient.get(`${url}/api/v1/films`, { json: true }),
+          )
+          const body = yield* _(
+            $Any.decode(t.type({ data: t.readonlyArray($FilmC) }))(
+              response.body,
+            ),
+          )
+
+          return body.data
+        }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    getFilm: (id) =>
+      pipe(
+        gen(function* (_) {
+          const response = yield* _(
+            $HttpClient.get(`${url}/api/v1/films/${id}`, { json: true }),
+          )
+          const body = yield* _(
+            $Any.decode(t.type({ data: $FilmC }))(response.body),
+          )
+
+          return body.data
+        }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    editFilm: (film) =>
+      pipe(
+        gen(function* (_) {
+          const response = yield* _(
+            $HttpClient.patch(`${url}/api/v1/films/${film._.id}`, {
+              body: { data: film },
+              json: true,
+            }),
+          )
+          const body = yield* _(
+            $Any.decode(t.type({ data: $FilmC }))(response.body),
+          )
+
+          return body.data
+        }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    removeFilm: (id) =>
+      pipe(
+        $HttpClient.delete(`${url}/api/v1/films/${id}`, { json: true }),
+        Effect.asUnit,
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
     createScreen: (screen) =>
       pipe(
         gen(function* (_) {
@@ -105,91 +190,6 @@ export const $HttpArcadiaClient =
         $HttpClient.delete(`${url}/api/v1/screens/${id}`, {
           json: true,
         }),
-        Effect.asUnit,
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    createFilm: (film) =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.post(`${url}/api/v1/films`, {
-              body: { data: film },
-              json: true,
-            }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $FilmC }))(response.body),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    getFilms: () =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.get(`${url}/api/v1/films`, { json: true }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: t.readonlyArray($FilmC) }))(
-              response.body,
-            ),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    getFilm: (id) =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.get(`${url}/api/v1/films/${id}`, { json: true }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $FilmC }))(response.body),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    editFilm: (film) =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.patch(`${url}/api/v1/films/${film._.id}`, {
-              body: { data: film },
-              json: true,
-            }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $FilmC }))(response.body),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    removeFilm: (id) =>
-      pipe(
-        $HttpClient.delete(`${url}/api/v1/films/${id}`, { json: true }),
         Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
