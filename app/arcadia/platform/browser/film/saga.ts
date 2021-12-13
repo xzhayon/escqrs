@@ -10,7 +10,7 @@ import { $FilmUpsertionSaga } from './upsertion/saga'
 function* coordinate() {
   yield* takeLatest(
     [
-      $FilmCreation.FilmCreated.type,
+      $FilmCreation.FilmCreationAccepted.type,
       $FilmEditing.FilmEdited.type,
       $FilmRemoval.FilmRemoved.type,
     ],

@@ -14,14 +14,14 @@ import { $FilmCreation } from './slice'
 
 const createFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmCreation.createFilm>) {
-    yield* put($FilmCreation.FilmCreationStarted())
+    yield* put($FilmCreation.FilmCreationRequested())
     try {
       const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
       yield* call(arcadia.createFilm, filmId, command.payload.title)
-      yield* put($FilmCreation.FilmCreated())
+      yield* put($FilmCreation.FilmCreationAccepted())
       command.payload.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($FilmCreation.FilmNotCreated(error))
+      yield* put($FilmCreation.FilmCreationRejected(error))
       command.payload.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }

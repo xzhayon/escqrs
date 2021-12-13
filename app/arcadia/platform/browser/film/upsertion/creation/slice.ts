@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { Command, Event } from '../../../Message'
-import { FilmNotCreated } from '../../error/FilmNotCreated'
+import { FilmCreationRejected } from '../../error/FilmCreationRejected'
 
 export interface FilmCreationState {
   state?: 'CreatingFilm'
@@ -18,14 +18,14 @@ export const $FilmCreationSlice = createSlice({
     stop() {},
     Stopped: () => initialState,
     createFilm(_, _command: Command<{ title: string }>) {},
-    FilmCreationStarted(state) {
+    FilmCreationRequested(state) {
       state.state = 'CreatingFilm'
     },
-    FilmNotCreated(state, _event: Event<Error>) {
+    FilmCreationRejected(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new FilmNotCreated()
+      state.error = new FilmCreationRejected()
     },
-    FilmCreated(state, _event: Event) {
+    FilmCreationAccepted(state) {
       state.state = undefined
       state.error = undefined
     },

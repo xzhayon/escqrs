@@ -13,7 +13,7 @@ import React, { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import { FilmNotCreated } from '../error/FilmNotCreated'
+import { FilmCreationRejected } from '../error/FilmCreationRejected'
 import { FilmNotEdited } from '../error/FilmNotEdited'
 import { FilmNotFetched } from '../error/FilmNotFetched'
 import { $FilmCreation, $FilmCreationSlice } from './creation/slice'
@@ -79,7 +79,7 @@ export const FilmUpsertion: FC = () => {
                     }
                     severity="error"
                   >
-                    {error instanceof FilmNotCreated
+                    {error instanceof FilmCreationRejected
                       ? 'Cannot create film.'
                       : error instanceof FilmNotFetched
                       ? 'Cannot fetch film detail.'
