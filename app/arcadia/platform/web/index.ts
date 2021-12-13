@@ -31,14 +31,14 @@ pipe(
       yield* _(routeHandler)
     }
 
+    yield* _(GetFilms)
+    yield* _(GetFilm)
+
     yield* _(CreateScreen)
     yield* _(GetScreens)
     yield* _(GetScreen)
     yield* _(EditScreen)
     yield* _(RemoveScreen)
-
-    yield* _(GetFilms)
-    yield* _(GetFilm)
 
     yield* _($ServiceBus.run)
     yield* _($HttpServer.run)
