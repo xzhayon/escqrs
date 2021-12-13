@@ -29,7 +29,7 @@ export const $HttpArcadiaClient =
         gen(function* (_) {
           const response = yield* _(
             $HttpClient.post(`${url}/api/v1/films/${film._.id}/create`, {
-              body: { data: film },
+              body: { data: { title: film.title } },
               json: true,
             }),
           )
