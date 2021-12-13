@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { Screen } from '../../../../../screen/Screen'
 import { Command, Event } from '../../../Message'
+import { ScreenNotCreated } from '../../error/ScreenNotCreated'
 
 export interface ScreenCreationState {
   state?: 'CreatingScreen'
@@ -39,10 +40,3 @@ export const $ScreenCreationSlice = createSlice({
 })
 
 export const $ScreenCreation = $ScreenCreationSlice.actions
-
-export class ScreenNotCreated extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreenNotCreated.prototype)
-  }
-}

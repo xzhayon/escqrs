@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../src/entity/Entity'
 import { Screen } from '../../../../screen/Screen'
 import { Command, Event } from '../../Message'
+import { ScreensNotFetched } from '../error/ScreensNotFetched'
 
 export interface ScreenDashboardState {
   isLoading?: boolean
@@ -41,10 +42,3 @@ export const $ScreenDashboardSlice = createSlice({
 })
 
 export const $ScreenDashboard = $ScreenDashboardSlice.actions
-
-export class ScreensNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreensNotFetched.prototype)
-  }
-}

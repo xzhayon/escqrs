@@ -14,12 +14,9 @@ import React, { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Screen } from '../../../../screen/Screen'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import {
-  $ScreenRemoval,
-  $ScreenRemovalSlice,
-  ScreenNotFetched,
-  ScreenNotRemoved,
-} from './slice'
+import { ScreenNotFetched } from '../error/ScreenNotFetched'
+import { ScreenNotRemoved } from '../error/ScreenNotRemoved'
+import { $ScreenRemoval, $ScreenRemovalSlice } from './slice'
 
 export const ScreenRemoval: FC = () => {
   const dispatch = use$Dispatch()

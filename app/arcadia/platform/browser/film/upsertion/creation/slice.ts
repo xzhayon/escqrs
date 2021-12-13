@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { Film } from '../../../../../film/Film'
 import { Command, Event } from '../../../Message'
+import { FilmNotCreated } from '../../error/FilmNotCreated'
 
 export interface FilmCreationState {
   state?: 'CreatingFilm'
@@ -33,10 +34,3 @@ export const $FilmCreationSlice = createSlice({
 })
 
 export const $FilmCreation = $FilmCreationSlice.actions
-
-export class FilmNotCreated extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, FilmNotCreated.prototype)
-  }
-}

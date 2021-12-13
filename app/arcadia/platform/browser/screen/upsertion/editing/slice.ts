@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../../src/entity/Entity'
 import { Screen } from '../../../../../screen/Screen'
 import { Command, Event } from '../../../Message'
+import { ScreenNotEdited } from '../../error/ScreenNotEdited'
+import { ScreenNotFetched } from '../../error/ScreenNotFetched'
 
 export interface ScreenEditingState {
   state?: 'FetchingScreen' | 'EditingScreen'
@@ -54,17 +56,3 @@ export const $ScreenEditingSlice = createSlice({
 })
 
 export const $ScreenEditing = $ScreenEditingSlice.actions
-
-export class ScreenNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreenNotFetched.prototype)
-  }
-}
-
-export class ScreenNotEdited extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreenNotEdited.prototype)
-  }
-}

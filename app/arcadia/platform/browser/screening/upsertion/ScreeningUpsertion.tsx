@@ -13,13 +13,10 @@ import React, { FC, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { $Screen } from '../../../../screen/Screen'
+import { FilmsAndScreensNotFetched } from '../../error/FilmsAndScreensNotFetched'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import {
-  $ScreeningCreation,
-  $ScreeningCreationSlice,
-  FilmsAndScreensNotFetched,
-  ScreeningNotCreated,
-} from './creation/slice'
+import { ScreeningNotCreated } from '../error/ScreeningNotCreated'
+import { $ScreeningCreation, $ScreeningCreationSlice } from './creation/slice'
 
 export const ScreenUpsertion: FC = () => {
   const dispatch = use$Dispatch()

@@ -14,12 +14,9 @@ import React, { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import {
-  $FilmRemoval,
-  $FilmRemovalSlice,
-  FilmNotFetched,
-  FilmNotRemoved,
-} from './slice'
+import { FilmNotFetched } from '../error/FilmNotFetched'
+import { FilmNotRemoved } from '../error/FilmNotRemoved'
+import { $FilmRemoval, $FilmRemovalSlice } from './slice'
 
 export const FilmRemoval: FC = () => {
   const dispatch = use$Dispatch()

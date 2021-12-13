@@ -13,17 +13,11 @@ import React, { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Screen } from '../../../../screen/Screen'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import {
-  $ScreenCreation,
-  $ScreenCreationSlice,
-  ScreenNotCreated,
-} from './creation/slice'
-import {
-  $ScreenEditing,
-  $ScreenEditingSlice,
-  ScreenNotEdited,
-  ScreenNotFetched,
-} from './editing/slice'
+import { ScreenNotCreated } from '../error/ScreenNotCreated'
+import { ScreenNotEdited } from '../error/ScreenNotEdited'
+import { ScreenNotFetched } from '../error/ScreenNotFetched'
+import { $ScreenCreation, $ScreenCreationSlice } from './creation/slice'
+import { $ScreenEditing, $ScreenEditingSlice } from './editing/slice'
 
 export const ScreenUpsertion: FC = () => {
   const dispatch = use$Dispatch()

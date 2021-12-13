@@ -3,7 +3,9 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../../src/entity/Entity'
 import { Film } from '../../../../../film/Film'
 import { Screen } from '../../../../../screen/Screen'
+import { FilmsAndScreensNotFetched } from '../../../error/FilmsAndScreensNotFetched'
 import { Command, Event } from '../../../Message'
+import { ScreeningNotCreated } from '../../error/ScreeningNotCreated'
 
 export interface ScreeningCreationState {
   state?: 'FetchingFilmsAndScreens' | 'CreatingScreening'
@@ -69,17 +71,3 @@ export const $ScreeningCreationSlice = createSlice({
 })
 
 export const $ScreeningCreation = $ScreeningCreationSlice.actions
-
-export class FilmsAndScreensNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, FilmsAndScreensNotFetched.prototype)
-  }
-}
-
-export class ScreeningNotCreated extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreeningNotCreated.prototype)
-  }
-}

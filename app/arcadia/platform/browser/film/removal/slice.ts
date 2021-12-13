@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../src/entity/Entity'
 import { Film } from '../../../../film/Film'
 import { Command, Event } from '../../Message'
+import { FilmNotFetched } from '../error/FilmNotFetched'
+import { FilmNotRemoved } from '../error/FilmNotRemoved'
 
 export interface FilmRemovalState {
   state?: 'FetchingFilm' | 'RemovingFilm'
@@ -48,17 +50,3 @@ export const $FilmRemovalSlice = createSlice({
 })
 
 export const $FilmRemoval = $FilmRemovalSlice.actions
-
-export class FilmNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, FilmNotFetched.prototype)
-  }
-}
-
-export class FilmNotRemoved extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, FilmNotRemoved.prototype)
-  }
-}

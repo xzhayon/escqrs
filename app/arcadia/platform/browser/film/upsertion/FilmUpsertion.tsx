@@ -13,17 +13,11 @@ import React, { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import {
-  $FilmCreation,
-  $FilmCreationSlice,
-  FilmNotCreated,
-} from './creation/slice'
-import {
-  $FilmEditing,
-  $FilmEditingSlice,
-  FilmNotFetched,
-  FilmNotEdited,
-} from './editing/slice'
+import { FilmNotCreated } from '../error/FilmNotCreated'
+import { FilmNotEdited } from '../error/FilmNotEdited'
+import { FilmNotFetched } from '../error/FilmNotFetched'
+import { $FilmCreation, $FilmCreationSlice } from './creation/slice'
+import { $FilmEditing, $FilmEditingSlice } from './editing/slice'
 
 export const FilmUpsertion: FC = () => {
   const dispatch = use$Dispatch()

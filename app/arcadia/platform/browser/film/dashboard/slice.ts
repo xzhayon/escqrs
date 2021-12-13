@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../src/entity/Entity'
 import { Film } from '../../../../film/Film'
 import { Command, Event } from '../../Message'
+import { FilmsNotFetched } from '../error/FilmsNotFetched'
 
 export interface FilmDashboardState {
   isLoading?: boolean
@@ -40,10 +41,3 @@ export const $FilmDashboardSlice = createSlice({
 })
 
 export const $FilmDashboard = $FilmDashboardSlice.actions
-
-export class FilmsNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, FilmsNotFetched.prototype)
-  }
-}

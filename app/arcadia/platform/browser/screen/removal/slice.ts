@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../src/entity/Entity'
 import { Screen } from '../../../../screen/Screen'
 import { Command, Event } from '../../Message'
+import { ScreenNotFetched } from '../error/ScreenNotFetched'
+import { ScreenNotRemoved } from '../error/ScreenNotRemoved'
 
 export interface ScreenRemovalState {
   state?: 'FetchingScreen' | 'RemovingScreen'
@@ -48,17 +50,3 @@ export const $ScreenRemovalSlice = createSlice({
 })
 
 export const $ScreenRemoval = $ScreenRemovalSlice.actions
-
-export class ScreenNotFetched extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreenNotFetched.prototype)
-  }
-}
-
-export class ScreenNotRemoved extends Error {
-  constructor() {
-    super()
-    Object.setPrototypeOf(this, ScreenNotRemoved.prototype)
-  }
-}
