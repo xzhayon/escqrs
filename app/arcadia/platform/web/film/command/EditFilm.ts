@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Film, $FilmC } from '../../../../film/Film'
 
-export const $EditFilm = $HttpServer.patch(
+export const EditFilm = $HttpServer.patch(
   '/api/v1/films/:id',
   {
     body: t.type({ data: t.exact(t.partial({ title: t.string })) }),

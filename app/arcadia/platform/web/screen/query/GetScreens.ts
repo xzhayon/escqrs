@@ -4,7 +4,7 @@ import { $Repository } from '../../../../../../src/entity/repository/Repository'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $ScreenC, Screen } from '../../../../screen/Screen'
 
-export const $GetScreens = $HttpServer.get(
+export const GetScreens = $HttpServer.get(
   '/api/v1/screens',
   { response: t.type({ data: t.readonlyArray($ScreenC) }) },
   () =>

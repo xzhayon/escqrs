@@ -4,7 +4,7 @@ import { $Repository } from '../../../../../../src/entity/repository/Repository'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $FilmC, Film } from '../../../../film/Film'
 
-export const $GetFilms = $HttpServer.get(
+export const GetFilms = $HttpServer.get(
   '/api/v1/films',
   { response: t.type({ data: t.readonlyArray($FilmC) }) },
   () =>

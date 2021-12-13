@@ -3,7 +3,7 @@ import { $Repository } from '../../../../../../src/entity/repository/Repository'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Film, Film } from '../../../../film/Film'
 
-export const $RemoveFilm = $HttpServer.delete(
+export const RemoveFilm = $HttpServer.delete(
   '/api/v1/films/:id',
   { params: t.type({ id: t.string }), response: t.void },
   (request) =>

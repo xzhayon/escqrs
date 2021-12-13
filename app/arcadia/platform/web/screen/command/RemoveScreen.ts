@@ -3,7 +3,7 @@ import { $Repository } from '../../../../../../src/entity/repository/Repository'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Screen, Screen } from '../../../../screen/Screen'
 
-export const $RemoveScreen = $HttpServer.delete(
+export const RemoveScreen = $HttpServer.delete(
   '/api/v1/screens/:id',
   { params: t.type({ id: t.string }), response: t.void },
   (request) =>

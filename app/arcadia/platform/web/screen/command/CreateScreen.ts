@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Screen, $ScreenC } from '../../../../screen/Screen'
 
-export const $CreateScreen = $HttpServer.post(
+export const CreateScreen = $HttpServer.post(
   '/api/v1/screens',
   {
     body: t.type({

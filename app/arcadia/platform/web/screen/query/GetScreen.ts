@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Screen, $ScreenC } from '../../../../screen/Screen'
 
-export const $GetScreen = $HttpServer.get(
+export const GetScreen = $HttpServer.get(
   '/api/v1/screens/:id',
   { params: t.type({ id: t.string }), response: t.type({ data: $ScreenC }) },
   (request) =>

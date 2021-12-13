@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Film, $FilmC } from '../../../../film/Film'
 
-export const $GetFilm = $HttpServer.get(
+export const GetFilm = $HttpServer.get(
   '/api/v1/films/:id',
   { params: t.type({ id: t.string }), response: t.type({ data: $FilmC }) },
   (request) =>

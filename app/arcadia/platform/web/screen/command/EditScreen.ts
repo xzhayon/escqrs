@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
 import { $Screen, $ScreenC } from '../../../../screen/Screen'
 
-export const $EditScreen = $HttpServer.patch(
+export const EditScreen = $HttpServer.patch(
   '/api/v1/screens/:id',
   {
     body: t.type({
