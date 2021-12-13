@@ -3,7 +3,7 @@ import { Id } from '../../../../../../src/entity/Entity'
 import { Film } from '../../../../film/Film'
 import { Command, Event } from '../../Message'
 import { FilmNotFetched } from '../error/FilmNotFetched'
-import { FilmNotRemoved } from '../error/FilmNotRemoved'
+import { FilmRemovalRejected } from '../error/FilmRemovalRejected'
 
 export interface FilmRemovalState {
   state?: 'FetchingFilm' | 'RemovingFilm'
@@ -35,14 +35,14 @@ export const $FilmRemovalSlice = createSlice({
       state.film = { title: event.payload.title }
     },
     removeFilm(_, _command: Command) {},
-    FilmRemovalStarted(state) {
+    FilmRemovalRequested(state) {
       state.state = 'RemovingFilm'
     },
-    FilmNotRemoved(state, _event: Event<Error>) {
+    FilmRemovalRejected(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new FilmNotRemoved()
+      state.error = new FilmRemovalRejected()
     },
-    FilmRemoved(state) {
+    FilmRemovalAccepted(state) {
       state.state = undefined
       state.error = undefined
     },

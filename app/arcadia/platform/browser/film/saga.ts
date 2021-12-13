@@ -12,7 +12,7 @@ function* coordinate() {
     [
       $FilmCreation.FilmCreationAccepted.type,
       $FilmEditing.FilmEditingAccepted.type,
-      $FilmRemoval.FilmRemoved.type,
+      $FilmRemoval.FilmRemovalAccepted.type,
     ],
     function* () {
       yield* put($FilmDashboard.fetchFilms())

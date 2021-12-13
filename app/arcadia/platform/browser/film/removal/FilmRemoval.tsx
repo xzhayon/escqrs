@@ -15,7 +15,7 @@ import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
 import { FilmNotFetched } from '../error/FilmNotFetched'
-import { FilmNotRemoved } from '../error/FilmNotRemoved'
+import { FilmRemovalRejected } from '../error/FilmRemovalRejected'
 import { $FilmRemoval, $FilmRemovalSlice } from './slice'
 
 export const FilmRemoval: FC = () => {
@@ -64,7 +64,7 @@ export const FilmRemoval: FC = () => {
                 >
                   {error instanceof FilmNotFetched
                     ? 'Cannot fetch film detail.'
-                    : error instanceof FilmNotRemoved
+                    : error instanceof FilmRemovalRejected
                     ? 'Cannot remove film.'
                     : undefined}
                 </Alert>

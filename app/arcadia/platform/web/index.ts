@@ -6,6 +6,7 @@ import { $ServiceBus } from '../../../../src/entity/message/command/servicebus/S
 import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
 import { $EditFilm } from '../../film/message/command/EditFilm'
+import { $RemoveFilm } from '../../film/message/command/RemoveFilm'
 import { CreateFilm } from './film/command/CreateFilm'
 import { EditFilm } from './film/command/EditFilm'
 import { RemoveFilm } from './film/command/RemoveFilm'
@@ -20,6 +21,7 @@ import { GetScreens } from './screen/query/GetScreens'
 const handlers = [
   [CreateFilm, $CreateFilm] as const,
   [EditFilm, $EditFilm] as const,
+  [RemoveFilm, $RemoveFilm] as const,
 ]
 
 pipe(
@@ -37,7 +39,6 @@ pipe(
 
     yield* _(GetFilms)
     yield* _(GetFilm)
-    yield* _(RemoveFilm)
 
     yield* _($ServiceBus.run)
     yield* _($HttpServer.run)

@@ -31,14 +31,14 @@ const fetchFilm = (filmId: Id<Film>) =>
 
 const removeFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmRemoval.removeFilm>) {
-    yield* put($FilmRemoval.FilmRemovalStarted())
+    yield* put($FilmRemoval.FilmRemovalRequested())
     try {
       const arcadiaClient = yield* getContext<ArcadiaClient>('arcadiaClient')
       yield* call(arcadiaClient.removeFilm, filmId)
-      yield* put($FilmRemoval.FilmRemoved())
+      yield* put($FilmRemoval.FilmRemovalAccepted())
       command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($FilmRemoval.FilmNotRemoved(error))
+      yield* put($FilmRemoval.FilmRemovalRejected(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }

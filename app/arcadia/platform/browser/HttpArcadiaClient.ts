@@ -48,6 +48,15 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
+    removeFilm: (id) =>
+      pipe(
+        $HttpClient.post(`${url}/api/v1/films/${id}/remove`, { json: true }),
+        Effect.asUnit,
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
     getFilms: () =>
       pipe(
         gen(function* (_) {
@@ -79,15 +88,6 @@ export const $HttpArcadiaClient =
 
           return body.data
         }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    removeFilm: (id) =>
-      pipe(
-        $HttpClient.delete(`${url}/api/v1/films/${id}`, { json: true }),
-        Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
         Effect.provideService(HasLogger)($logger),

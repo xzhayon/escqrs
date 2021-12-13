@@ -31,6 +31,7 @@ export function $Film() {
 $Film.id = aggregate.id
 $Film.load = aggregate.load
 $Film.save = aggregate.save
+$Film.delete = aggregate.delete
 
 $Film.create = (id: Id<Film>, title: string) => $Film()({ title }, { id })
 
