@@ -17,13 +17,9 @@ const createFilm = (filmId: Id<Film>) =>
     yield* put($FilmCreation.FilmCreationStarted())
     try {
       const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const film = yield* call(arcadia.createFilm, {
-        _: { id: filmId },
-        title: command.payload.title,
-      })
-      yield* put($FilmCreation.FilmCreated(film))
-      command.payload.onSuccess &&
-        (yield* call(command.payload.onSuccess, film))
+      yield* call(arcadia.createFilm, filmId, command.payload.title)
+      yield* put($FilmCreation.FilmCreated())
+      command.payload.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
       yield* put($FilmCreation.FilmNotCreated(error))
       command.payload.onFailure &&

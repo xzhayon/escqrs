@@ -24,21 +24,13 @@ export const $HttpArcadiaClient =
     $logger: Logger
   }) =>
   (url: string): ArcadiaClient => ({
-    createFilm: (film) =>
+    createFilm: (id, title) =>
       pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.post(`${url}/api/v1/films/${film._.id}/create`, {
-              body: { data: { title: film.title } },
-              json: true,
-            }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $FilmC }))(response.body),
-          )
-
-          return body.data
+        $HttpClient.post(`${url}/api/v1/films/${id}/create`, {
+          body: { data: { title } },
+          json: true,
         }),
+        Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
         Effect.provideService(HasLogger)($logger),

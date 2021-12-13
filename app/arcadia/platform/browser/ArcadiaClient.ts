@@ -6,9 +6,7 @@ import { Screen } from '../../screen/Screen'
 import { Screening } from '../../screening/Screening'
 
 export interface ArcadiaClient {
-  readonly createFilm: (
-    film: { _: Pick<Header<Film>, 'id'> } & Body<Film>,
-  ) => Promise<Film>
+  readonly createFilm: (id: Id<Film>, title: string) => Promise<void>
   readonly getFilms: () => Promise<Array.Array<Film>>
   readonly getFilm: (id: Id<Film>) => Promise<Film>
   readonly editFilm: (
