@@ -17,8 +17,7 @@ const createScreen = (screenId: Id<Screen>) =>
     yield* put($ScreenCreation.ScreenCreationStarted())
     try {
       const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const screen = yield* call(arcadia.createScreen, {
-        _: { id: screenId },
+      const screen = yield* call(arcadia.createScreen, screenId, {
         name: command.payload.name,
         seats: command.payload.seats,
       })

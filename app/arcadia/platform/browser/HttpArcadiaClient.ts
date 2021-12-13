@@ -93,21 +93,52 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
-    createScreen: (screen) =>
+    createScreen: (id, body) =>
       pipe(
         gen(function* (_) {
           const response = yield* _(
             $HttpClient.post(`${url}/api/v1/screens`, {
-              body: { data: screen },
+              body: { data: { ...body, _: { id } } },
               json: true,
             }),
           )
-          const body = yield* _(
+          const _body = yield* _(
             $Any.decode(t.type({ data: $ScreenC }))(response.body),
           )
 
-          return body.data
+          return _body.data
         }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    editScreen: (id, body) =>
+      pipe(
+        gen(function* (_) {
+          const response = yield* _(
+            $HttpClient.patch(`${url}/api/v1/screens/${id}`, {
+              body: { data: body },
+              json: true,
+            }),
+          )
+          const _body = yield* _(
+            $Any.decode(t.type({ data: $ScreenC }))(response.body),
+          )
+
+          return _body.data
+        }),
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
+    removeScreen: (id) =>
+      pipe(
+        $HttpClient.delete(`${url}/api/v1/screens/${id}`, {
+          json: true,
+        }),
+        Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
         Effect.provideService(HasLogger)($logger),
@@ -144,37 +175,6 @@ export const $HttpArcadiaClient =
 
           return body.data
         }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    editScreen: (screen) =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.patch(`${url}/api/v1/screens/${screen._.id}`, {
-              body: { data: screen },
-              json: true,
-            }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $ScreenC }))(response.body),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    removeScreen: (id) =>
-      pipe(
-        $HttpClient.delete(`${url}/api/v1/screens/${id}`, {
-          json: true,
-        }),
-        Effect.asUnit,
         Effect.provideService(HasClock)($clock),
         Effect.provideService(HasHttpClient)($http),
         Effect.provideService(HasLogger)($logger),

@@ -35,10 +35,10 @@ pipe(
     yield* _(GetFilm)
 
     yield* _(CreateScreen)
-    yield* _(GetScreens)
-    yield* _(GetScreen)
     yield* _(EditScreen)
     yield* _(RemoveScreen)
+    yield* _(GetScreens)
+    yield* _(GetScreen)
 
     yield* _($ServiceBus.run)
     yield* _($HttpServer.run)

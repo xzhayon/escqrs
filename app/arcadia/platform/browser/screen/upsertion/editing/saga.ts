@@ -34,8 +34,7 @@ const editScreen = (screenId: Id<Screen>) =>
     yield* put($ScreenEditing.ScreenEditingStarted())
     try {
       const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const screen = yield* call(arcadia.editScreen, {
-        _: { id: screenId },
+      const screen = yield* call(arcadia.editScreen, screenId, {
         name: command.payload.name,
         seats: command.payload.seats,
       })
