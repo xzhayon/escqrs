@@ -6,7 +6,7 @@ import * as t from 'io-ts'
 import { $Any } from '../../Any'
 import { $Error } from '../../Error'
 import { $Logger, HasLogger, Logger } from '../../logger/Logger'
-import { HttpMethod } from '../Http'
+import { HttpMethod, HttpResponse } from '../Http'
 import { HttpServer, HttpServerHandler, HttpServerRoute } from './HttpServer'
 
 const CHANNEL = 'FastifyHttpServer'
@@ -36,8 +36,8 @@ const route =
       Effect.tryCatch(
         () =>
           fastify.register(async (instance) =>
-            instance[method](path, async (request) =>
-              pipe(
+            instance[method](path, async (request, reply) => {
+              const response = await pipe(
                 gen(function* (_) {
                   request.body = yield* _(
                     $Any.decode(schema.body ?? t.unknown)(request.body),
@@ -73,8 +73,19 @@ const route =
                 Effect.provideService(HasLogger)($logger),
                 Effect.provideAll(r),
                 Effect.runPromise,
-              ),
-            ),
+              )
+
+              if (response instanceof HttpResponse) {
+                reply
+                  .status(response.status)
+                  .headers(response.headers)
+                  .send(response.body)
+
+                return
+              }
+
+              return response
+            }),
           ),
         $Error.fromUnknown(
           Error(`Cannot register route "${method.toUpperCase()} ${path}"`),

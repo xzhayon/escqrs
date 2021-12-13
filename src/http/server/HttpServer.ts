@@ -2,7 +2,7 @@ import { Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $Logger } from '../../logger/Logger'
-import { HttpMethod } from '../Http'
+import { HttpMethod, HttpResponse } from '../Http'
 
 const CHANNEL = 'HttpServer'
 
@@ -55,7 +55,11 @@ export interface HttpServerHandler<
       t.TypeOf<ParamsC>,
       t.TypeOf<QueryC>
     >,
-  ): Effect.Effect<R, Error, t.TypeOf<ResponseC>>
+  ): Effect.Effect<
+    R,
+    Error,
+    t.TypeOf<ResponseC> | HttpResponse<t.TypeOf<ResponseC>>
+  >
 }
 
 export interface HttpServerRequest<
