@@ -37,6 +37,9 @@ export type Aggregate<A extends MutableEntity> = A extends EventSourcedEntity
     }
   : _Aggregate<A> & {
       readonly save: (entity: A) => Effect.Effect<ROf<Save>, EOf<Save>, void>
+      readonly delete: (
+        id: Id<A>,
+      ) => Effect.Effect<ROf<Delete>, EOf<Delete>, void>
     }
 
 interface _Aggregate<A extends MutableEntity> {
@@ -46,6 +49,7 @@ interface _Aggregate<A extends MutableEntity> {
 
 type Load = ReturnType<ReturnType<typeof load>>
 type Save = ReturnType<ReturnType<typeof save>>
+type Delete = ReturnType<ReturnType<typeof _delete>>
 
 export function $Aggregate<A extends EventSourcedEntity, E extends Event<A>>(
   type: Type<A>,
@@ -75,7 +79,7 @@ export function $Aggregate<A extends MutableEntity, E extends Event<A>>(
         load: load(type, reducer),
         apply: apply<A & EventSourcedEntity>(type, reducer),
       }
-    : { ...aggregate, load: load(type) }
+    : { ...aggregate, load: load(type), delete: _delete(type) }
 }
 
 const loadFromEventStore =
@@ -219,6 +223,28 @@ const save =
           $Logger.debug('Aggregate saved', {
             aggregateType: type,
             aggregateId: entity._.id,
+            channel: CHANNEL,
+          }),
+      ),
+    )
+
+const _delete =
+  <A extends MutableEntity>(type: Type<A>) =>
+  (id: Id<A>) =>
+    pipe(
+      $Repository.delete({ _: { type, id } }),
+      Effect.tapBoth(
+        (error) =>
+          $Logger.error('Aggregate not deleted', {
+            aggregateType: type,
+            error,
+            aggregateId: id,
+            channel: CHANNEL,
+          }),
+        () =>
+          $Logger.debug('Aggregate deleted', {
+            aggregateType: type,
+            aggregateId: id,
             channel: CHANNEL,
           }),
       ),
