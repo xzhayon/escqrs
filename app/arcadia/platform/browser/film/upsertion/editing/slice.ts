@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { Id } from '../../../../../../../src/entity/Entity'
 import { Film } from '../../../../../film/Film'
 import { Command, Event } from '../../../Message'
-import { FilmNotEdited } from '../../error/FilmNotEdited'
+import { FilmEditingRejected } from '../../error/FilmEditingRejected'
 import { FilmNotFetched } from '../../error/FilmNotFetched'
 
 export interface FilmEditingState {
@@ -34,15 +34,15 @@ export const $FilmEditingSlice = createSlice({
       state.error = undefined
       state.film = { title: event.payload.title }
     },
-    editFilm(_, _command: Command<{ title: string }, Film>) {},
-    FilmEditingStarted(state) {
+    editFilm(_, _command: Command<{ title: string }>) {},
+    FilmEditingRequested(state) {
       state.state = 'EditingFilm'
     },
-    FilmNotEdited(state, _event: Event<Error>) {
+    FilmEditingRejected(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new FilmNotEdited()
+      state.error = new FilmEditingRejected()
     },
-    FilmEdited(state, _event: Event<Film>) {
+    FilmEditingAccepted(state) {
       state.state = undefined
       state.error = undefined
     },

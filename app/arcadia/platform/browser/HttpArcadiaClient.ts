@@ -36,6 +36,18 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
+    editFilm: (id, body) =>
+      pipe(
+        $HttpClient.post(`${url}/api/v1/films/${id}/edit`, {
+          body: { data: body },
+          json: true,
+        }),
+        Effect.asUnit,
+        Effect.provideService(HasClock)($clock),
+        Effect.provideService(HasHttpClient)($http),
+        Effect.provideService(HasLogger)($logger),
+        Effect.runPromise,
+      ),
     getFilms: () =>
       pipe(
         gen(function* (_) {
@@ -60,26 +72,6 @@ export const $HttpArcadiaClient =
         gen(function* (_) {
           const response = yield* _(
             $HttpClient.get(`${url}/api/v1/films/${id}`, { json: true }),
-          )
-          const body = yield* _(
-            $Any.decode(t.type({ data: $FilmC }))(response.body),
-          )
-
-          return body.data
-        }),
-        Effect.provideService(HasClock)($clock),
-        Effect.provideService(HasHttpClient)($http),
-        Effect.provideService(HasLogger)($logger),
-        Effect.runPromise,
-      ),
-    editFilm: (film) =>
-      pipe(
-        gen(function* (_) {
-          const response = yield* _(
-            $HttpClient.patch(`${url}/api/v1/films/${film._.id}`, {
-              body: { data: film },
-              json: true,
-            }),
           )
           const body = yield* _(
             $Any.decode(t.type({ data: $FilmC }))(response.body),

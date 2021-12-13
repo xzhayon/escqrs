@@ -7,11 +7,12 @@ import { Screening } from '../../screening/Screening'
 
 export interface ArcadiaClient {
   readonly createFilm: (id: Id<Film>, title: string) => Promise<void>
+  readonly editFilm: (
+    id: Id<Film>,
+    body: DeepPartial<Body<Film>>,
+  ) => Promise<void>
   readonly getFilms: () => Promise<Array.Array<Film>>
   readonly getFilm: (id: Id<Film>) => Promise<Film>
-  readonly editFilm: (
-    film: { _: Pick<Header<Film>, 'id'> } & DeepPartial<Body<Film>>,
-  ) => Promise<Film>
   readonly removeFilm: (id: Id<Film>) => Promise<void>
   readonly createScreen: (
     screen: { _: Pick<Header<Screen>, 'id'> } & Body<Screen>,

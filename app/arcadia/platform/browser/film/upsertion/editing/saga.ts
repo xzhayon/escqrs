@@ -31,18 +31,14 @@ const fetchFilm = (filmId: Id<Film>) =>
 
 const editFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmEditing.editFilm>) {
-    yield* put($FilmEditing.FilmEditingStarted())
+    yield* put($FilmEditing.FilmEditingRequested())
     try {
       const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-      const film = yield* call(arcadia.editFilm, {
-        _: { id: filmId },
-        title: command.payload.title,
-      })
-      yield* put($FilmEditing.FilmEdited(film))
-      command.payload.onSuccess &&
-        (yield* call(command.payload.onSuccess, film))
+      yield* call(arcadia.editFilm, filmId, { title: command.payload.title })
+      yield* put($FilmEditing.FilmEditingAccepted())
+      command.payload.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($FilmEditing.FilmNotEdited(error))
+      yield* put($FilmEditing.FilmEditingRejected(error))
       command.payload.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }

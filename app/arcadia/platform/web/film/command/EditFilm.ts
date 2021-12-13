@@ -1,21 +1,28 @@
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
+import { $ServiceBus } from '../../../../../../src/entity/message/command/servicebus/ServiceBus'
+import { $Http } from '../../../../../../src/http/Http'
 import { $HttpServer } from '../../../../../../src/http/server/HttpServer'
-import { $Film, $FilmC } from '../../../../film/Film'
+import { $Film } from '../../../../film/Film'
+import { $EditFilm } from '../../../../film/message/command/EditFilm'
 
-export const EditFilm = $HttpServer.patch(
-  '/api/v1/films/:id',
+export const EditFilm = $HttpServer.post(
+  '/api/v1/films/:id/edit',
   {
-    body: t.type({ data: t.exact(t.partial({ title: t.string })) }),
+    body: t.type({ data: t.partial({ title: t.string }) }),
     params: t.type({ id: t.string }),
-    response: t.type({ data: $FilmC }),
+    response: t.void,
   },
   (request) =>
     gen(function* (_) {
-      const film = yield* _($Film.load($Film.id(request.params.id)))
-      const _film = { ...film, ...request.body.data }
-      yield* _($Film.save(_film))
+      const command = yield* _(
+        $EditFilm()({
+          ...request.body.data,
+          aggregateId: $Film.id(request.params.id),
+        })(),
+      )
+      yield* _($ServiceBus.dispatch(command))
 
-      return { data: yield* _($Film.load(film._.id)) }
+      return $Http.Accepted()
     }),
 )

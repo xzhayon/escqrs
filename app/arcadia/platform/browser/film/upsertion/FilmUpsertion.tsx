@@ -14,7 +14,7 @@ import { useNavigate, useParams } from 'react-router'
 import { $Film } from '../../../../film/Film'
 import { use$Dispatch, use$Selector } from '../../Hook'
 import { FilmCreationRejected } from '../error/FilmCreationRejected'
-import { FilmNotEdited } from '../error/FilmNotEdited'
+import { FilmEditingRejected } from '../error/FilmEditingRejected'
 import { FilmNotFetched } from '../error/FilmNotFetched'
 import { $FilmCreation, $FilmCreationSlice } from './creation/slice'
 import { $FilmEditing, $FilmEditingSlice } from './editing/slice'
@@ -83,7 +83,7 @@ export const FilmUpsertion: FC = () => {
                       ? 'Cannot create film.'
                       : error instanceof FilmNotFetched
                       ? 'Cannot fetch film detail.'
-                      : error instanceof FilmNotEdited
+                      : error instanceof FilmEditingRejected
                       ? 'Cannot edit film.'
                       : undefined}
                   </Alert>

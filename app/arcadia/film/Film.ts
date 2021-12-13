@@ -1,7 +1,8 @@
 import { Branded } from '@effect-ts/core'
 import * as t from 'io-ts'
 import { $Aggregate } from '../../../src/Aggregate'
-import { Id } from '../../../src/entity/Entity'
+import { DeepPartial } from '../../../src/DeepPartial'
+import { Body, Id } from '../../../src/entity/Entity'
 import {
   $MutableEntity,
   $MutableEntityC,
@@ -32,3 +33,8 @@ $Film.load = aggregate.load
 $Film.save = aggregate.save
 
 $Film.create = (id: Id<Film>, title: string) => $Film()({ title }, { id })
+
+$Film.edit = (film: Film, body: DeepPartial<Body<Film>>) => ({
+  ...film,
+  title: body.title ?? film.title,
+})

@@ -5,6 +5,7 @@ import { $Layer } from '../../../../config/Layer.local'
 import { $ServiceBus } from '../../../../src/entity/message/command/servicebus/ServiceBus'
 import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
+import { $EditFilm } from '../../film/message/command/EditFilm'
 import { CreateFilm } from './film/command/CreateFilm'
 import { EditFilm } from './film/command/EditFilm'
 import { RemoveFilm } from './film/command/RemoveFilm'
@@ -16,11 +17,14 @@ import { RemoveScreen } from './screen/command/RemoveScreen'
 import { GetScreen } from './screen/query/GetScreen'
 import { GetScreens } from './screen/query/GetScreens'
 
+const handlers = [
+  [CreateFilm, $CreateFilm] as const,
+  [EditFilm, $EditFilm] as const,
+]
+
 pipe(
   gen(function* (_) {
-    for (const [routeHandler, commandHandler] of [
-      [CreateFilm, $CreateFilm] as const,
-    ]) {
+    for (const [routeHandler, commandHandler] of handlers) {
       yield* _($ServiceBus.registerHandler(yield* _(commandHandler.handler)))
       yield* _(routeHandler)
     }
@@ -33,7 +37,6 @@ pipe(
 
     yield* _(GetFilms)
     yield* _(GetFilm)
-    yield* _(EditFilm)
     yield* _(RemoveFilm)
 
     yield* _($ServiceBus.run)

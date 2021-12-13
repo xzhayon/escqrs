@@ -11,7 +11,7 @@ function* coordinate() {
   yield* takeLatest(
     [
       $FilmCreation.FilmCreationAccepted.type,
-      $FilmEditing.FilmEdited.type,
+      $FilmEditing.FilmEditingAccepted.type,
       $FilmRemoval.FilmRemoved.type,
     ],
     function* () {
