@@ -102,7 +102,7 @@ const run = pipe(
         error,
         channel: CHANNEL,
       }),
-    () => $Logger.debug('Event store started', { channel: CHANNEL }),
+    () => $Logger.info('Event store started', { channel: CHANNEL }),
   ),
 )
 

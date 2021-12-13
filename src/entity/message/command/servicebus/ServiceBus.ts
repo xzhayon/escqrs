@@ -73,7 +73,7 @@ const run = pipe(
         error,
         channel: CHANNEL,
       }),
-    () => $Logger.debug('Service bus started', { channel: CHANNEL }),
+    () => $Logger.info('Service bus started', { channel: CHANNEL }),
   ),
 )
 
