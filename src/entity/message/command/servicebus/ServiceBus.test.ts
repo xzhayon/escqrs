@@ -48,6 +48,7 @@ describe('ServiceBus', () => {
               ),
             )
             yield* _($ServiceBus.registerHandler(handler))
+            yield* _($ServiceBus.run)
             const command = yield* _(
               $Command('foo')({
                 aggregateId: 'bar',
@@ -89,6 +90,7 @@ describe('ServiceBus', () => {
             for (const handler of handlers) {
               yield* _($ServiceBus.registerHandler(handler))
             }
+            yield* _($ServiceBus.run)
             const command = yield* _(
               $Command('foo')({
                 aggregateId: 'bar',

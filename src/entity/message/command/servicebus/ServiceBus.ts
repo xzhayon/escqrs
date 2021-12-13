@@ -8,13 +8,14 @@ const CHANNEL = 'ServiceBus'
 export interface ServiceBus {
   readonly dispatch: (command: Command) => Effect.IO<Error, void>
   readonly registerHandler: (handler: CommandHandler) => Effect.IO<Error, void>
+  readonly run: Effect.IO<Error, void>
 }
 
 export const HasServiceBus = Has.tag<ServiceBus>()
 
-const { dispatch: _dispatch } = Effect.deriveLifted(HasServiceBus)(
+const { dispatch: _dispatch, run: _run } = Effect.deriveLifted(HasServiceBus)(
   ['dispatch'],
-  [],
+  ['run'],
   [],
 )
 const { registerHandler: _registerHandler } = Effect.deriveAccessM(
@@ -64,4 +65,16 @@ const registerHandler = (handler: CommandHandler) =>
     ),
   )
 
-export const $ServiceBus = { dispatch, registerHandler }
+const run = pipe(
+  _run,
+  Effect.tapBoth(
+    (error) =>
+      $Logger.error('Service bus not started', {
+        error,
+        channel: CHANNEL,
+      }),
+    () => $Logger.debug('Service bus started', { channel: CHANNEL }),
+  ),
+)
+
+export const $ServiceBus = { dispatch, registerHandler, run }
