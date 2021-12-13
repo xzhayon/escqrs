@@ -1,6 +1,7 @@
 import { Branded } from '@effect-ts/core'
 import * as t from 'io-ts'
 import { $Aggregate } from '../../../src/Aggregate'
+import { Id } from '../../../src/entity/Entity'
 import {
   $MutableEntity,
   $MutableEntityC,
@@ -29,3 +30,5 @@ export function $Film() {
 $Film.id = aggregate.id
 $Film.load = aggregate.load
 $Film.save = aggregate.save
+
+$Film.create = (id: Id<Film>, title: string) => $Film()({ title }, { id })

@@ -2,8 +2,10 @@ import { Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as Layer from '@effect-ts/system/Layer'
 import { $Layer } from '../../../../config/Layer.local'
+import { $ServiceBus } from '../../../../src/entity/message/command/servicebus/ServiceBus'
 import { $HttpServer } from '../../../../src/http/server/HttpServer'
-import { $CreateFilm } from './film/command/CreateFilm'
+import { $CreateFilm } from '../../film/message/command/CreateFilm'
+import { CreateFilm } from './film/command/CreateFilm'
 import { $EditFilm } from './film/command/EditFilm'
 import { $RemoveFilm } from './film/command/RemoveFilm'
 import { $GetFilm } from './film/query/GetFilm'
@@ -22,12 +24,14 @@ pipe(
     yield* _($EditScreen)
     yield* _($RemoveScreen)
 
-    yield* _($CreateFilm)
+    yield* _(CreateFilm)
+    yield* _($ServiceBus.registerHandler(yield* _($CreateFilm.handler)))
     yield* _($GetFilms)
     yield* _($GetFilm)
     yield* _($EditFilm)
     yield* _($RemoveFilm)
 
+    yield* _($ServiceBus.run)
     yield* _($HttpServer.run)
   }),
   Layer.fromRawEffect,
