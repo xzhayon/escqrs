@@ -1,3 +1,4 @@
+import { DateTimePicker } from '@mui/lab'
 import {
   Alert,
   Button,
@@ -6,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  MenuItem,
   Snackbar,
   TextField,
 } from '@mui/material'
@@ -104,39 +106,57 @@ export const ScreenUpsertion: FC = () => {
                   autoFocus
                   disabled={undefined !== state}
                   fullWidth
+                  inputProps={{ required: true }}
                   label="Film"
                   name="film"
                   required
+                  select
                   variant="filled"
                   value={filmId}
                   onChange={(event) => setFilmId(event.target.value)}
-                />
+                >
+                  {films?.map(({ id, title }) => (
+                    <MenuItem key={id} value={id}>
+                      {title}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   disabled={undefined !== state}
                   fullWidth
+                  inputProps={{ required: true }}
                   label="Screen"
                   name="screen"
                   required
-                  type="number"
+                  select
                   variant="filled"
                   value={screenId}
                   onChange={(event) => setScreenId(event.target.value)}
-                />
+                >
+                  {screens?.map(({ id, name }) => (
+                    <MenuItem key={id} value={id}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
               <Grid item xs={6}>
-                <TextField
+                <DateTimePicker
                   disabled={undefined !== state}
-                  fullWidth
-                  inputProps={{ min: 1, max: 1000 }}
                   label="Date"
-                  name="date"
-                  required
-                  type="number"
-                  variant="filled"
+                  renderInput={(props) => (
+                    <TextField
+                      {...props}
+                      fullWidth
+                      name="date"
+                      required
+                      variant="filled"
+                    />
+                  )}
                   value={date}
-                  onChange={(event) => setDate(new Date(event.target.value))}
+                  onChange={(_value) => null != _value && setDate(_value)}
                 />
               </Grid>
             </Grid>
