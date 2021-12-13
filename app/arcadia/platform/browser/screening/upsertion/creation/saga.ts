@@ -36,20 +36,20 @@ function* fetchFilmsAndScreens(
 
 const createScreening = (screeningId: Id<Screening>) =>
   function* (command: ReturnType<typeof $ScreeningCreation.createScreening>) {
-    yield* put($ScreeningCreation.ScreeningCreationStarted())
+    yield* put($ScreeningCreation.ScreeningCreationRequested())
     try {
-      const client = yield* getContext<ArcadiaClient>('arcadiaClient')
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
       yield* call(
-        client.createScreening,
+        arcadia.createScreening,
         screeningId,
         command.payload.filmId,
         command.payload.screenId,
         command.payload.date,
       )
-      yield* put($ScreeningCreation.ScreeningCreated())
+      yield* put($ScreeningCreation.ScreeningCreationAccepted())
       command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
     } catch (error: any) {
-      yield* put($ScreeningCreation.ScreeningNotCreated(error))
+      yield* put($ScreeningCreation.ScreeningCreationRejected(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }

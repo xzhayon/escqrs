@@ -7,6 +7,7 @@ import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
 import { $EditFilm } from '../../film/message/command/EditFilm'
 import { $RemoveFilm } from '../../film/message/command/RemoveFilm'
+import { $CreateScreening } from '../../screening/command/CreateScreening'
 import { CreateFilm } from './film/command/CreateFilm'
 import { EditFilm } from './film/command/EditFilm'
 import { RemoveFilm } from './film/command/RemoveFilm'
@@ -17,11 +18,13 @@ import { EditScreen } from './screen/command/EditScreen'
 import { RemoveScreen } from './screen/command/RemoveScreen'
 import { GetScreen } from './screen/query/GetScreen'
 import { GetScreens } from './screen/query/GetScreens'
+import { CreateScreening } from './screening/command/CreateScreening'
 
 const handlers = [
   [CreateFilm, $CreateFilm] as const,
   [EditFilm, $EditFilm] as const,
   [RemoveFilm, $RemoveFilm] as const,
+  [CreateScreening, $CreateScreening] as const,
 ]
 
 pipe(

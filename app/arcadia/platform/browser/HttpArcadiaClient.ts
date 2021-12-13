@@ -180,10 +180,10 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
-    createScreening: (screening) =>
+    createScreening: (screeningId, filmId, screenId, date) =>
       pipe(
-        $HttpClient.post(`${url}/api/v1/screenings`, {
-          body: { data: screening },
+        $HttpClient.post(`${url}/api/v1/screenings/${screeningId}/create`, {
+          body: { data: { filmId, screenId, date } },
           json: true,
         }),
         Effect.asUnit,

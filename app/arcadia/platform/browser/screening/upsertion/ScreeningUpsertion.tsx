@@ -15,7 +15,7 @@ import { $Film } from '../../../../film/Film'
 import { $Screen } from '../../../../screen/Screen'
 import { FilmsAndScreensNotFetched } from '../../error/FilmsAndScreensNotFetched'
 import { use$Dispatch, use$Selector } from '../../Hook'
-import { ScreeningNotCreated } from '../error/ScreeningNotCreated'
+import { ScreeningCreationRejected } from '../error/ScreeningCreationRejected'
 import { $ScreeningCreation, $ScreeningCreationSlice } from './creation/slice'
 
 export const ScreenUpsertion: FC = () => {
@@ -91,7 +91,7 @@ export const ScreenUpsertion: FC = () => {
                     }
                     severity="error"
                   >
-                    {error instanceof ScreeningNotCreated
+                    {error instanceof ScreeningCreationRejected
                       ? 'Cannot create screening.'
                       : error instanceof FilmsAndScreensNotFetched
                       ? 'Cannot fetch films and/or screens.'

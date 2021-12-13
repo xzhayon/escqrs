@@ -5,7 +5,7 @@ import { Film } from '../../../../../film/Film'
 import { Screen } from '../../../../../screen/Screen'
 import { FilmsAndScreensNotFetched } from '../../../error/FilmsAndScreensNotFetched'
 import { Command, Event } from '../../../Message'
-import { ScreeningNotCreated } from '../../error/ScreeningNotCreated'
+import { ScreeningCreationRejected } from '../../error/ScreeningCreationRejected'
 
 export interface ScreeningCreationState {
   state?: 'FetchingFilmsAndScreens' | 'CreatingScreening'
@@ -56,14 +56,14 @@ export const $ScreeningCreationSlice = createSlice({
       _,
       _command: Command<{ filmId: Id<Film>; screenId: Id<Screen>; date: Date }>,
     ) {},
-    ScreeningCreationStarted(state) {
+    ScreeningCreationRequested(state) {
       state.state = 'CreatingScreening'
     },
-    ScreeningNotCreated(state, _event: Event<Error>) {
+    ScreeningCreationRejected(state, _event: Event<Error>) {
       state.state = undefined
-      state.error = new ScreeningNotCreated()
+      state.error = new ScreeningCreationRejected()
     },
-    ScreeningCreated(state, _event: Event) {
+    ScreeningCreationAccepted(state) {
       state.state = undefined
       state.error = undefined
     },
