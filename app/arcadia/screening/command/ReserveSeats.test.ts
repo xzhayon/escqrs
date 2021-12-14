@@ -51,7 +51,7 @@ describe('ReserveSeats', () => {
     })
 
     describe('seats were reserved', () => {
-      test('reserving already taken seats', async () => {
+      test.skip('reserving already taken seats', async () => {
         await Gwt.test($ReserveSeats.handler)
           .given(
             $ScreeningCreated()({ aggregateId, date, seats })(),
