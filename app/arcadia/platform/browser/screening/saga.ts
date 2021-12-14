@@ -4,12 +4,14 @@ import { $ScreeningDashboard } from './dashboard/slice'
 import { $ScreeningCreation } from './upsertion/creation/slice'
 import { $ScreeningUpsertionSaga } from './upsertion/saga'
 
-function* coordinate() {
+export function* fetchScreenings() {
+  yield* put($ScreeningDashboard.fetchScreenings())
+}
+
+export function* coordinate() {
   yield* takeLatest(
     [$ScreeningCreation.ScreeningCreationAccepted.type],
-    function* () {
-      yield* put($ScreeningDashboard.fetchScreenings())
-    },
+    fetchScreenings,
   )
 }
 
