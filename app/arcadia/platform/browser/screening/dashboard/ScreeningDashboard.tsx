@@ -39,7 +39,7 @@ export const ScreeningDashboard: FC = () => {
     return () => {
       dispatch($ScreeningDashboard.stop())
     }
-  })
+  }, [])
 
   return (
     <>

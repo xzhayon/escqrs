@@ -8,6 +8,7 @@ import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
 import { $EditFilm } from '../../film/message/command/EditFilm'
 import { $RemoveFilm } from '../../film/message/command/RemoveFilm'
+import { $ScreeningProjection } from '../../projection/Screening'
 import { $CreateScreening } from '../../screening/command/CreateScreening'
 import { CreateFilm } from './film/command/CreateFilm'
 import { EditFilm } from './film/command/EditFilm'
@@ -26,12 +27,19 @@ const handlers = [
   [CreateFilm, $CreateFilm] as const,
   [EditFilm, $EditFilm] as const,
   [RemoveFilm, $RemoveFilm] as const,
-  [CreateScreening, $CreateScreening] as const,
+  [
+    CreateScreening,
+    $CreateScreening,
+    $ScreeningProjection.onScreeningCreated,
+  ] as const,
 ]
 
 pipe(
   gen(function* (_) {
-    for (const [routeHandler, commandHandler] of handlers) {
+    for (const [routeHandler, commandHandler, ...eventHandlers] of handlers) {
+      for (const eventHandler of eventHandlers) {
+        yield* _($EventStore.subscribe(yield* _(eventHandler)))
+      }
       yield* _($ServiceBus.registerHandler(yield* _(commandHandler.handler)))
       yield* _(routeHandler)
     }
