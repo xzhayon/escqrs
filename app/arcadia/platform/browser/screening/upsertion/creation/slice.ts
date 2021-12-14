@@ -17,7 +17,7 @@ export interface ScreeningCreationState {
 const initialState: ScreeningCreationState = {}
 
 export const $ScreeningCreationSlice = createSlice({
-  name: 'ScreeningCreationSlice',
+  name: 'ScreeningCreation',
   initialState,
   reducers: {
     start() {},

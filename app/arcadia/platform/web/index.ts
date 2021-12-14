@@ -20,6 +20,7 @@ import { RemoveScreen } from './screen/command/RemoveScreen'
 import { GetScreen } from './screen/query/GetScreen'
 import { GetScreens } from './screen/query/GetScreens'
 import { CreateScreening } from './screening/command/CreateScreening'
+import { GetScreenings } from './screening/query/GetScreenings'
 
 const handlers = [
   [CreateFilm, $CreateFilm] as const,
@@ -43,6 +44,8 @@ pipe(
     yield* _(RemoveScreen)
     yield* _(GetScreens)
     yield* _(GetScreen)
+
+    yield* _(GetScreenings)
 
     yield* _($EventStore.run)
     yield* _($ServiceBus.run)

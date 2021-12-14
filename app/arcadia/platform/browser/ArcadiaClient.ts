@@ -2,6 +2,7 @@ import { Array } from '@effect-ts/core'
 import { DeepPartial } from '../../../../src/DeepPartial'
 import { Body, Id } from '../../../../src/entity/Entity'
 import { Film } from '../../film/Film'
+import { ScreeningProjection } from '../../projection/Screening'
 import { Screen } from '../../screen/Screen'
 import { Screening } from '../../screening/Screening'
 
@@ -28,4 +29,5 @@ export interface ArcadiaClient {
     screenId: Id<Screen>,
     date: Date,
   ) => Promise<void>
+  readonly getScreenings: () => Promise<Array.Array<ScreeningProjection>>
 }

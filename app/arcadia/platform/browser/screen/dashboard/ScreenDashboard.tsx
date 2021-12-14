@@ -63,7 +63,7 @@ export const ScreenDashboard: FC = () => {
                 }
                 severity="error"
               >
-                Cannot fetch list of screens.
+                Cannot fetch screens.
               </Alert>
             </Grid>
           )}

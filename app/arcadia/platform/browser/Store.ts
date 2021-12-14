@@ -10,6 +10,7 @@ import { $ScreenDashboardSlice } from './screen/dashboard/slice'
 import { $ScreenRemovalSlice } from './screen/removal/slice'
 import { $ScreenCreationSlice } from './screen/upsertion/creation/slice'
 import { $ScreenEditingSlice } from './screen/upsertion/editing/slice'
+import { $ScreeningDashboardSlice } from './screening/dashboard/slice'
 import { $ScreeningCreationSlice } from './screening/upsertion/creation/slice'
 
 const sagaMiddleware = createSagaMiddleware({ context: $Context })
@@ -24,6 +25,7 @@ export const $Store = configureStore({
     [$FilmCreationSlice.name]: $FilmCreationSlice.reducer,
     [$FilmEditingSlice.name]: $FilmEditingSlice.reducer,
     [$FilmRemovalSlice.name]: $FilmRemovalSlice.reducer,
+    [$ScreeningDashboardSlice.name]: $ScreeningDashboardSlice.reducer,
     [$ScreeningCreationSlice.name]: $ScreeningCreationSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>

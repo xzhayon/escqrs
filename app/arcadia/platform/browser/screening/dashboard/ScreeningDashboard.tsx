@@ -1,7 +1,8 @@
-import { Array } from '@effect-ts/core'
 import { Add } from '@mui/icons-material'
 import {
+  Alert,
   Box,
+  Button,
   Fab,
   Grid,
   Paper,
@@ -15,13 +16,30 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
-import { Screening } from '../../../../screening/Screening'
+import { use$Dispatch, use$Selector } from '../../Hook'
+import { $ScreeningDashboard, $ScreeningDashboardSlice } from './slice'
 
 export const ScreeningDashboard: FC = () => {
-  const isLoading = false
-  const screenings: Array.Array<Screening> | undefined = undefined
+  const dispatch = use$Dispatch()
+
+  const isLoading = use$Selector(
+    (state) => state[$ScreeningDashboardSlice.name].isLoading,
+  )
+  const error = use$Selector(
+    (state) => state[$ScreeningDashboardSlice.name].error,
+  )
+  const screenings = use$Selector(
+    (state) => state[$ScreeningDashboardSlice.name].screenings,
+  )
+
+  useEffect(() => {
+    dispatch($ScreeningDashboard.start())
+    return () => {
+      dispatch($ScreeningDashboard.stop())
+    }
+  })
 
   return (
     <>
@@ -30,6 +48,27 @@ export const ScreeningDashboard: FC = () => {
           <Grid item xs={12}>
             <Typography variant="h4">Screenings</Typography>
           </Grid>
+          {error && (
+            <Grid item xs={12}>
+              <Alert
+                action={
+                  <Button
+                    color="inherit"
+                    disabled={isLoading}
+                    size="small"
+                    onClick={() =>
+                      dispatch($ScreeningDashboard.fetchScreenings())
+                    }
+                  >
+                    Retry
+                  </Button>
+                }
+                severity="error"
+              >
+                Cannot fetch screenings.
+              </Alert>
+            </Grid>
+          )}
           <Grid item xs={12}>
             <TableContainer component={Paper}>
               <Table>
@@ -45,16 +84,18 @@ export const ScreeningDashboard: FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {(screenings ?? [null, null, null]).map((_screening, i) => (
+                  {(screenings ?? [null, null, null]).map((screening, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Skeleton variant="text" />
+                        {screening?.filmName ?? <Skeleton variant="text" />}
                       </TableCell>
                       <TableCell>
-                        <Skeleton variant="text" />
+                        {screening?.screenName ?? <Skeleton variant="text" />}
                       </TableCell>
                       <TableCell>
-                        <Skeleton variant="text" />
+                        {screening?.date.toISOString() ?? (
+                          <Skeleton variant="text" />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -75,7 +116,7 @@ export const ScreeningDashboard: FC = () => {
         </Fab>
       </Box>
       <Outlet />
-      <Snackbar open={isLoading} message="Fetching list of films..." />
+      <Snackbar open={isLoading} message="Fetching screenings..." />
     </>
   )
 }

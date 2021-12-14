@@ -61,7 +61,7 @@ export const FilmDashboard: FC = () => {
                 }
                 severity="error"
               >
-                Cannot fetch list of films.
+                Cannot fetch films.
               </Alert>
             </Grid>
           )}

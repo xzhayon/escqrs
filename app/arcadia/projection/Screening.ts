@@ -1,10 +1,15 @@
 import { Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/core/Effect'
+import * as t from 'io-ts'
+import { DateFromISOString } from 'io-ts-types'
 import { $Aggregate } from '../../../src/Aggregate'
 import { Id } from '../../../src/entity/Entity'
 import { $EventHandler } from '../../../src/entity/message/event/EventHandler'
 import { HasEventStore } from '../../../src/entity/message/event/eventstore/EventStore'
-import { $MutableEntity } from '../../../src/entity/MutableEntity'
+import {
+  $MutableEntity,
+  $MutableEntityC,
+} from '../../../src/entity/MutableEntity'
 import { HasRepository } from '../../../src/entity/repository/Repository'
 import { HasLogger } from '../../../src/logger/Logger'
 import { HasUuid } from '../../../src/uuid/Uuid'
@@ -19,6 +24,26 @@ export interface ScreeningProjection
   readonly date: Date
   readonly seats: { readonly total: number; readonly free: number }
 }
+
+export const $ScreeningProjectionC: t.Type<ScreeningProjection> =
+  t.intersection(
+    [
+      t.readonly(
+        t.type({
+          filmName: t.string,
+          screenName: t.string,
+          date: DateFromISOString as t.Mixed,
+          seats: t.readonly(t.type({ total: t.number, free: t.number })),
+        }),
+        'Body',
+      ),
+      $MutableEntityC(
+        t.literal('_Projection.Screening') as t.Mixed,
+        t.string as t.Mixed,
+      ),
+    ],
+    'ScreeningProjection',
+  )
 
 const aggregate = $Aggregate<ScreeningProjection>('_Projection.Screening')
 
