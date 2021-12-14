@@ -1,9 +1,8 @@
 import { gen } from '@effect-ts/system/Effect'
 import { EntityNotFound } from '../../../../src/entity/repository/EntityNotFound'
-import { $Repository } from '../../../../src/entity/repository/Repository'
 import { Gwt } from '../../../../src/Gwt'
-import { $Film, Film } from '../../film/Film'
-import { $Screen, Screen } from '../../screen/Screen'
+import { $Film } from '../../film/Film'
+import { $Screen } from '../../screen/Screen'
 import { $ScreeningCreated } from '../event/ScreeningCreated'
 import { $Screening } from '../Screening'
 import { $CreateScreening } from './CreateScreening'
@@ -28,7 +27,7 @@ describe('CreateScreening', () => {
         .given(
           gen(function* (_) {
             const film = yield* _($Film()({ title: 'foo' }, { id: filmId }))
-            yield* _($Repository.insert<Film>(film))
+            yield* _($Film.save(film))
           }),
         )
         .when($CreateScreening()({ aggregateId, filmId, screenId, date })())
@@ -45,8 +44,8 @@ describe('CreateScreening', () => {
               const screen = yield* _(
                 $Screen()({ name: 'bar', seats }, { id: screenId }),
               )
-              yield* _($Repository.insert<Film>(film))
-              yield* _($Repository.insert<Screen>(screen))
+              yield* _($Film.save(film))
+              yield* _($Screen.save(screen))
             }),
           )
           .when($CreateScreening()({ aggregateId, filmId, screenId, date })())
