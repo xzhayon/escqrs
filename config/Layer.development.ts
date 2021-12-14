@@ -32,7 +32,11 @@ export const $Layer = pipe(
               EVENT_STORE_PATH: t.string,
               REPOSITORY_PATH: t.string,
             }),
-            t.partial({ HTTP_PORT: NumberFromString, HTTP_ADDRESS: t.string }),
+            t.partial({
+              EVENT_STORE_REPLAY: NumberFromString.pipe($Any.booleanFromBit),
+              HTTP_PORT: NumberFromString,
+              HTTP_ADDRESS: t.string,
+            }),
           ],
           'Environment',
         ),
@@ -45,22 +49,27 @@ export const $Layer = pipe(
     )
   }),
   Layer.fromRawEffect,
-  Layer.chain(
-    ({ EVENT_STORE_PATH, REPOSITORY_PATH, HTTP_PORT, HTTP_ADDRESS }) =>
-      pipe(
-        Layer.all(
-          $Layer_testing,
-          Layer.fromManaged(HasEventStore)(
-            $StorageEventStore(EVENT_STORE_PATH, () => new EventEmitter()),
+  Layer.chain((env) =>
+    pipe(
+      Layer.all(
+        $Layer_testing,
+        Layer.fromManaged(HasEventStore)(
+          $StorageEventStore(
+            env.EVENT_STORE_PATH,
+            () => new EventEmitter(),
+            env.EVENT_STORE_REPLAY,
           ),
-          Layer.fromManaged(HasHttpServer)(
-            $FastifyHttpServer(fastify, HTTP_PORT, HTTP_ADDRESS),
-          ),
-          Layer.fromEffect(HasRepository)($StorageRepository(REPOSITORY_PATH)),
         ),
-        Layer.usingAnd(Layer.fromValue(HasLogger)($Console(true))),
-        Layer.usingAnd(Layer.fromValue(HasStorage)($Fs(fs))),
+        Layer.fromManaged(HasHttpServer)(
+          $FastifyHttpServer(fastify, env.HTTP_PORT, env.HTTP_ADDRESS),
+        ),
+        Layer.fromEffect(HasRepository)(
+          $StorageRepository(env.REPOSITORY_PATH),
+        ),
       ),
+      Layer.usingAnd(Layer.fromValue(HasLogger)($Console(true))),
+      Layer.usingAnd(Layer.fromValue(HasStorage)($Fs(fs))),
+    ),
   ),
   Layer.main,
 )

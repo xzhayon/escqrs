@@ -7,6 +7,7 @@
     "build-browser": "webpack --config ./webpack.config.browser.js",
     "build-web": "tsc --project ./tsconfig.web.json",
     "start-browser": "webpack serve --config ./webpack.config.browser.js --mode=development --open",
+    "start-cli-replay": "env EVENT_STORE_REPLAY=1 ts-node ./app/arcadia/platform/cli/replay",
     "start-web": "ts-node-dev ./app/arcadia/platform/web",
     "test": "jest --coverage --collectCoverageFrom=./app/**/*.ts --collectCoverageFrom=./src/**/*.ts"
   },
