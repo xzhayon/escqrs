@@ -12,7 +12,7 @@
     "test": "jest --coverage --collectCoverageFrom=./app/**/*.ts --collectCoverageFrom=./src/**/*.ts"
   },
   "author": "Alberto Villa <villa.alberto@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@date-io/date-fns": "^2.11.0",
     "@effect-ts/core": "^0.48.3",
