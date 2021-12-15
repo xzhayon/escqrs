@@ -43,6 +43,7 @@ export const $ScreeningCreationSlice = createSlice({
       event: Event<{ films: Array.Array<Film>; screens: Array.Array<Screen> }>,
     ) {
       state.state = undefined
+      state.error = undefined
       state.films = event.payload.films.map(({ _, title }) => ({
         id: _.id,
         title,
