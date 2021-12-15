@@ -22,18 +22,18 @@ const splitWords = (s: string) =>
     .split('\0')
     .filter(Function.not(isEmpty))
 
-const pascal = flow(
+const pascalcase = flow(
   splitWords,
   Array.map(lowercase),
   Array.map(capitalize),
   Array.join(''),
 )
 
-const camel = flow(pascal, uncapitalize)
+const camelcase = flow(pascalcase, uncapitalize)
 
-const snake = flow(splitWords, Array.join('_'), lowercase)
+const snakecase = flow(splitWords, Array.join('_'), lowercase)
 
-const kebab = flow(splitWords, Array.join('-'), lowercase)
+const kebabcase = flow(splitWords, Array.join('-'), lowercase)
 
 const isEmpty = (s: string) => '' === s
 
@@ -42,9 +42,9 @@ export const $String = {
   lowercase,
   capitalize,
   uncapitalize,
-  camel,
-  pascal,
-  snake,
-  kebab,
+  camelcase,
+  pascalcase,
+  snakecase,
+  kebabcase,
   isEmpty,
 }

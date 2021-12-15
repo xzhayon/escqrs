@@ -1,7 +1,7 @@
 import { $String } from './String'
 
 describe('String', () => {
-  describe('camel', () => {
+  describe('camelcase', () => {
     test.each([
       ['foo', 'foo'],
       ['Foo', 'foo'],
@@ -28,10 +28,10 @@ describe('String', () => {
       ['FOO0bar', 'foo0Bar'],
       ['foo0BAR', 'foo0Bar'],
     ])('converting "%s" to "%s"', (from, to) => {
-      expect($String.camel(from)).toStrictEqual(to)
+      expect($String.camelcase(from)).toStrictEqual(to)
     })
   })
-  describe('pascal', () => {
+  describe('pascalcase', () => {
     test.each([
       ['foo', 'Foo'],
       ['Foo', 'Foo'],
@@ -58,10 +58,10 @@ describe('String', () => {
       ['FOO0bar', 'Foo0Bar'],
       ['foo0BAR', 'Foo0Bar'],
     ])('converting "%s" to "%s"', (from, to) => {
-      expect($String.pascal(from)).toStrictEqual(to)
+      expect($String.pascalcase(from)).toStrictEqual(to)
     })
   })
-  describe('snake', () => {
+  describe('snakecase', () => {
     test.each([
       ['foo', 'foo'],
       ['Foo', 'foo'],
@@ -88,10 +88,10 @@ describe('String', () => {
       ['FOO0bar', 'foo0_bar'],
       ['foo0BAR', 'foo0_bar'],
     ])('converting "%s" to "%s"', (from, to) => {
-      expect($String.snake(from)).toStrictEqual(to)
+      expect($String.snakecase(from)).toStrictEqual(to)
     })
   })
-  describe('kebab', () => {
+  describe('kebabcase', () => {
     test.each([
       ['foo', 'foo'],
       ['Foo', 'foo'],
@@ -118,7 +118,7 @@ describe('String', () => {
       ['FOO0bar', 'foo0-bar'],
       ['foo0BAR', 'foo0-bar'],
     ])('converting "%s" to "%s"', (from, to) => {
-      expect($String.kebab(from)).toStrictEqual(to)
+      expect($String.kebabcase(from)).toStrictEqual(to)
     })
   })
 })
