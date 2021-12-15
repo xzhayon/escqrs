@@ -1,0 +1,44 @@
+services:
+  nginx:
+    image: nginx:1.21-alpine
+    restart: on-failure
+    links:
+      - browser
+      - web
+    ports:
+      - ${COMPOSE_PORT_NGINX}:8080
+    volumes:
+      - ./config/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+
+  browser:
+    image: node:16.13-alpine
+    user: node
+    restart: on-failure
+    expose:
+      - 8080
+    env_file:
+      - ./.env
+    environment:
+      ARCADIA_URL: http://localhost:${COMPOSE_PORT_NGINX}
+    working_dir: /dist/
+    entrypoint: ['npm', 'run', 'start-browser', '--', '--allowed-hosts=all', "--client-web-socket-url-port=${COMPOSE_PORT_NGINX}", '--port=8080']
+    volumes:
+      - ./:/dist/
+
+  web:
+    image: node:16.13-alpine
+    user: node
+    restart: on-failure
+    expose:
+      - 8081
+    env_file:
+      - ./.env
+    environment:
+      EVENT_STORE_PATH: /tmp/eventstore/
+      REPOSITORY_PATH: /tmp/repository/
+    working_dir: /dist/
+    entrypoint: ['npm', 'run', 'start-web', '8081']
+    volumes:
+      - ./:/dist/
+      - ./var/eventstore/:/tmp/eventstore/
+      - ./var/repository/:/tmp/repository/

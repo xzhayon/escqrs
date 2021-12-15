@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["./app/arcadia/platform/web/index.ts", "./config/"]
+}
