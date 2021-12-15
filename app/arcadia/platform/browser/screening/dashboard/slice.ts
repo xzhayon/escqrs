@@ -1,13 +1,13 @@
 import { Array } from '@effect-ts/core'
 import { createSlice } from '@reduxjs/toolkit'
-import { ScreeningProjection } from '../../../../projection/Screening'
+import { ScreeningsByFilm } from '../../../../projection/ScreeningsByFilm'
 import { Command, Event } from '../../Message'
 import { ScreeningsNotFetched } from '../error/ScreeningsNotFetched'
 
 export interface ScreeningDashboardState {
   isLoading?: boolean
   error?: Error
-  screenings?: Array.Array<ScreeningProjection>
+  screenings?: Array.Array<ScreeningsByFilm>
 }
 
 const initialState: ScreeningDashboardState = {}
@@ -22,7 +22,7 @@ export const $ScreeningDashboardSlice = createSlice({
     Stopped() {},
     fetchScreenings(
       _,
-      _command: Command<void, Array.Array<ScreeningProjection>>,
+      _command: Command<void, Array.Array<ScreeningsByFilm>>,
     ) {},
     ScreeningsFetchingStarted(state) {
       state.isLoading = true
@@ -31,10 +31,13 @@ export const $ScreeningDashboardSlice = createSlice({
       state.isLoading = false
       state.error = new ScreeningsNotFetched()
     },
-    ScreeningsFetched(state, event: Event<Array.Array<ScreeningProjection>>) {
+    ScreeningsFetched(state, event: Event<Array.Array<ScreeningsByFilm>>) {
       state.isLoading = false
       state.error = undefined
-      state.screenings = [...event.payload]
+      state.screenings = event.payload.map(({ screenings, ...entity }) => ({
+        ...entity,
+        screenings: [...screenings],
+      }))
     },
   },
 })

@@ -15,7 +15,7 @@ function* fetchScreenings(
   yield* put($ScreeningDashboard.ScreeningsFetchingStarted())
   try {
     const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-    const screenings = yield* call(arcadia.getScreenings)
+    const screenings = yield* call(arcadia.getScreeningsByFilm)
     yield* put($ScreeningDashboard.ScreeningsFetched(screenings))
     command.payload?.onSuccess &&
       (yield* call(command.payload.onSuccess, screenings))

@@ -8,7 +8,7 @@ import { $HttpServer } from '../../../../src/http/server/HttpServer'
 import { $CreateFilm } from '../../film/message/command/CreateFilm'
 import { $EditFilm } from '../../film/message/command/EditFilm'
 import { $RemoveFilm } from '../../film/message/command/RemoveFilm'
-import { $ScreeningProjection } from '../../projection/Screening'
+import { $ScreeningsByFilm } from '../../projection/ScreeningsByFilm'
 import { $CreateScreening } from '../../screening/command/CreateScreening'
 import { CreateFilm } from './film/command/CreateFilm'
 import { EditFilm } from './film/command/EditFilm'
@@ -21,7 +21,7 @@ import { RemoveScreen } from './screen/command/RemoveScreen'
 import { GetScreen } from './screen/query/GetScreen'
 import { GetScreens } from './screen/query/GetScreens'
 import { CreateScreening } from './screening/command/CreateScreening'
-import { GetScreenings } from './screening/query/GetScreenings'
+import { GetScreeningsByFilm } from './screening/query/GetScreeningsByFilm'
 
 const handlers = [
   [CreateFilm, $CreateFilm] as const,
@@ -30,7 +30,7 @@ const handlers = [
   [
     CreateScreening,
     $CreateScreening,
-    $ScreeningProjection.onScreeningCreated,
+    $ScreeningsByFilm.onScreeningCreated,
   ] as const,
 ]
 
@@ -53,7 +53,7 @@ pipe(
     yield* _(GetScreens)
     yield* _(GetScreen)
 
-    yield* _(GetScreenings)
+    yield* _(GetScreeningsByFilm)
 
     yield* _($EventStore.run)
     yield* _($ServiceBus.run)

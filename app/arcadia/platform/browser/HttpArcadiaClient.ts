@@ -10,7 +10,7 @@ import {
 } from '../../../../src/http/client/HttpClient'
 import { HasLogger, Logger } from '../../../../src/logger/Logger'
 import { $FilmC } from '../../film/Film'
-import { $ScreeningProjectionC } from '../../projection/Screening'
+import { $ScreeningsByFilmC } from '../../projection/ScreeningsByFilm'
 import { $ScreenC } from '../../screen/Screen'
 import { ArcadiaClient } from './ArcadiaClient'
 
@@ -193,18 +193,18 @@ export const $HttpArcadiaClient =
         Effect.provideService(HasLogger)($logger),
         Effect.runPromise,
       ),
-    getScreenings: () =>
+    getScreeningsByFilm: () =>
       pipe(
         gen(function* (_) {
           const response = yield* _(
-            $HttpClient.get(`${url}/api/v1/screenings`, {
+            $HttpClient.get(`${url}/api/v1/screenings-by-film`, {
               json: true,
             }),
           )
           const body = yield* _(
-            $Any.decode(
-              t.type({ data: t.readonlyArray($ScreeningProjectionC) }),
-            )(response.body),
+            $Any.decode(t.type({ data: t.readonlyArray($ScreeningsByFilmC) }))(
+              response.body,
+            ),
           )
 
           return body.data

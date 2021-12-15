@@ -4,6 +4,7 @@ import * as Layer from '@effect-ts/system/Layer'
 import dotenv from 'dotenv'
 import EventEmitter from 'events'
 import fastify from 'fastify'
+import fastifyCors from 'fastify-cors'
 import fs from 'fs'
 import * as t from 'io-ts'
 import { NumberFromString } from 'io-ts-types'
@@ -61,7 +62,11 @@ export const $Layer = pipe(
           ),
         ),
         Layer.fromManaged(HasHttpServer)(
-          $FastifyHttpServer(fastify, env.HTTP_PORT, env.HTTP_ADDRESS),
+          $FastifyHttpServer(
+            () => fastify().register(fastifyCors),
+            env.HTTP_PORT,
+            env.HTTP_ADDRESS,
+          ),
         ),
         Layer.fromEffect(HasRepository)(
           $StorageRepository(env.REPOSITORY_PATH),

@@ -2,9 +2,9 @@ import { Effect, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/core/Effect'
 import { $Layer } from '../../../../config/Layer.local'
 import { $EventStore } from '../../../../src/entity/message/event/eventstore/EventStore'
-import { $ScreeningProjection } from '../../projection/Screening'
+import { $ScreeningsByFilm } from '../../projection/ScreeningsByFilm'
 
-const handlers = [$ScreeningProjection.onScreeningCreated]
+const handlers = [$ScreeningsByFilm.onScreeningCreated]
 
 pipe(
   gen(function* (_) {

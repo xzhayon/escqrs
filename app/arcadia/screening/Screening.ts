@@ -54,9 +54,15 @@ export const $Screening = {
       return yield* _(
         $Screening.apply(
           yield* _(
-            $ScreeningCreated()({ aggregateId: id, date, seats: screen.seats })(
-              command,
-            ),
+            $ScreeningCreated()({
+              aggregateId: id,
+              filmId: film._.id,
+              filmTitle: film.title,
+              date,
+              screenId: screen._.id,
+              screenName: screen.name,
+              seats: screen.seats,
+            })(command),
           ),
         )(),
       )

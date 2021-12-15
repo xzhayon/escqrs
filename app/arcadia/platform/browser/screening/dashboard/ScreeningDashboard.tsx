@@ -5,15 +5,12 @@ import {
   Button,
   Fab,
   Grid,
-  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListSubheader,
   Skeleton,
   Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from '@mui/material'
 import React, { FC, useEffect } from 'react'
@@ -70,38 +67,48 @@ export const ScreeningDashboard: FC = () => {
             </Grid>
           )}
           <Grid item xs={12}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: 'calc(100% * 2 / 3)' }}>
-                      Film
-                    </TableCell>
-                    <TableCell sx={{ width: 'calc(100% * 1 / 3)' }}>
-                      Screen
-                    </TableCell>
-                    <TableCell align="right">Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(screenings ?? [null, null, null]).map((screening, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        {screening?.filmName ?? <Skeleton variant="text" />}
-                      </TableCell>
-                      <TableCell>
-                        {screening?.screenName ?? <Skeleton variant="text" />}
-                      </TableCell>
-                      <TableCell>
-                        {screening?.date.toISOString() ?? (
-                          <Skeleton variant="text" />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <List sx={{ '& ul': { padding: 0 } }}>
+              {(screenings || [null, null, null]).map((entity, i) => (
+                <li key={i}>
+                  <ul>
+                    <ListSubheader>
+                      {entity?.filmTitle ?? <Skeleton variant="text" />}
+                    </ListSubheader>
+                    {(entity?.screenings || [null, null, null]).map(
+                      (screening, j) => (
+                        <ListItem key={j}>
+                          <ListItemText
+                            primary={
+                              screening?.date.toISOString() ?? (
+                                <Skeleton variant="text" />
+                              )
+                            }
+                            secondary={
+                              screening ? (
+                                <>
+                                  <Typography
+                                    color="text.primary"
+                                    component="span"
+                                    sx={{ display: 'inline' }}
+                                    variant="body2"
+                                  >
+                                    {screening.screenName}
+                                  </Typography>{' '}
+                                  - {screening.seats.free}/
+                                  {screening.seats.total} seats
+                                </>
+                              ) : (
+                                <Skeleton variant="text" />
+                              )
+                            }
+                          />
+                        </ListItem>
+                      ),
+                    )}
+                  </ul>
+                </li>
+              ))}
+            </List>
           </Grid>
         </Grid>
         <Fab
