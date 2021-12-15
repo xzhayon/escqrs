@@ -6,7 +6,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,5 +17,4 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
       - run: npm ci
-      - run: npm run build
       - run: npm test
