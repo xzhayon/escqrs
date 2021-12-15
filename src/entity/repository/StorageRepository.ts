@@ -6,20 +6,30 @@ import { HasLogger } from '../../logger/Logger'
 import { DirectoryNotFound } from '../../storage/DirectoryNotFound'
 import { FileNotFound } from '../../storage/FileNotFound'
 import { $Storage, HasStorage } from '../../storage/Storage'
+import { $String } from '../../String'
 import { Body, Entity, Header } from '../Entity'
 import { EntityNotFound } from './EntityNotFound'
 import { Repository } from './Repository'
-
-const CHANNEL = 'StorageRepository'
 
 const getLocation = (directory: string, type: string, id?: string) =>
   undefined !== id
     ? join(
         directory,
-        ...type.toLowerCase().split('.'),
-        `${id.toLowerCase()}.json`,
+        ...type
+          .split('.')
+          .map((s) =>
+            '_' === s[0] ? `_${$String.kebabcase(s)}` : $String.kebabcase(s),
+          ),
+        `${$String.kebabcase(id)}.json`,
       )
-    : join(directory, ...type.toLowerCase().split('.'))
+    : join(
+        directory,
+        ...type
+          .split('.')
+          .map((s) =>
+            '_' === s[0] ? `_${$String.kebabcase(s)}` : $String.kebabcase(s),
+          ),
+      )
 
 export const $StorageRepository = (location: string) =>
   gen(function* (_) {
