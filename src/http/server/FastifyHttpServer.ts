@@ -6,6 +6,7 @@ import * as t from 'io-ts'
 import { $Any } from '../../Any'
 import { $Error } from '../../Error'
 import { $Logger, HasLogger, Logger } from '../../logger/Logger'
+import { $String } from '../../String'
 import { HttpMethod, HttpResponse } from '../Http'
 import { HttpServer, HttpServerHandler, HttpServerRoute } from './HttpServer'
 
@@ -57,14 +58,14 @@ const route =
                 Effect.tapBoth(
                   (error) =>
                     $Logger.error('HTTP request not handled', {
-                      method: method.toUpperCase(),
+                      method: $String.uppercase(method),
                       path,
                       error,
                       channel: CHANNEL,
                     }),
                   () =>
                     $Logger.debug('HTTP request handled', {
-                      method: method.toUpperCase(),
+                      method: $String.uppercase(method),
                       path,
                       channel: CHANNEL,
                     }),
@@ -88,7 +89,7 @@ const route =
             }),
           ),
         $Error.fromUnknown(
-          Error(`Cannot register route "${method.toUpperCase()} ${path}"`),
+          Error(`Cannot register route "${$String.uppercase(method)} ${path}"`),
         ),
       ),
     )

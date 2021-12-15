@@ -2,6 +2,7 @@ import { Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $Logger } from '../../logger/Logger'
+import { $String } from '../../String'
 import { HttpMethod, HttpResponse } from '../Http'
 
 const CHANNEL = 'HttpServer'
@@ -121,14 +122,14 @@ const _route =
       Effect.tapBoth(
         (error) =>
           $Logger.error('Route not registered', {
-            method: method.toUpperCase(),
+            method: $String.uppercase(method),
             path,
             error,
             channel: CHANNEL,
           }),
         () =>
           $Logger.debug('Route registered', {
-            method: method.toUpperCase(),
+            method: $String.uppercase(method),
             path,
             channel: CHANNEL,
           }),

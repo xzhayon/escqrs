@@ -1,5 +1,6 @@
 import { Effect, Record } from '@effect-ts/core'
 import { pipe } from '@effect-ts/system/Function'
+import { $String } from '../String'
 import { Logger, LogLevel, _context } from './Logger'
 
 const consoleFunctions: {
@@ -25,7 +26,7 @@ const logFunction =
       _context,
       Effect.chain(({ date, appName, appVersion }) =>
         Effect.succeedWith(() => {
-          const _level = level.toUpperCase()
+          const _level = $String.uppercase(level)
           const _context = pipe(
             context ?? {},
             Record.map((value) =>

@@ -2,6 +2,7 @@ import { Array, Effect, Has, pipe } from '@effect-ts/core'
 import * as Dictionary from '@effect-ts/core/Collections/Immutable/Dictionary'
 import { AOf, EOf } from '../../Effect'
 import { $Logger } from '../../logger/Logger'
+import { $String } from '../../String'
 import { HttpMethod } from '../Http'
 
 const CHANNEL = 'HttpClient'
@@ -71,14 +72,14 @@ const request =
       Effect.tapBoth(
         (error) =>
           $Logger.error('HTTP request failed', {
-            method: method.toUpperCase(),
+            method: $String.uppercase(method),
             url,
             error,
             channel: CHANNEL,
           }),
         () =>
           $Logger.debug('HTTP request succeeded', {
-            method: method.toUpperCase(),
+            method: $String.uppercase(method),
             url,
             channel: CHANNEL,
           }),

@@ -1,6 +1,7 @@
 import { Effect, pipe } from '@effect-ts/core'
 import { AxiosResponse, AxiosStatic } from 'axios'
 import { $Error } from '../../Error'
+import { $String } from '../../String'
 import { HttpMethod } from '../Http'
 import { HttpClient, HttpClientOptions, HttpClientResponse } from './HttpClient'
 
@@ -29,7 +30,7 @@ const request = (
           url,
         }),
       $Error.fromUnknown(
-        Error(`Cannot make HTTP request "${method.toUpperCase()} ${url}"`),
+        Error(`Cannot make HTTP request "${$String.uppercase(method)} ${url}"`),
       ),
     ),
     Effect.map(response(url)),
