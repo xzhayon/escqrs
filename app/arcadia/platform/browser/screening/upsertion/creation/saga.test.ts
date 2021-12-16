@@ -12,7 +12,7 @@ describe('ScreeningCreationSaga', () => {
   const date = new Date()
   const screenId = $Screen.id('screenId')
   const error = Error()
-  const screenings: unknown[] = []
+  const creations: unknown[] = []
   const arcadiaClient: Pick<
     ArcadiaClient,
     'getFilms' | 'getScreens' | 'createScreening'
@@ -20,7 +20,7 @@ describe('ScreeningCreationSaga', () => {
     getFilms: async () => [],
     getScreens: async () => [],
     createScreening: async (screeningId, filmId, screenId, date) => {
-      screenings.push({ screeningId, filmId, screenId, date })
+      creations.push({ screeningId, filmId, screenId, date })
     },
   }
   const uuid: Uuid = { v4: async () => 'uuid' }
@@ -166,7 +166,7 @@ describe('ScreeningCreationSaga', () => {
         $ScreeningCreation.ScreeningCreationAccepted(),
         $ScreeningCreation.Stopped(),
       ])
-      expect(screenings).toStrictEqual([
+      expect(creations).toStrictEqual([
         { screeningId: 'uuid', filmId, date, screenId },
       ])
     })

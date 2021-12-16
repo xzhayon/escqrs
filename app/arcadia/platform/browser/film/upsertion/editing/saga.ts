@@ -11,7 +11,7 @@ import { Film } from '../../../../../film/Film'
 import { ArcadiaClient } from '../../../ArcadiaClient'
 import { $FilmEditing } from './slice'
 
-export const fetchAndEdit = (filmId: Id<Film>) =>
+const fetchAndEdit = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmEditing.fetchFilm>) {
     yield* put($FilmEditing.FilmFetchingStarted())
     try {
@@ -28,7 +28,7 @@ export const fetchAndEdit = (filmId: Id<Film>) =>
     }
   }
 
-export const editFilm = (filmId: Id<Film>) =>
+const editFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmEditing.editFilm>) {
     yield* put($FilmEditing.FilmEditingRequested())
     try {

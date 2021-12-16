@@ -1,152 +1,142 @@
-import { cloneableGenerator } from '@redux-saga/testing-utils'
-import { call, getContext, put, takeLeading } from 'typed-redux-saga'
+import { EventEmitter } from 'events'
+import { runSaga, stdChannel, Task } from 'redux-saga'
 import { $Film, Film } from '../../../../../film/Film'
 import { ArcadiaClient } from '../../../ArcadiaClient'
-import { editFilm, fetchAndEdit } from './saga'
+import { $FilmEditingSaga } from './saga'
 import { $FilmEditing } from './slice'
 
 describe('FilmEditingSaga', () => {
-  describe('fetchAndEdit', () => {
-    const filmId = $Film.id('filmId')
-    const film: Film = {
-      _: {
-        type: 'Film',
-        id: filmId,
-        date: { created: new Date(), updated: new Date() },
-        version: 0,
-      },
-      title: 'filmTitle',
-    }
-    const saga = cloneableGenerator(fetchAndEdit(filmId))(
-      $FilmEditing.fetchFilm(),
+  const filmId = $Film.id('filmId')
+  const filmTitle = 'filmTitle'
+  const film: Film = {
+    _: {
+      type: 'Film',
+      id: filmId,
+      date: { created: new Date(), updated: new Date() },
+      version: 0,
+    },
+    title: 'filmTitle',
+  }
+  const error = Error()
+  const editings: unknown[] = []
+  const arcadiaClient: Pick<ArcadiaClient, 'getFilm' | 'editFilm'> = {
+    getFilm: async () => film,
+    editFilm: async (id, body) => {
+      editings.push({ id, body })
+    },
+  }
+
+  let events: unknown[]
+  const channel = stdChannel()
+  let task: Task
+  const emitter = new EventEmitter()
+  emitter
+    .on('message', (message) => {
+      ;/\/[A-Z]/.test(message.type) && events.push(message)
+      channel.put(message)
+    })
+    .on(
+      'message',
+      (message) =>
+        $FilmEditing.FilmFetched.type === message.type &&
+        emitter.emit('message', $FilmEditing.editFilm({ title: filmTitle })),
+    )
+    .on(
+      'message',
+      (message) => $FilmEditing.Stopped.type === message.type && task.cancel(),
+    )
+    .on(
+      'message',
+      (message) =>
+        ($FilmEditing.FilmNotFetched.type === message.type ||
+          $FilmEditing.FilmEditingRejected.type === message.type ||
+          $FilmEditing.FilmEditingAccepted.type === message.type) &&
+        emitter.emit('message', $FilmEditing.stop()),
     )
 
-    test('starting saga', () => {
-      expect(saga.next().value).toStrictEqual(
-        put($FilmEditing.FilmFetchingStarted()).next().value,
-      )
-    })
-    test('getting client from context', () => {
-      expect(saga.next().value).toStrictEqual(
-        getContext('arcadiaClient').next().value,
-      )
-    })
-    test('fetching films', () => {
-      const arcadia: Pick<ArcadiaClient, 'getFilm'> = {
-        getFilm: async () => film,
-      }
-
-      expect(saga.next(arcadia).value).toStrictEqual(
-        call(arcadia.getFilm, filmId).next().value,
-      )
-    })
-
-    describe('request failed', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('handling error', () => {
-        const error = Error()
-
-        expect(clone.throw && clone.throw(error).value).toStrictEqual(
-          put($FilmEditing.FilmNotFetched(error)).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
-
-    describe('request succeeded', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('returning film', () => {
-        expect(clone.next(film).value).toStrictEqual(
-          put($FilmEditing.FilmFetched(film)).next().value,
-        )
-      })
-      test('listening for film editing', () => {
-        expect(JSON.stringify(clone.next().value)).toStrictEqual(
-          JSON.stringify(
-            takeLeading($FilmEditing.editFilm.type, editFilm(filmId)).next()
-              .value,
-          ),
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
+  beforeEach(() => {
+    events = []
   })
 
-  describe('editFilm', () => {
-    const filmId = $Film.id('filmId')
-    const filmTitle = 'filmTitle'
-    const saga = cloneableGenerator(editFilm(filmId))(
-      $FilmEditing.editFilm({ title: filmTitle }),
+  test('failing film fetching', async () => {
+    task = runSaga(
+      {
+        channel,
+        dispatch: (message) => emitter.emit('message', message),
+        context: {
+          arcadiaClient: {
+            ...arcadiaClient,
+            getFilm: async () => {
+              throw error
+            },
+          },
+        },
+      },
+      $FilmEditingSaga,
     )
+    emitter.emit('message', $FilmEditing.start({ id: filmId }))
+    await task.toPromise()
 
-    test('starting saga', () => {
-      expect(saga.next().value).toStrictEqual(
-        put($FilmEditing.FilmEditingRequested()).next().value,
+    expect(events).toStrictEqual([
+      $FilmEditing.Started(),
+      $FilmEditing.FilmFetchingStarted(),
+      $FilmEditing.FilmNotFetched(error),
+      $FilmEditing.Stopped(),
+    ])
+  })
+
+  describe('film was fetched', () => {
+    test('failing film editing', async () => {
+      task = runSaga(
+        {
+          channel,
+          dispatch: (message) => emitter.emit('message', message),
+          context: {
+            arcadiaClient: {
+              ...arcadiaClient,
+              editFilm: async () => {
+                throw error
+              },
+            },
+          },
+        },
+        $FilmEditingSaga,
       )
+      emitter.emit('message', $FilmEditing.start({ id: filmId }))
+      await task.toPromise()
+
+      expect(events).toStrictEqual([
+        $FilmEditing.Started(),
+        $FilmEditing.FilmFetchingStarted(),
+        $FilmEditing.FilmFetched(film),
+        $FilmEditing.FilmEditingRequested(),
+        $FilmEditing.FilmEditingRejected(error),
+        $FilmEditing.Stopped(),
+      ])
     })
-    test('getting client from context', () => {
-      expect(saga.next().value).toStrictEqual(
-        getContext('arcadiaClient').next().value,
+    test('editing film', async () => {
+      task = runSaga(
+        {
+          channel,
+          dispatch: (message) => emitter.emit('message', message),
+          context: { arcadiaClient },
+        },
+        $FilmEditingSaga,
       )
-    })
-    test('fetching films', () => {
-      const arcadia: Pick<ArcadiaClient, 'editFilm'> = {
-        editFilm: async () => {},
-      }
+      emitter.emit('message', $FilmEditing.start({ id: filmId }))
+      await task.toPromise()
 
-      expect(saga.next(arcadia).value).toStrictEqual(
-        call(arcadia.editFilm, filmId, { title: filmTitle }).next().value,
-      )
-    })
-
-    describe('request failed', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('handling error', () => {
-        const error = Error()
-
-        expect(clone.throw && clone.throw(error).value).toStrictEqual(
-          put($FilmEditing.FilmEditingRejected(error)).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
-
-    describe('request succeeded', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('confirming film editing', () => {
-        expect(clone.next().value).toStrictEqual(
-          put($FilmEditing.FilmEditingAccepted()).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
+      expect(events).toStrictEqual([
+        $FilmEditing.Started(),
+        $FilmEditing.FilmFetchingStarted(),
+        $FilmEditing.FilmFetched(film),
+        $FilmEditing.FilmEditingRequested(),
+        $FilmEditing.FilmEditingAccepted(),
+        $FilmEditing.Stopped(),
+      ])
+      expect(editings).toStrictEqual([
+        { id: filmId, body: { title: filmTitle } },
+      ])
     })
   })
 })
