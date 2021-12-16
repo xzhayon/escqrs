@@ -1,161 +1,174 @@
-import { cloneableGenerator } from '@redux-saga/testing-utils'
-import { all, call, getContext, put, takeLeading } from 'typed-redux-saga'
+import { runSaga, stdChannel, Task } from 'redux-saga'
+import { EventEmitter } from 'stream'
 import { $Film } from '../../../../../film/Film'
 import { $Screen } from '../../../../../screen/Screen'
-import { $Screening } from '../../../../../screening/Screening'
 import { ArcadiaClient } from '../../../ArcadiaClient'
-import { createScreening, fetchAndCreate } from './saga'
+import { Uuid } from '../../../uuid/Uuid'
+import { $ScreeningCreationSaga } from './saga'
 import { $ScreeningCreation } from './slice'
 
 describe('ScreeningCreationSaga', () => {
-  describe('fetchAndCreate', () => {
-    const screeningId = $Screening.id('screeningId')
-    const saga = cloneableGenerator(fetchAndCreate(screeningId))(
-      $ScreeningCreation.fetchFilmsAndScreens(),
+  const filmId = $Film.id('filmId')
+  const date = new Date()
+  const screenId = $Screen.id('screenId')
+  const error = Error()
+  const screenings: unknown[] = []
+  const arcadiaClient: Pick<
+    ArcadiaClient,
+    'getFilms' | 'getScreens' | 'createScreening'
+  > = {
+    getFilms: async () => [],
+    getScreens: async () => [],
+    createScreening: async (screeningId, filmId, screenId, date) => {
+      screenings.push({ screeningId, filmId, screenId, date })
+    },
+  }
+  const uuid: Uuid = { v4: async () => 'uuid' }
+
+  let events: unknown[]
+  const channel = stdChannel()
+  let task: Task
+  const emitter = new EventEmitter()
+  emitter
+    .on('message', (message) => {
+      ;/\/[A-Z]/.test(message.type) && events.push(message)
+      channel.put(message)
+    })
+    .on(
+      'message',
+      (message) =>
+        $ScreeningCreation.FilmsAndScreensFetched.type === message.type &&
+        emitter.emit(
+          'message',
+          $ScreeningCreation.createScreening({ filmId, date, screenId }),
+        ),
+    )
+    .on(
+      'message',
+      (message) =>
+        $ScreeningCreation.Stopped.type === message.type && task.cancel(),
+    )
+    .on(
+      'message',
+      (message) =>
+        ($ScreeningCreation.FilmsAndScreensNotFetched.type === message.type ||
+          $ScreeningCreation.ScreeningCreationRejected.type === message.type ||
+          $ScreeningCreation.ScreeningCreationAccepted.type === message.type) &&
+        emitter.emit('message', $ScreeningCreation.stop()),
     )
 
-    test('starting saga', () => {
-      expect(saga.next().value).toStrictEqual(
-        put($ScreeningCreation.FilmsAndScreensFetchingStarted()).next().value,
-      )
-    })
-    test('getting client from context', () => {
-      expect(saga.next().value).toStrictEqual(
-        getContext('arcadiaClient').next().value,
-      )
-    })
-    test('fetching films and screens', () => {
-      const arcadia: Pick<ArcadiaClient, 'getFilms' | 'getScreens'> = {
-        getFilms: async () => [],
-        getScreens: async () => [],
-      }
-
-      expect(saga.next(arcadia).value).toStrictEqual(
-        all([call(arcadia.getFilms), call(arcadia.getScreens)]).next().value,
-      )
-    })
-
-    describe('request failed', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('handling client error', () => {
-        const error = Error()
-
-        expect(clone.throw && clone.throw(error).value).toStrictEqual(
-          put($ScreeningCreation.FilmsAndScreensNotFetched(error)).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
-
-    describe('request succeeded', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('returning result', () => {
-        expect(clone.next([[], []]).value).toStrictEqual(
-          put(
-            $ScreeningCreation.FilmsAndScreensFetched({
-              films: [],
-              screens: [],
-            }),
-          ).next().value,
-        )
-      })
-      test('listening for screening creation', () => {
-        expect(JSON.stringify(clone.next().value)).toStrictEqual(
-          JSON.stringify(
-            takeLeading(
-              $ScreeningCreation.createScreening.type,
-              createScreening(screeningId),
-            ).next().value,
-          ),
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
+  beforeEach(() => {
+    events = []
   })
 
-  describe('createScreening', () => {
-    const screeningId = $Screening.id('screeningId')
-    const filmId = $Film.id('filmId')
-    const screenId = $Screen.id('screenId')
-    const date = new Date()
-    const saga = cloneableGenerator(createScreening(screeningId))(
-      $ScreeningCreation.createScreening({ filmId, screenId, date }),
+  test('failing film fetching', async () => {
+    task = runSaga(
+      {
+        channel,
+        dispatch: (message) => emitter.emit('message', message),
+        context: {
+          arcadiaClient: {
+            ...arcadiaClient,
+            getFilms: async () => {
+              throw error
+            },
+          },
+          uuid,
+        },
+      },
+      $ScreeningCreationSaga,
     )
+    emitter.emit('message', $ScreeningCreation.start())
+    await task.toPromise()
 
-    test('starting saga', () => {
-      expect(saga.next().value).toStrictEqual(
-        put($ScreeningCreation.ScreeningCreationRequested()).next().value,
+    expect(events).toStrictEqual([
+      $ScreeningCreation.Started(),
+      $ScreeningCreation.FilmsAndScreensFetchingStarted(),
+      $ScreeningCreation.FilmsAndScreensNotFetched(error),
+      $ScreeningCreation.Stopped(),
+    ])
+  })
+  test('failing screen fetching', async () => {
+    task = runSaga(
+      {
+        channel,
+        dispatch: (message) => emitter.emit('message', message),
+        context: {
+          arcadiaClient: {
+            ...arcadiaClient,
+            getScreens: async () => {
+              throw error
+            },
+          },
+          uuid,
+        },
+      },
+      $ScreeningCreationSaga,
+    )
+    emitter.emit('message', $ScreeningCreation.start())
+    await task.toPromise()
+
+    expect(events).toStrictEqual([
+      $ScreeningCreation.Started(),
+      $ScreeningCreation.FilmsAndScreensFetchingStarted(),
+      $ScreeningCreation.FilmsAndScreensNotFetched(error),
+      $ScreeningCreation.Stopped(),
+    ])
+  })
+
+  describe('films and screens were fetched', () => {
+    test('failing screening creation', async () => {
+      task = runSaga(
+        {
+          channel,
+          dispatch: (message) => emitter.emit('message', message),
+          context: {
+            arcadiaClient: {
+              ...arcadiaClient,
+              createScreening: async () => {
+                throw error
+              },
+            },
+            uuid,
+          },
+        },
+        $ScreeningCreationSaga,
       )
+      emitter.emit('message', $ScreeningCreation.start())
+      await task.toPromise()
+
+      expect(events).toStrictEqual([
+        $ScreeningCreation.Started(),
+        $ScreeningCreation.FilmsAndScreensFetchingStarted(),
+        $ScreeningCreation.FilmsAndScreensFetched({ films: [], screens: [] }),
+        $ScreeningCreation.ScreeningCreationRequested(),
+        $ScreeningCreation.ScreeningCreationRejected(error),
+        $ScreeningCreation.Stopped(),
+      ])
     })
-    test('getting client from context', () => {
-      expect(saga.next().value).toStrictEqual(
-        getContext('arcadiaClient').next().value,
+    test('creating screening', async () => {
+      task = runSaga(
+        {
+          channel,
+          dispatch: (message) => emitter.emit('message', message),
+          context: { arcadiaClient, uuid },
+        },
+        $ScreeningCreationSaga,
       )
-    })
-    test('creating screening', () => {
-      const arcadia: Pick<ArcadiaClient, 'createScreening'> = {
-        createScreening: async () => {},
-      }
+      emitter.emit('message', $ScreeningCreation.start())
+      await task.toPromise()
 
-      expect(saga.next(arcadia).value).toStrictEqual(
-        call(
-          arcadia.createScreening,
-          screeningId,
-          filmId,
-          screenId,
-          date,
-        ).next().value,
-      )
-    })
-
-    describe('request failed', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('handling client error', () => {
-        const error = Error()
-
-        expect(clone.throw && clone.throw(error).value).toStrictEqual(
-          put($ScreeningCreation.ScreeningCreationRejected(error)).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
-    })
-
-    describe('request succeeded', () => {
-      let clone: ReturnType<typeof saga.clone>
-
-      beforeAll(() => {
-        clone = saga.clone()
-      })
-
-      test('confirming creation', () => {
-        expect(clone.next().value).toStrictEqual(
-          put($ScreeningCreation.ScreeningCreationAccepted()).next().value,
-        )
-      })
-      test('closing saga', () => {
-        expect(clone.next().done).toBeTruthy()
-      })
+      expect(events).toStrictEqual([
+        $ScreeningCreation.Started(),
+        $ScreeningCreation.FilmsAndScreensFetchingStarted(),
+        $ScreeningCreation.FilmsAndScreensFetched({ films: [], screens: [] }),
+        $ScreeningCreation.ScreeningCreationRequested(),
+        $ScreeningCreation.ScreeningCreationAccepted(),
+        $ScreeningCreation.Stopped(),
+      ])
+      expect(screenings).toStrictEqual([
+        { screeningId: 'uuid', filmId, date, screenId },
+      ])
     })
   })
 })

@@ -13,7 +13,7 @@ import { ArcadiaClient } from '../../../ArcadiaClient'
 import { Uuid } from '../../../uuid/Uuid'
 import { $ScreeningCreation } from './slice'
 
-export const fetchAndCreate = (screeningId: Id<Screening>) =>
+const fetchAndCreate = (screeningId: Id<Screening>) =>
   function* (
     command: ReturnType<typeof $ScreeningCreation.fetchFilmsAndScreens>,
   ) {
@@ -38,7 +38,7 @@ export const fetchAndCreate = (screeningId: Id<Screening>) =>
     }
   }
 
-export const createScreening = (screeningId: Id<Screening>) =>
+const createScreening = (screeningId: Id<Screening>) =>
   function* (command: ReturnType<typeof $ScreeningCreation.createScreening>) {
     yield* put($ScreeningCreation.ScreeningCreationRequested())
     try {
