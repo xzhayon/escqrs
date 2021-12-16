@@ -1,4 +1,5 @@
 import { Effect, Has, pipe } from '@effect-ts/core'
+import { flow } from '@effect-ts/core/Function'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
 import { $Logger } from '../../logger/Logger'
@@ -18,9 +19,8 @@ export interface HttpServer {
   readonly run: Effect.IO<Error, void>
 }
 
-export interface HttpServerRoute {
+export interface HttpServerRoute<R = unknown> {
   <
-    R,
     BodyC extends t.Mixed = t.UnknownC,
     HeadersC extends t.Mixed = t.UnknownC,
     ParamsC extends t.Mixed = t.UnknownC,
@@ -36,13 +36,13 @@ export interface HttpServerRoute {
       readonly response: ResponseC
     }>,
     handler: HttpServerHandler<R, BodyC, HeadersC, ParamsC, QueryC, ResponseC>,
-  ): Effect.Effect<R, Error, void>
+  ): Effect.Effect<R & Effect.DefaultEnv, Error, void>
 }
 
 export const HasHttpServer = Has.tag<HttpServer>()
 
 export interface HttpServerHandler<
-  R,
+  R = unknown,
   BodyC extends t.Mixed = t.UnknownC,
   HeadersC extends t.Mixed = t.UnknownC,
   ParamsC extends t.Mixed = t.UnknownC,
@@ -57,7 +57,7 @@ export interface HttpServerHandler<
       t.TypeOf<QueryC>
     >,
   ): Effect.Effect<
-    R,
+    R & Effect.DefaultEnv,
     Error,
     t.TypeOf<ResponseC> | HttpResponse<t.TypeOf<ResponseC>>
   >
@@ -115,9 +115,11 @@ const _route =
   ) =>
     pipe(
       gen(function* (_) {
-        const f = yield* _(route)
+        const r = yield* _(Effect.environment<R>())
+        const __route = yield* _(route)
+        const _handler = flow(handler, Effect.provide(r))
 
-        return yield* _(f(path, schema, handler))
+        return yield* _(__route(path, schema, _handler))
       }),
       Effect.tapBoth(
         (error) =>

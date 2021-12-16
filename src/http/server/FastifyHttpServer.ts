@@ -1,5 +1,5 @@
 import { Effect, Function, Managed, pipe } from '@effect-ts/core'
-import { Clock, HasClock } from '@effect-ts/system/Clock'
+import { HasClock } from '@effect-ts/system/Clock'
 import { gen } from '@effect-ts/system/Effect'
 import { FastifyInstance } from 'fastify'
 import * as t from 'io-ts'
@@ -13,10 +13,9 @@ import { HttpServer, HttpServerHandler, HttpServerRoute } from './HttpServer'
 const CHANNEL = 'FastifyHttpServer'
 
 const route =
-  ($clock: Clock, $logger: Logger) =>
+  ($logger: Logger) =>
   (fastify: FastifyInstance, method: HttpMethod): HttpServerRoute =>
   <
-    R,
     BodyC extends t.Mixed = t.UnknownC,
     HeadersC extends t.Mixed = t.UnknownC,
     ParamsC extends t.Mixed = t.UnknownC,
@@ -31,66 +30,69 @@ const route =
       readonly query: QueryC
       readonly response: ResponseC
     }>,
-    handler: HttpServerHandler<R, BodyC, HeadersC, ParamsC, QueryC, ResponseC>,
+    handler: HttpServerHandler<
+      unknown,
+      BodyC,
+      HeadersC,
+      ParamsC,
+      QueryC,
+      ResponseC
+    >,
   ) =>
-    Effect.accessM((r: R) =>
-      Effect.tryCatch(
-        () =>
-          fastify.register(async (instance) =>
-            instance[method](path, async (request, reply) => {
-              const response = await pipe(
-                gen(function* (_) {
-                  request.body = yield* _(
-                    $Any.decode(schema.body ?? t.unknown)(request.body),
-                  )
-                  request.query = yield* _(
-                    $Any.decode(schema.query ?? t.unknown)(request.query),
-                  )
-                  request.params = yield* _(
-                    $Any.decode(schema.params ?? t.unknown)(request.params),
-                  )
-                  yield* _(
-                    $Any.decode(schema.headers ?? t.unknown)(request.headers),
-                  )
+    Effect.tryCatch(
+      () =>
+        fastify.register(async (instance) =>
+          instance[method](path, async (request, reply) => {
+            const response = await pipe(
+              gen(function* (_) {
+                request.body = yield* _(
+                  $Any.decode(schema.body ?? t.unknown)(request.body),
+                )
+                request.query = yield* _(
+                  $Any.decode(schema.query ?? t.unknown)(request.query),
+                )
+                request.params = yield* _(
+                  $Any.decode(schema.params ?? t.unknown)(request.params),
+                )
+                yield* _(
+                  $Any.decode(schema.headers ?? t.unknown)(request.headers),
+                )
 
-                  return yield* _(handler(request))
-                }),
-                Effect.tapBoth(
-                  (error) =>
-                    $Logger.error('HTTP request not handled', {
-                      method: $String.uppercase(method),
-                      path,
-                      error,
-                      channel: CHANNEL,
-                    }),
-                  () =>
-                    $Logger.debug('HTTP request handled', {
-                      method: $String.uppercase(method),
-                      path,
-                      channel: CHANNEL,
-                    }),
-                ),
-                Effect.provideService(HasClock)($clock),
-                Effect.provideService(HasLogger)($logger),
-                Effect.provideAll(r),
-                Effect.runPromise,
-              )
+                return yield* _(handler(request))
+              }),
+              Effect.tapBoth(
+                (error) =>
+                  $Logger.error('HTTP request not handled', {
+                    method: $String.uppercase(method),
+                    path,
+                    error,
+                    channel: CHANNEL,
+                  }),
+                () =>
+                  $Logger.debug('HTTP request handled', {
+                    method: $String.uppercase(method),
+                    path,
+                    channel: CHANNEL,
+                  }),
+              ),
+              Effect.provideService(HasLogger)($logger),
+              Effect.runPromise,
+            )
 
-              if (response instanceof HttpResponse) {
-                reply
-                  .status(response.status)
-                  .headers(response.headers)
-                  .send(response.body)
+            if (response instanceof HttpResponse) {
+              reply
+                .status(response.status)
+                .headers(response.headers)
+                .send(response.body)
 
-                return
-              }
+              return
+            }
 
-              return response
-            }),
-          ),
-        $Error.fromUnknown(
-          Error(`Cannot register route "${$String.uppercase(method)} ${path}"`),
+            return response
+          }),
         ),
+      $Error.fromUnknown(
+        Error(`Cannot register route "${$String.uppercase(method)} ${path}"`),
       ),
     )
 
@@ -118,13 +120,13 @@ export const $FastifyHttpServer = (
         const $logger = yield* _(HasLogger)
 
         const server: HttpServer = {
-          delete: route($clock, $logger)(_fastify, 'delete'),
-          get: route($clock, $logger)(_fastify, 'get'),
-          head: route($clock, $logger)(_fastify, 'head'),
-          options: route($clock, $logger)(_fastify, 'options'),
-          patch: route($clock, $logger)(_fastify, 'patch'),
-          post: route($clock, $logger)(_fastify, 'post'),
-          put: route($clock, $logger)(_fastify, 'put'),
+          delete: route($logger)(_fastify, 'delete'),
+          get: route($logger)(_fastify, 'get'),
+          head: route($logger)(_fastify, 'head'),
+          options: route($logger)(_fastify, 'options'),
+          patch: route($logger)(_fastify, 'patch'),
+          post: route($logger)(_fastify, 'post'),
+          put: route($logger)(_fastify, 'put'),
           run: pipe(
             Effect.tryCatchPromise(
               () => _fastify.listen(port, address),
