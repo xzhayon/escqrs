@@ -9,7 +9,7 @@ const handlers = [$ScreeningsByFilm.onScreeningCreated]
 pipe(
   gen(function* (_) {
     for (const eventHandler of handlers) {
-      yield* _($EventStore.subscribe(yield* _(eventHandler)))
+      yield* _($EventStore.subscribe(eventHandler))
     }
 
     yield* _($EventStore.run)

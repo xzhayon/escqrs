@@ -24,12 +24,12 @@ import { CreateScreening } from './screening/command/CreateScreening'
 import { GetScreeningsByFilm } from './screening/query/GetScreeningsByFilm'
 
 const handlers = [
-  [CreateFilm, $CreateFilm] as const,
-  [EditFilm, $EditFilm] as const,
-  [RemoveFilm, $RemoveFilm] as const,
+  [CreateFilm, $CreateFilm.handler] as const,
+  [EditFilm, $EditFilm.handler] as const,
+  [RemoveFilm, $RemoveFilm.handler] as const,
   [
     CreateScreening,
-    $CreateScreening,
+    $CreateScreening.handler,
     $ScreeningsByFilm.onScreeningCreated,
   ] as const,
 ]
@@ -38,9 +38,9 @@ pipe(
   gen(function* (_) {
     for (const [routeHandler, commandHandler, ...eventHandlers] of handlers) {
       for (const eventHandler of eventHandlers) {
-        yield* _($EventStore.subscribe(yield* _(eventHandler)))
+        yield* _($EventStore.subscribe(eventHandler))
       }
-      yield* _($ServiceBus.registerHandler(yield* _(commandHandler.handler)))
+      yield* _($ServiceBus.registerHandler(commandHandler))
       yield* _(routeHandler)
     }
 
