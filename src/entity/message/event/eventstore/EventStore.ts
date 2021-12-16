@@ -1,4 +1,5 @@
 import { Array, Effect, Has, pipe } from '@effect-ts/core'
+import { gen } from '@effect-ts/core/Effect'
 import { $Logger } from '../../../../logger/Logger'
 import { Id } from '../../../Entity'
 import { Event } from '../Event'
@@ -21,11 +22,13 @@ export const HasEventStore = Has.tag<EventStore>()
 const {
   publish: _publish,
   events: _events,
+  subscribe: _subscribe,
   run: _run,
-} = Effect.deriveLifted(HasEventStore)(['publish', 'events'], ['run'], [])
-const { subscribe: _subscribe } = Effect.deriveAccessM(HasEventStore)([
-  'subscribe',
-])
+} = Effect.deriveLifted(HasEventStore)(
+  ['publish', 'events'],
+  ['run'],
+  ['subscribe'],
+)
 
 const publish = (event: Event) =>
   pipe(
@@ -54,9 +57,17 @@ const publish = (event: Event) =>
     ),
   )
 
-const subscribe = (handler: EventHandler) =>
+const subscribe = <R>({ handle, ...handler }: EventHandler<R>) =>
   pipe(
-    _subscribe((f) => f(handler)),
+    gen(function* (_) {
+      const r = yield* _(Effect.environment<R>())
+      const __subscribe = yield* _(_subscribe)
+      const _handler: EventHandler = {
+        ...handler,
+        handle: (event) => pipe(handle(event), Effect.provide(r)),
+      }
+      yield* _(__subscribe(_handler))
+    }),
     Effect.tapBoth(
       (error) =>
         $Logger.error('Event handler not subscribed', {

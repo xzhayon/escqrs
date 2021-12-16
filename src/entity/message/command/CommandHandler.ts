@@ -1,19 +1,13 @@
-import { Effect, pipe } from '@effect-ts/core'
 import { Type } from '../../Entity'
 import { $MessageHandler, MessageHandler } from '../MessageHandler'
 import { Command } from './Command'
 
-export interface CommandHandler<A extends Command = Command>
-  extends MessageHandler<A> {}
+export interface CommandHandler<R = unknown, A extends Command = Command>
+  extends MessageHandler<R, A> {}
 
 export function $CommandHandler<A extends Command>(type: Type<A>) {
-  return <R>(handle: Effect.RIO<R, CommandHandler<A>['handle']>) =>
-    pipe(
-      $MessageHandler(type)(
-        handle as Effect.RIO<R, MessageHandler<A>['handle']>,
-      ),
-      Effect.map((handler) => handler as CommandHandler),
-    )
+  return <R>(handle: CommandHandler<R, A>['handle']) =>
+    $MessageHandler(type)(handle as MessageHandler<R, A>['handle'])
 }
 
 $CommandHandler.handle = (command: Command) => (handler: CommandHandler) =>

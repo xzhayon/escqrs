@@ -1,4 +1,5 @@
 import { Effect, Has, pipe } from '@effect-ts/core'
+import { gen } from '@effect-ts/core/Effect'
 import { $Logger } from '../../../../logger/Logger'
 import { Command } from '../Command'
 import { CommandHandler } from '../CommandHandler'
@@ -13,14 +14,15 @@ export interface ServiceBus {
 
 export const HasServiceBus = Has.tag<ServiceBus>()
 
-const { dispatch: _dispatch, run: _run } = Effect.deriveLifted(HasServiceBus)(
+const {
+  dispatch: _dispatch,
+  registerHandler: _registerHandler,
+  run: _run,
+} = Effect.deriveLifted(HasServiceBus)(
   ['dispatch'],
   ['run'],
-  [],
+  ['registerHandler'],
 )
-const { registerHandler: _registerHandler } = Effect.deriveAccessM(
-  HasServiceBus,
-)(['registerHandler'])
 
 const dispatch = (command: Command) =>
   pipe(
@@ -47,9 +49,17 @@ const dispatch = (command: Command) =>
     ),
   )
 
-const registerHandler = (handler: CommandHandler) =>
+const registerHandler = <R>({ handle, ...handler }: CommandHandler<R>) =>
   pipe(
-    _registerHandler((f) => f(handler)),
+    gen(function* (_) {
+      const r = yield* _(Effect.environment<R>())
+      const __registerHandler = yield* _(_registerHandler)
+      const _handler: CommandHandler = {
+        ...handler,
+        handle: (command) => pipe(handle(command), Effect.provide(r)),
+      }
+      yield* _(__registerHandler(_handler))
+    }),
     Effect.tapBoth(
       (error) =>
         $Logger.error('Command handler not registered', {

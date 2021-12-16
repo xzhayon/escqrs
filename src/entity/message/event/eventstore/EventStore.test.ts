@@ -67,17 +67,13 @@ describe('EventStore', () => {
       await expect(
         pipe(
           gen(function* (_) {
-            const handler = yield* _(
-              $EventHandler(
-                'foo',
-                'bar',
-              )(
-                Effect.succeed((event) =>
-                  Effect.succeedWith(() => {
-                    bar += (event as any).bar
-                  }),
-                ),
-              ),
+            const handler = $EventHandler(
+              'foo',
+              'bar',
+            )((event) =>
+              Effect.succeedWith(() => {
+                bar += (event as any).bar
+              }),
             )
             yield* _($EventStore.subscribe(handler))
             const event = yield* _(
@@ -97,29 +93,21 @@ describe('EventStore', () => {
         pipe(
           gen(function* (_) {
             const handlers = [
-              yield* _(
-                $EventHandler(
-                  'foo',
-                  'bar',
-                )(
-                  Effect.succeed((event) =>
-                    Effect.succeedWith(() => {
-                      bar += (event as any).bar
-                    }),
-                  ),
-                ),
+              $EventHandler(
+                'foo',
+                'bar',
+              )((event) =>
+                Effect.succeedWith(() => {
+                  bar += (event as any).bar
+                }),
               ),
-              yield* _(
-                $EventHandler(
-                  'foo',
-                  'bar',
-                )(
-                  Effect.succeed((event) =>
-                    Effect.succeedWith(() => {
-                      bar -= 2 * (event as any).bar
-                    }),
-                  ),
-                ),
+              $EventHandler(
+                'foo',
+                'bar',
+              )((event) =>
+                Effect.succeedWith(() => {
+                  bar -= 2 * (event as any).bar
+                }),
               ),
             ]
             for (const handler of handlers) {
@@ -140,17 +128,13 @@ describe('EventStore', () => {
     test('restarting the event store', async () => {
       await pipe(
         gen(function* (_) {
-          const handler = yield* _(
-            $EventHandler(
-              'foo',
-              'bar',
-            )(
-              Effect.succeed((event) =>
-                Effect.succeedWith(() => {
-                  bar += (event as any).bar
-                }),
-              ),
-            ),
+          const handler = $EventHandler(
+            'foo',
+            'bar',
+          )((event) =>
+            Effect.succeedWith(() => {
+              bar += (event as any).bar
+            }),
           )
           yield* _($EventStore.subscribe(handler))
           const event = yield* _(
@@ -166,17 +150,13 @@ describe('EventStore', () => {
       await expect(
         pipe(
           gen(function* (_) {
-            const handler = yield* _(
-              $EventHandler(
-                'foo',
-                'bar',
-              )(
-                Effect.succeed((event) =>
-                  Effect.succeedWith(() => {
-                    bar += (event as any).bar
-                  }),
-                ),
-              ),
+            const handler = $EventHandler(
+              'foo',
+              'bar',
+            )((event) =>
+              Effect.succeedWith(() => {
+                bar += (event as any).bar
+              }),
             )
             yield* _($EventStore.subscribe(handler))
 

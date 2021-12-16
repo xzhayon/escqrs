@@ -1,23 +1,22 @@
 import { Effect, pipe } from '@effect-ts/core'
-import { gen } from '@effect-ts/system/Effect'
 import { $Logger } from '../../logger/Logger'
 import { Type } from '../Entity'
 import { Message } from './Message'
 
 const CHANNEL = 'MessageHandler'
 
-export interface MessageHandler<A extends Message = Message> {
+export interface MessageHandler<R = unknown, A extends Message = Message> {
   readonly type: Type<A>
-  readonly handle: (message: A) => Effect.Effect<Effect.DefaultEnv, Error, void>
+  readonly handle: (
+    message: A,
+  ) => Effect.Effect<R & Effect.DefaultEnv, Error, void>
 }
 
 export function $MessageHandler<A extends Message>(type: Type<A>) {
-  return <R>(
-    handle: Effect.RIO<R, MessageHandler<A>['handle']>,
-  ): Effect.RIO<R, MessageHandler> =>
-    gen(function* (_) {
-      return { type, handle: (yield* _(handle)) as MessageHandler['handle'] }
-    })
+  return <R>(handle: MessageHandler<R, A>['handle']): MessageHandler<R> => ({
+    type,
+    handle: handle as MessageHandler<R>['handle'],
+  })
 }
 
 $MessageHandler.handle = (message: Message) => (handler: MessageHandler) =>

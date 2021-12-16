@@ -7,12 +7,10 @@ import { $MessageHandler } from './MessageHandler'
 describe('MessageHandler', () => {
   describe('handle', () => {
     let bar: number
-    const handler = $MessageHandler('foo')(
-      Effect.succeed(() =>
-        Effect.succeedWith(() => {
-          bar++
-        }),
-      ),
+    const handler = $MessageHandler('foo')(() =>
+      Effect.succeedWith(() => {
+        bar++
+      }),
     )
 
     beforeEach(() => {
@@ -25,7 +23,7 @@ describe('MessageHandler', () => {
           gen(function* (_) {
             const message = yield* _($Message('foo')({ aggregateId: 'bar' })())
 
-            return yield* _($MessageHandler.handle(message)(yield* _(handler)))
+            return yield* _($MessageHandler.handle(message)(handler))
           }),
           Effect.provideSomeLayer($Layer),
           Effect.runPromise,
@@ -42,11 +40,11 @@ describe('MessageHandler', () => {
             const barMessage = yield* _(
               $Message('bar')({ aggregateId: 'bar' })(),
             )
-            yield* _($MessageHandler.handle(fooMessage)(yield* _(handler)))
-            yield* _($MessageHandler.handle(barMessage)(yield* _(handler)))
-            yield* _($MessageHandler.handle(fooMessage)(yield* _(handler)))
-            yield* _($MessageHandler.handle(barMessage)(yield* _(handler)))
-            yield* _($MessageHandler.handle(fooMessage)(yield* _(handler)))
+            yield* _($MessageHandler.handle(fooMessage)(handler))
+            yield* _($MessageHandler.handle(barMessage)(handler))
+            yield* _($MessageHandler.handle(fooMessage)(handler))
+            yield* _($MessageHandler.handle(barMessage)(handler))
+            yield* _($MessageHandler.handle(fooMessage)(handler))
 
             return bar
           }),

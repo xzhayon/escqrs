@@ -5,8 +5,8 @@ import { $CommandHandler } from './entity/message/command/CommandHandler'
 import { $Event } from './entity/message/event/Event'
 import { Gwt } from './Gwt'
 
-const handler = $CommandHandler('foo')(
-  Effect.succeed((command) => Effect.fail(Error(command._.type))),
+const handler = $CommandHandler('foo')((command) =>
+  Effect.fail(Error(command._.type)),
 )
 
 describe('Gwt', () => {

@@ -46,8 +46,8 @@ export const $Screening = {
   create: (
     id: Id<Screening>,
     film: Film,
-    screen: Screen,
     date: Date,
+    screen: Screen,
     command?: CreateScreening,
   ) =>
     gen(function* (_) {

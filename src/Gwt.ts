@@ -23,17 +23,13 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
   private _error!: Error
   private _then: Array.Array<Effect.Effect<any, Error, Event>>
 
-  private constructor(
-    private readonly _subject: Effect.Effect<any, Error, CommandHandler>,
-  ) {
+  private constructor(private readonly _handler: CommandHandler<any>) {
     this._given = Effect.succeed([])
     this._then = []
   }
 
-  static test<_R>(
-    subject: Effect.Effect<GwtEnv & _R, Error, CommandHandler>,
-  ): Gwt<_R, 'Given'> {
-    return new Gwt<_R, 'Given'>(subject)
+  static test<_R>(handler: CommandHandler<GwtEnv & _R>): Gwt<_R, 'Given'> {
+    return new Gwt<_R, 'Given'>(handler)
   }
 
   given<_R>(
@@ -104,7 +100,7 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
     this: Gwt<GwtEnv | R, 'Run'>,
     layer: Layer.Layer<GwtEnv, Error, R> = Layer.identity<any>(),
   ): Promise<void> {
-    const subject = this._subject
+    const handler = this._handler
     const given = this._given
     const when = this._when
 
@@ -121,7 +117,6 @@ export class Gwt<R, S extends 'Given' | 'When' | 'Then' | 'Run'> {
 
     const actual = pipe(
       gen(function* (_) {
-        const handler = yield* _(subject)
         const command = yield* _(when)
 
         const events = yield* _(given)

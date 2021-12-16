@@ -38,14 +38,10 @@ describe('ServiceBus', () => {
       await expect(
         pipe(
           gen(function* (_) {
-            const handler = yield* _(
-              $CommandHandler('foo')(
-                Effect.succeed((command) =>
-                  Effect.succeedWith(() => {
-                    bar += (command as any).bar
-                  }),
-                ),
-              ),
+            const handler = $CommandHandler('foo')((command) =>
+              Effect.succeedWith(() => {
+                bar += (command as any).bar
+              }),
             )
             yield* _($ServiceBus.registerHandler(handler))
             yield* _($ServiceBus.run)
@@ -68,23 +64,15 @@ describe('ServiceBus', () => {
         pipe(
           gen(function* (_) {
             const handlers = [
-              yield* _(
-                $CommandHandler('foo')(
-                  Effect.succeed((command) =>
-                    Effect.succeedWith(() => {
-                      bar += (command as any).bar
-                    }),
-                  ),
-                ),
+              $CommandHandler('foo')((command) =>
+                Effect.succeedWith(() => {
+                  bar += (command as any).bar
+                }),
               ),
-              yield* _(
-                $CommandHandler('foo')(
-                  Effect.succeed((command) =>
-                    Effect.succeedWith(() => {
-                      bar -= 2 * (command as any).bar
-                    }),
-                  ),
-                ),
+              $CommandHandler('foo')((command) =>
+                Effect.succeedWith(() => {
+                  bar -= 2 * (command as any).bar
+                }),
               ),
             ]
             for (const handler of handlers) {

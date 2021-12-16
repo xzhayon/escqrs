@@ -1,21 +1,17 @@
-import { Effect, pipe } from '@effect-ts/core'
 import { Type } from '../../Entity'
 import { $MessageHandler, MessageHandler } from '../MessageHandler'
 import { Event } from './Event'
 
-export interface EventHandler<A extends Event = Event>
-  extends MessageHandler<A> {
+export interface EventHandler<R = unknown, A extends Event = Event>
+  extends MessageHandler<R, A> {
   readonly name: string
 }
 
 export function $EventHandler<A extends Event>(type: Type<A>, name: string) {
-  return <R>(handle: Effect.RIO<R, EventHandler<A>['handle']>) =>
-    pipe(
-      $MessageHandler(type)(
-        handle as Effect.RIO<R, MessageHandler<A>['handle']>,
-      ),
-      Effect.map((handler) => ({ ...handler, name } as EventHandler)),
-    )
+  return <R>(handle: EventHandler<R, A>['handle']) => ({
+    ...$MessageHandler(type)(handle as MessageHandler<R, A>['handle']),
+    name,
+  })
 }
 
 $EventHandler.handle = (event: Event) => (handler: EventHandler) =>
