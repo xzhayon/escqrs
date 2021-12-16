@@ -117,14 +117,13 @@ $ScreeningsByFilm.onScreeningCreated = $EventHandler<ScreeningCreated>(
       ),
     )
 
-    const seats = event.seats.rows * event.seats.columns
     const _projection = $ScreeningsByFilm.addScreening(
       projection,
       event.aggregateId,
       event.date,
       event.screenId,
       event.screenName,
-      seats,
+      event.seats.rows * event.seats.columns,
     )
 
     yield* _($ScreeningsByFilm.save(_projection))
