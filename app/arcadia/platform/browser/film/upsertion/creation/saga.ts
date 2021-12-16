@@ -12,7 +12,7 @@ import { ArcadiaClient } from '../../../ArcadiaClient'
 import { Uuid } from '../../../uuid/Uuid'
 import { $FilmCreation } from './slice'
 
-const createFilm = (filmId: Id<Film>) =>
+export const createFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmCreation.createFilm>) {
     yield* put($FilmCreation.FilmCreationRequested())
     try {
