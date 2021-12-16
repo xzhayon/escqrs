@@ -13,27 +13,6 @@ import { ArcadiaClient } from '../../../ArcadiaClient'
 import { Uuid } from '../../../uuid/Uuid'
 import { $ScreeningCreation } from './slice'
 
-export const createScreening = (screeningId: Id<Screening>) =>
-  function* (command: ReturnType<typeof $ScreeningCreation.createScreening>) {
-    yield* put($ScreeningCreation.ScreeningCreationRequested())
-    try {
-      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
-      yield* call(
-        arcadia.createScreening,
-        screeningId,
-        command.payload.filmId,
-        command.payload.screenId,
-        command.payload.date,
-      )
-      yield* put($ScreeningCreation.ScreeningCreationAccepted())
-      command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
-    } catch (error: any) {
-      yield* put($ScreeningCreation.ScreeningCreationRejected(error))
-      command.payload?.onFailure &&
-        (yield* call(command.payload.onFailure, error))
-    }
-  }
-
 export const fetchAndCreate = (screeningId: Id<Screening>) =>
   function* (
     command: ReturnType<typeof $ScreeningCreation.fetchFilmsAndScreens>,
@@ -54,6 +33,27 @@ export const fetchAndCreate = (screeningId: Id<Screening>) =>
       )
     } catch (error: any) {
       yield* put($ScreeningCreation.FilmsAndScreensNotFetched(error))
+      command.payload?.onFailure &&
+        (yield* call(command.payload.onFailure, error))
+    }
+  }
+
+export const createScreening = (screeningId: Id<Screening>) =>
+  function* (command: ReturnType<typeof $ScreeningCreation.createScreening>) {
+    yield* put($ScreeningCreation.ScreeningCreationRequested())
+    try {
+      const arcadia = yield* getContext<ArcadiaClient>('arcadiaClient')
+      yield* call(
+        arcadia.createScreening,
+        screeningId,
+        command.payload.filmId,
+        command.payload.screenId,
+        command.payload.date,
+      )
+      yield* put($ScreeningCreation.ScreeningCreationAccepted())
+      command.payload?.onSuccess && (yield* call(command.payload.onSuccess))
+    } catch (error: any) {
+      yield* put($ScreeningCreation.ScreeningCreationRejected(error))
       command.payload?.onFailure &&
         (yield* call(command.payload.onFailure, error))
     }

@@ -1,8 +1,6 @@
 import {
-  all,
   call,
   cancel,
-  fork,
   getContext,
   put,
   take,
@@ -13,7 +11,7 @@ import { Film } from '../../../../../film/Film'
 import { ArcadiaClient } from '../../../ArcadiaClient'
 import { $FilmEditing } from './slice'
 
-const fetchFilm = (filmId: Id<Film>) =>
+export const fetchAndEdit = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmEditing.fetchFilm>) {
     yield* put($FilmEditing.FilmFetchingStarted())
     try {
@@ -22,6 +20,7 @@ const fetchFilm = (filmId: Id<Film>) =>
       yield* put($FilmEditing.FilmFetched(film))
       command.payload?.onSuccess &&
         (yield* call(command.payload.onSuccess, film))
+      yield* takeLeading($FilmEditing.editFilm.type, editFilm(filmId))
     } catch (error: any) {
       yield* put($FilmEditing.FilmNotFetched(error))
       command.payload?.onFailure &&
@@ -29,7 +28,7 @@ const fetchFilm = (filmId: Id<Film>) =>
     }
   }
 
-const editFilm = (filmId: Id<Film>) =>
+export const editFilm = (filmId: Id<Film>) =>
   function* (command: ReturnType<typeof $FilmEditing.editFilm>) {
     yield* put($FilmEditing.FilmEditingRequested())
     try {
@@ -49,12 +48,10 @@ export function* $FilmEditingSaga() {
     $FilmEditing.start.type,
     function* ({ payload: { id } }: ReturnType<typeof $FilmEditing.start>) {
       yield* put($FilmEditing.Started())
-      const task = yield* fork(function* () {
-        yield* all([
-          takeLeading($FilmEditing.fetchFilm.type, fetchFilm(id)),
-          takeLeading($FilmEditing.editFilm.type, editFilm(id)),
-        ])
-      })
+      const task = yield* takeLeading(
+        $FilmEditing.fetchFilm.type,
+        fetchAndEdit(id),
+      )
       yield* put($FilmEditing.fetchFilm())
       yield* take($FilmEditing.stop.type)
       yield* cancel(task)

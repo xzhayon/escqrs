@@ -15,7 +15,6 @@ describe('ScreeningSaga', () => {
         ).next().value,
       )
     })
-
     test('closing saga', () => {
       expect(saga.next().done).toBeTruthy()
     })

@@ -19,13 +19,11 @@ describe('ScreeningCreationSaga', () => {
         put($ScreeningCreation.FilmsAndScreensFetchingStarted()).next().value,
       )
     })
-
     test('getting client from context', () => {
       expect(saga.next().value).toStrictEqual(
         getContext('arcadiaClient').next().value,
       )
     })
-
     test('fetching films and screens', () => {
       const arcadia: Pick<ArcadiaClient, 'getFilms' | 'getScreens'> = {
         getFilms: async () => [],
@@ -51,7 +49,6 @@ describe('ScreeningCreationSaga', () => {
           put($ScreeningCreation.FilmsAndScreensNotFetched(error)).next().value,
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })
@@ -74,7 +71,6 @@ describe('ScreeningCreationSaga', () => {
           ).next().value,
         )
       })
-
       test('listening for screening creation', () => {
         expect(JSON.stringify(clone.next().value)).toStrictEqual(
           JSON.stringify(
@@ -85,7 +81,6 @@ describe('ScreeningCreationSaga', () => {
           ),
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })
@@ -106,13 +101,11 @@ describe('ScreeningCreationSaga', () => {
         put($ScreeningCreation.ScreeningCreationRequested()).next().value,
       )
     })
-
     test('getting client from context', () => {
       expect(saga.next().value).toStrictEqual(
         getContext('arcadiaClient').next().value,
       )
     })
-
     test('creating screening', () => {
       const arcadia: Pick<ArcadiaClient, 'createScreening'> = {
         createScreening: async () => {},
@@ -143,7 +136,6 @@ describe('ScreeningCreationSaga', () => {
           put($ScreeningCreation.ScreeningCreationRejected(error)).next().value,
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })
@@ -161,7 +153,6 @@ describe('ScreeningCreationSaga', () => {
           put($ScreeningCreation.ScreeningCreationAccepted()).next().value,
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })

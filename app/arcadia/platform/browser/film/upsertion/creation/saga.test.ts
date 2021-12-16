@@ -18,13 +18,11 @@ describe('FilmCreationSaga', () => {
         put($FilmCreation.FilmCreationRequested()).next().value,
       )
     })
-
     test('getting client from context', () => {
       expect(saga.next().value).toStrictEqual(
         getContext('arcadiaClient').next().value,
       )
     })
-
     test('creating film', () => {
       const arcadia: Pick<ArcadiaClient, 'createFilm'> = {
         createFilm: async () => {},
@@ -49,7 +47,6 @@ describe('FilmCreationSaga', () => {
           put($FilmCreation.FilmCreationRejected(error)).next().value,
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })
@@ -67,7 +64,6 @@ describe('FilmCreationSaga', () => {
           put($FilmCreation.FilmCreationAccepted()).next().value,
         )
       })
-
       test('closing saga', () => {
         expect(clone.next().done).toBeTruthy()
       })
