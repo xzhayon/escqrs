@@ -4,6 +4,7 @@ import * as t from 'io-ts'
 import { DateFromISOString } from 'io-ts-types'
 import { $Aggregate } from '../../../src/Aggregate'
 import { Id } from '../../../src/entity/Entity'
+import { Event } from '../../../src/entity/message/event/Event'
 import { $EventHandler } from '../../../src/entity/message/event/EventHandler'
 import {
   $MutableEntity,
@@ -67,6 +68,36 @@ $ScreeningsByFilm.load = aggregate.load
 $ScreeningsByFilm.save = aggregate.save
 $ScreeningsByFilm.delete = aggregate.delete
 
+$ScreeningsByFilm.create = (
+  filmId: Id<Film>,
+  filmTitle: string,
+  event?: Event,
+) =>
+  $ScreeningsByFilm()(
+    { filmId: filmId, filmTitle: filmTitle, screenings: [] },
+    { id: filmId, date: { created: event?._.date } },
+  )
+
+$ScreeningsByFilm.addScreening = (
+  projection: ScreeningsByFilm,
+  screeningId: Id<Screening>,
+  date: Date,
+  screenId: Id<Screen>,
+  screenName: string,
+  seats: number,
+) => ({
+  ...projection,
+  screenings: projection.screenings
+    .filter((screening) => screeningId !== screening.screeningId)
+    .concat({
+      screeningId,
+      date,
+      screenId,
+      screenName,
+      seats: { total: seats, free: seats },
+    }),
+})
+
 $ScreeningsByFilm.onScreeningCreated = $EventHandler<ScreeningCreated>(
   'ScreeningCreated',
   'UpdateScreeningsByFilm',
@@ -76,34 +107,20 @@ $ScreeningsByFilm.onScreeningCreated = $EventHandler<ScreeningCreated>(
       pipe(
         $ScreeningsByFilm.load(event.filmId),
         Effect.orElse(() =>
-          $ScreeningsByFilm()(
-            {
-              filmId: event.filmId,
-              filmTitle: event.filmTitle,
-              screenings: [],
-            },
-            {
-              id: event.filmId,
-              date: { created: event._.date, updated: event._.date },
-            },
-          ),
+          $ScreeningsByFilm.create(event.filmId, event.filmTitle, event),
         ),
       ),
     )
 
     const seats = event.seats.rows * event.seats.columns
-    const _projection = {
-      ...projection,
-      screenings: projection.screenings
-        .filter(({ screeningId }) => event.aggregateId !== screeningId)
-        .concat({
-          screeningId: event.aggregateId,
-          date: event.date,
-          screenId: event.screenId,
-          screenName: event.screenName,
-          seats: { total: seats, free: seats },
-        }),
-    }
+    const _projection = $ScreeningsByFilm.addScreening(
+      projection,
+      event.aggregateId,
+      event.date,
+      event.screenId,
+      event.screenName,
+      seats,
+    )
 
     yield* _($ScreeningsByFilm.save(_projection))
   }),
