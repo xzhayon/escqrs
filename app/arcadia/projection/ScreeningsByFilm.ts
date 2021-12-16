@@ -1,4 +1,4 @@
-import { Array, Effect, pipe } from '@effect-ts/core'
+import { Array, Effect, Option, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/core/Effect'
 import * as t from 'io-ts'
 import { DateFromISOString } from 'io-ts-types'
@@ -10,6 +10,7 @@ import {
   $MutableEntity,
   $MutableEntityC,
 } from '../../../src/entity/MutableEntity'
+import { EntityNotFound } from '../../../src/entity/repository/EntityNotFound'
 import { Film } from '../film/Film'
 import { Screen } from '../screen/Screen'
 import { ScreeningCreated } from '../screening/event/ScreeningCreated'
@@ -106,8 +107,12 @@ $ScreeningsByFilm.onScreeningCreated = $EventHandler<ScreeningCreated>(
     const projection = yield* _(
       pipe(
         $ScreeningsByFilm.load(event.filmId),
-        Effect.orElse(() =>
-          $ScreeningsByFilm.create(event.filmId, event.filmTitle, event),
+        Effect.catchSome((error) =>
+          error instanceof EntityNotFound
+            ? Option.some(
+                $ScreeningsByFilm.create(event.filmId, event.filmTitle, event),
+              )
+            : Option.none,
         ),
       ),
     )
