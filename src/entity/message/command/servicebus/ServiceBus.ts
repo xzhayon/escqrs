@@ -1,5 +1,6 @@
 import { Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/core/Effect'
+import { $Effect } from '../../../../Effect'
 import { $Logger } from '../../../../logger/Logger'
 import { Command } from '../Command'
 import { CommandHandler } from '../CommandHandler'
@@ -52,13 +53,9 @@ const dispatch = (command: Command) =>
 const registerHandler = <R>({ handle, ...handler }: CommandHandler<R>) =>
   pipe(
     gen(function* (_) {
-      const r = yield* _(Effect.environment<R>())
       const __registerHandler = yield* _(_registerHandler)
-      const _handler: CommandHandler = {
-        ...handler,
-        handle: (command) => pipe(handle(command), Effect.provide(r)),
-      }
-      yield* _(__registerHandler(_handler))
+      const _handle = yield* _($Effect.providedWith<R>()(handle))
+      yield* _(__registerHandler({ ...handler, handle: _handle }))
     }),
     Effect.tapBoth(
       (error) =>

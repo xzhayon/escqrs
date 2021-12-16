@@ -1,5 +1,6 @@
 import { Array, Effect, Has, pipe } from '@effect-ts/core'
 import { gen } from '@effect-ts/core/Effect'
+import { $Effect } from '../../../../Effect'
 import { $Logger } from '../../../../logger/Logger'
 import { Id } from '../../../Entity'
 import { Event } from '../Event'
@@ -60,13 +61,9 @@ const publish = (event: Event) =>
 const subscribe = <R>({ handle, ...handler }: EventHandler<R>) =>
   pipe(
     gen(function* (_) {
-      const r = yield* _(Effect.environment<R>())
       const __subscribe = yield* _(_subscribe)
-      const _handler: EventHandler = {
-        ...handler,
-        handle: (event) => pipe(handle(event), Effect.provide(r)),
-      }
-      yield* _(__subscribe(_handler))
+      const _handle = yield* _($Effect.providedWith<R>()(handle))
+      yield* _(__subscribe({ ...handler, handle: _handle }))
     }),
     Effect.tapBoth(
       (error) =>

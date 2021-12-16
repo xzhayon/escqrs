@@ -1,7 +1,7 @@
 import { Effect, Has, pipe } from '@effect-ts/core'
-import { flow } from '@effect-ts/core/Function'
 import { gen } from '@effect-ts/system/Effect'
 import * as t from 'io-ts'
+import { $Effect } from '../../Effect'
 import { $Logger } from '../../logger/Logger'
 import { $String } from '../../String'
 import { HttpMethod, HttpResponse } from '../Http'
@@ -115,9 +115,8 @@ const _route =
   ) =>
     pipe(
       gen(function* (_) {
-        const r = yield* _(Effect.environment<R>())
         const __route = yield* _(route)
-        const _handler = flow(handler, Effect.provide(r))
+        const _handler = yield* _($Effect.providedWith<R>()(handler))
 
         return yield* _(__route(path, schema, _handler))
       }),
