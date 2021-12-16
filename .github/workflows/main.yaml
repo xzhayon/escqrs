@@ -49,3 +49,4 @@ jobs:
       - run: npm ci
       - run: ln -s ./Layer.testing.ts ./config/Layer.local.ts
       - run: npm test
+      - uses: codecov/codecov-action@v2
