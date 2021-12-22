@@ -1,10 +1,10 @@
-import { pipe } from '@effect-ts/core'
+import { pipe, Queue } from '@effect-ts/core'
 import * as Layer from '@effect-ts/system/Layer'
 import EventEmitter from 'events'
 import fastify from 'fastify'
 import _fs from 'fs'
 import { fs } from 'memfs'
-import { $InMemoryServiceBus } from '../src/entity/message/command/servicebus/InMemoryServiceBus'
+import { $QueueServiceBus } from '../src/entity/message/command/servicebus/QueueServiceBus'
 import { HasServiceBus } from '../src/entity/message/command/servicebus/ServiceBus'
 import { HasEventStore } from '../src/entity/message/event/eventstore/EventStore'
 import { $InMemoryEventStore } from '../src/entity/message/event/eventstore/InMemoryEventStore'
@@ -26,9 +26,7 @@ export const $Layer = pipe(
     ),
     Layer.fromManaged(HasHttpServer)($FastifyHttpServer(fastify)),
     Layer.fromManaged(HasRepository)($InMemoryRepository),
-    Layer.fromManaged(HasServiceBus)(
-      $InMemoryServiceBus(() => new EventEmitter()),
-    ),
+    Layer.fromManaged(HasServiceBus)($QueueServiceBus(Queue.makeSliding(16))),
     Layer.fromValue(HasStorage)($Fs(fs as unknown as typeof _fs)),
     Layer.fromValue(HasUuid)($Rfc4122Uuid),
   ),

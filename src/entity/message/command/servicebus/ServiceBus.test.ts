@@ -1,4 +1,4 @@
-import { Effect, pipe } from '@effect-ts/core'
+import { Effect, pipe, Queue } from '@effect-ts/core'
 import { gen } from '@effect-ts/system/Effect'
 import * as Layer from '@effect-ts/system/Layer'
 import EventEmitter from 'events'
@@ -9,6 +9,7 @@ import { Body } from '../../../Entity'
 import { $Command, Command } from '../Command'
 import { $CommandHandler } from '../CommandHandler'
 import { $InMemoryServiceBus } from './InMemoryServiceBus'
+import { $QueueServiceBus } from './QueueServiceBus'
 import { $ServiceBus, HasServiceBus } from './ServiceBus'
 
 describe('ServiceBus', () => {
@@ -21,6 +22,20 @@ describe('ServiceBus', () => {
           Layer.and(
             Layer.fromManaged(HasServiceBus)(
               $InMemoryServiceBus(() => new EventEmitter()),
+            ),
+          ),
+          Layer.using(Layer.fromValue(HasLogger)($NilLogger)),
+          Layer.main,
+        ),
+    ],
+    [
+      'QueueServiceBus',
+      () =>
+        pipe(
+          $Layer,
+          Layer.and(
+            Layer.fromManaged(HasServiceBus)(
+              $QueueServiceBus(Queue.makeUnbounded()),
             ),
           ),
           Layer.using(Layer.fromValue(HasLogger)($NilLogger)),
